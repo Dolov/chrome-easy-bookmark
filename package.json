@@ -1,6 +1,6 @@
 {
-  "name": "easy-books",
-  "displayName": "Easy books",
+  "name": "easy-bookmark",
+  "displayName": "easy-bookmark",
   "version": "0.0.1",
   "description": "A basic Plasmo extension.",
   "author": "Plasmo Corp. <foss@plasmo.com>",
@@ -10,6 +10,12 @@
     "test": "plasmo test"
   },
   "dependencies": {
+    "@ant-design/icons": "^5.1.4",
+    "@plasmohq/storage": "^1.7.0",
+    "antd": "^5.7.1",
+    "classnames": "^2.3.2",
+    "immer": "^10.0.2",
+    "lodash": "^4.17.21",
     "plasmo": "0.81.0",
     "react": "18.2.0",
     "react-dom": "18.2.0"
@@ -24,6 +30,18 @@
     "typescript": "5.1.6"
   },
   "manifest": {
+    "commands": {
+      "helloworld": {
+        "suggested_key": {
+          "default": "Ctrl+Shift+2",
+          "mac": "Command+Shift+2"
+        },
+        "description": "触发快捷键事件"
+      }
+    },
+    "permissions": [
+      "bookmarks"
+    ],
     "host_permissions": [
       "https://*/*"
     ]

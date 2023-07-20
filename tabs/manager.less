@@ -1,0 +1,82 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  padding: 0 100px;
+}
+
+.container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  header {
+    .search-input {
+      height: 40px;
+      border-radius: 20px;
+      margin: 24px 0;
+      .ant-input-prefix {
+        padding: 0 6px;
+      }
+    }
+  }
+
+  .history-container {
+    padding: 10px;
+    background: #EFF0F0;
+    border-radius: 4px;
+    border: 1px solid #E7E9E8;
+    margin-bottom: 12px;
+  }
+
+  .search-list-container {
+    padding: 10px;
+    background: #EFF0F0;
+    border-radius: 4px;
+    border: 1px solid #E7E9E8;
+    margin-bottom: 12px;
+  }
+
+  main {
+    flex: 1;
+    overflow: auto;
+  }
+
+  .tree-mode-container {
+    .ant-tree-icon__customize {
+      margin-right: 8px;
+      display: inline-flex !important;
+      align-items: center;
+
+      >span {
+        display: inline-flex;
+        align-items: center;
+      }
+    }
+
+    .ant-tree-treenode {
+      display: flex !important;
+      align-items: center;
+    }
+
+    .ant-tree-node-content-wrapper {
+      line-height: 36px !important;
+      display: flex;
+      align-items: center;
+      padding-left: 16px !important;
+    }
+
+    .tree-title-link {
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    .tree-title-dir-name {
+      font-weight: bold;
+    }
+  }
+}
