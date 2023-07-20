@@ -1,0 +1,45 @@
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  background: #fafafa;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  padding: 0 36px;
+
+  .ant-form {
+    flex: 1;
+  }
+  .ant-tree {
+    margin-top: 5px;
+    background: #f0f0f0;
+    padding: 5px;
+  }
+
+  .parent-node {
+    .ant-form-item {
+      margin-bottom: 0;
+    }
+  }
+
+  header {
+    height: 56px;
+  }
+
+  footer {
+    width: 100%;
+    display: flex;
+    flex-direction: row-reverse;
+    height: 70px;
+    align-items: center;
+    .save-button {
+      margin-left: 16px;
+    }
+  }
+}

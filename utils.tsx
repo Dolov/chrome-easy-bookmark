@@ -23,33 +23,67 @@ export const moveBookMark = (bookmark, parentId, index) => {
   })
 }
 
+/** 更新书签信息 */
+export const updateBookMark = bookmark => {
+  return new Promise(resolve => {
+    chrome.bookmarks.update(bookmark.id, {
+      url: bookmark.url,
+      title: bookmark.title,
+    }, updatedBookmark => {
+      resolve(updatedBookmark)
+    });
+  })
+}
+
+/** 更新书签信息并移动 */
+export const updateMoveBookMark = async (bookmark, parentId, index) => {
+  const updatedBookmark = await updateBookMark(bookmark)
+  const newBookmark = await moveBookMark(updatedBookmark, parentId, index)
+  return newBookmark
+}
+
 /** 创建文件夹 */
 export const createBookMarkDir = (title: string, parentId, index) => {
   return new Promise(resolve => {
     chrome.bookmarks.create({ title, parentId, index }, newFolder => {
       resolve(newFolder)
-   });
+    });
   })
 }
 
 
-export const formatTreeData = (treeData, parentChain, options) => {
+export const formatTreeData = (treeData, parentChain, options?) => {
   if (!Array.isArray(treeData)) return []
-  const { onClick } = options
+  const { onClick = () => { }, jsxTitle = true } = options || {}
   return treeData.map(item => {
     const nextParentChain = [...parentChain, { id: item.id, title: item.title }]
     return {
       ...item,
       parentChain,
       key: item.id,
-      icon: item.url ? null: <Icon name="dir" size={20} />,
-      title: (
-        <TreeTitle item={item} onClick={onClick} />  
-      ),
+      icon: item.url ? null : <Icon name="dir" size={20} />,
+      title: jsxTitle ? (
+        <TreeTitle item={item} onClick={onClick} />
+      ) : item.title,
       originalTitle: item.title || "",
       children: formatTreeData(item.children, nextParentChain, options)
     }
   })
+}
+
+export const getDirTreeData = (treeData) => {
+  return treeData.reduce((currentValue, item) => {
+    if (!item) return currentValue
+    const { children, url, id } = item
+    if (url) return currentValue
+    currentValue.push({
+      ...item,
+      key: id,
+      children: getDirTreeData(children),
+      originalChildren: children,
+    })
+    return currentValue
+  }, [])
 }
 
 export const flat = treeData => {
@@ -58,6 +92,17 @@ export const flat = treeData => {
     const { children, ...otherProps } = itemValue
     return currentValue.concat([otherProps]).concat(flat(children))
   }, [])
+}
+
+export const getOption = (id, treeData) => {
+  if (!Array.isArray(treeData)) return null
+  for (let index = 0; index < treeData.length; index++) {
+    const item = treeData[index];
+    const { children } = item
+    if (id === item.id) return item
+    const target = getOption(id, children)
+    if (target) return target
+  }
 }
 
 export const searchTreeData = (searchValue, treeData) => {

@@ -10,16 +10,28 @@ chrome.commands.onCommand.addListener(function(command) {
   }
 });
 
-
-
+/** 监听图标点击 */
 chrome.action.onClicked.addListener(activeTab => {
   chrome.tabs.create({ url: "./tabs/manager.html" });
 });
 
-
-
-chrome.bookmarks.onCreated.addListener(function(bookmark) {
-  // 自定义处理逻辑
-  console.log('用户收藏了一个网页');
-  console.log(bookmark);
+/** 监听创建书签的事件 */
+chrome.bookmarks.onCreated.addListener(bookmark => {
+  /** 获取浏览器位于窗口的位置信息 */
+  chrome.windows.getCurrent({ populate: true }, window => {
+    const { width, height, left, top } =  window
+    
+    /** popop 的预设宽高 */
+    const popopWidth = 600
+    const popopHeight = 700
+    /** 打开重新选择标签存储位置的页面 */
+    chrome.windows.create({
+      type: "popup",
+      width: popopWidth,
+      height: popopHeight,
+      left: Math.floor(width / 2) + left - Math.floor(popopWidth / 2),
+      top: top + 120,
+      url: `./tabs/remark.html?id=${bookmark}`,
+    });
+  });
 });
