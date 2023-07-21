@@ -15,21 +15,45 @@
 
   .ant-form {
     flex: 1;
-  }
-  .ant-tree {
-    margin-top: 5px;
-    background: #f0f0f0;
-    padding: 5px;
-  }
 
-  .parent-node {
-    .ant-form-item {
+    .ant-form-item:last-child {
       margin-bottom: 0;
+    }
+  }
+  
+
+  .searchable-tree {
+    padding: 8px;
+    padding-top: 12px;
+    background: #f0f0f0;
+    border-radius: 5px;
+
+    .ant-tree {
+      margin-top: 8px;
+      background: transparent;
+    }
+    .ant-tree-treenode {
+      width: 100%;
+      padding: 3px 0;
+      &:hover {
+        background: #bae0ff;
+      }
+    }
+    .ant-tree-node-content-wrapper {
+      width: 100%;
+      background: transparent;
+    }
+    .ant-tree-treenode-selected {
+      background: #91caff !important;
+    }
+    .tree-item-search-value {
+      color: #1677ff;
+      font-weight: bold;
     }
   }
 
   header {
-    height: 56px;
+    height: 40px;
   }
 
   footer {
@@ -38,8 +62,8 @@
     flex-direction: row-reverse;
     height: 70px;
     align-items: center;
-    .save-button {
-      margin-left: 16px;
+    .save-button, .delete-button {
+      margin-left: 8px;
     }
   }
 }

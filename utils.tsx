@@ -42,6 +42,15 @@ export const updateMoveBookMark = async (bookmark, parentId, index) => {
   return newBookmark
 }
 
+/** 删除书签 */
+export const deleteBookMark = async id => {
+  return new Promise(resolve => {
+    chrome.bookmarks.remove(id, () => {
+      resolve(true)
+    });
+  })
+}
+
 /** 创建文件夹 */
 export const createBookMarkDir = (title: string, parentId, index) => {
   return new Promise(resolve => {
@@ -114,6 +123,27 @@ export const searchTreeData = (searchValue, treeData) => {
   })
 }
 
+/** 搜索匹配的文件夹 */
+export const searchMatchDir = (searchValue, treeData) => {
+  if (!Array.isArray(treeData)) return []
+  const lowerValue = searchValue.toLowerCase().replace(/\s/g, "")
+  return flat(treeData).filter(item => {
+    if (item.url) return false
+    return item.title.toLowerCase().replace(/\s/g, "").includes(lowerValue)
+  })
+}
+
+export const getParentIds = (key, treeData) => {
+  const ids = []
+  const target = getOption(key, treeData)
+  if (!target?.parentId) return ids
+  const { parentId } = target
+  ids.push(parentId)
+  const nextIds = getParentIds(parentId, treeData)
+  ids.push(...nextIds)
+  return ids
+}
+
 /** 将“书签栏”与“其他书签”合并 */
 export const mergeRootDir = treeData => {
   if (!Array.isArray(treeData)) return []
@@ -123,4 +153,10 @@ export const mergeRootDir = treeData => {
     return root1.children.concat([root2])
   }
   return rootData
+}
+
+
+export const fs = (str: string) => {
+  if (typeof str !== 'string') return ''
+  return str.replace(/\s*/g, "").toLowerCase()
 }

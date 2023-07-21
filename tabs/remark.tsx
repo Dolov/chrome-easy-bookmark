@@ -1,7 +1,8 @@
 import React from 'react'
 import { parse } from 'qs'
-import { Button, Tree, Form, Input } from 'antd';
-import { getDirTreeData, getOption, updateMoveBookMark } from '../utils'
+import { Button, Form, Input } from 'antd';
+import Tree from '../components/Tree'
+import { getDirTreeData, getOption, updateMoveBookMark, deleteBookMark } from '../utils'
 import './remark.less'
 
 export interface remarkProps {
@@ -51,6 +52,12 @@ const remark: React.FC<remarkProps> = props => {
     onCancel()
   }
 
+  const onDelete = async () => {
+    if (!bookmarkRef.current) return
+    await deleteBookMark(bookmarkRef.current.id)
+    onCancel()
+  }
+
   return (
     <div className="container">
       <header></header>
@@ -70,24 +77,21 @@ const remark: React.FC<remarkProps> = props => {
         >
           <Input />
         </Form.Item>
-        <div className="parent-node">
-          <Form.Item
-            label="上级目录"
-            name="parentId"
-            rules={[{ required: true }]}
-            valuePropName='checkedKeys'
-            trigger='onSelect'
-          >
-            <Tree
-              defaultExpandAll
-              height={415}
-              treeData={treeData}
-            />
-          </Form.Item>
-        </div>
+        <Form.Item
+          label="上级目录"
+          name="parentId"
+          rules={[{ required: true }]}
+          valuePropName='selectedKeys'
+          trigger='onSelect'
+        >
+          <Tree
+            treeData={treeData}
+          />
+        </Form.Item>
       </Form>
       <footer>
         <Button onClick={onSave} className='save-button' type="primary">保存</Button>
+        <Button onClick={onDelete} className='delete-button' danger>移除</Button>
         <Button onClick={onCancel}>取消</Button>
       </footer>
     </div>
