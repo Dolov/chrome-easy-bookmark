@@ -1,32 +1,56 @@
 
 import { openPage } from './utils'
 
-const managerId = "bookmark-manager"
-const settingId = "bookmark-setting"
+const menuList: (chrome.contextMenus.CreateProperties & { action?(tab: chrome.tabs.Tab): void })[] = [
+  {
+    id: "bookmark-manager",
+    title: "书签管理",
+    contexts: ["action"],
+    action() {
+      chrome.tabs.create({
+        url: "./tabs/manager.html"
+      })
+    }
+  },
+  {
+    id: "bookmark-setting",
+    title: "书签设置",
+    contexts: ["action"],
+    action() {
+      chrome.tabs.create({
+        url: "./tabs/setting.html"
+      })
+    }
+  },
+  {
+    id: "page-mark",
+    title: "收藏该网页至 easy-bookmark",
+    contexts: ["page"]
+  },
+  {
+    id: "image-mark",
+    title: "收藏选中图片至 easy-bookmark",
+    contexts: ["image"]
+  },
+  {
+    id: "text-mark",
+    title: "收藏选中文本至 easy-bookmark",
+    contexts: ["selection"]
+  },
+]
 
-chrome.contextMenus.create({
-  id: managerId,
-	title: "书签管理",
-  contexts: ["action"]
-});
+menuList.forEach(item => {
+  const { action, ...menuProps } = item
+  chrome.contextMenus.create(menuProps);
+})
 
-chrome.contextMenus.create({
-  id: settingId,
-	title: "书签设置",
-  contexts: ["action"]
-});
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId === managerId) {
-    chrome.tabs.create({
-      url: "./tabs/manager.html"
-    })
-  }
-  if (info.menuItemId === settingId) {
-    chrome.tabs.create({
-      url: "./tabs/setting.html"
-    })
-  }
+  const { menuItemId } = info
+  const menu = menuList.find(item => item.id === menuItemId)
+  if (!menu) return
+  const { action } = menu
+  action && action(tab)
 });
 
 

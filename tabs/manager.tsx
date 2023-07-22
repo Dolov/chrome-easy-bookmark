@@ -6,7 +6,7 @@ import './manager.less'
 
 const Manager: React.FC<ManagerCoreProps> = props => {
   return (
-    <div className="px-5 pt-8 flex-1 flex overflow-hidden">
+    <div className="px-5 pt-8 pb-6 flex-1 flex overflow-hidden">
       <ManagerCore {...props} />
     </div>
   )

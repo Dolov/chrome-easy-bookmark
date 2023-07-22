@@ -15,7 +15,7 @@ export interface TreeModeProps {
 const TreeMode: React.FC<TreeModeProps> = props => {
   const { data, height: outHeight, refresh, updateHeight } = props
   const containerRef = React.useRef<HTMLDivElement>(null)
-  const [height, setHeight] = React.useState(0)
+  const [height, setHeight] = React.useState(undefined)
 
   const calcHeight = debounce(() => {
     if (!containerRef.current) return
