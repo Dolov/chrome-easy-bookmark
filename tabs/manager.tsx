@@ -1,24 +1,30 @@
 import React from 'react'
-import { Input } from 'antd'
+import { useStorage } from '@plasmohq/storage/hook'
 import { debounce } from 'lodash'
-import { SearchOutlined } from '@ant-design/icons'
+import Input from 'antd/es/input'
+import SearchOutlined from '@ant-design/icons/SearchOutlined'
 import History from '../components/History'
 import TreeMode from '../components/TreeMode'
 import SearchList from '../components/SearchList'
-import { useStorage } from '@plasmohq/storage/hook'
 import { getBookmarks, mergeRootDir, formatTreeData, searchTreeData } from '../utils'
 import './manager.less'
 
 const HISTORY_DATA_KEY = 'history'
 
 export interface managerProps {
-
+  height?: number
+  showHistory?: boolean
 }
 
-const manager: React.FC<managerProps> = props => {
-  const { } = props
+const Manager: React.FC<managerProps> = props => {
+  const { height, showHistory = true } = props
 
+  /**
+   * 频繁的操作会导致报错
+   * MAX_WRITE_OPERATIONS_PER_MINUTE
+   */
   const [history = [], setHistroy] = useStorage(HISTORY_DATA_KEY)
+
   const [bookmarks, setBookmarks] = React.useState<any>([])
   const [searchList, setSearchList] = React.useState([])
   const histroyRef = React.useRef(history)
@@ -60,7 +66,7 @@ const manager: React.FC<managerProps> = props => {
   }, 1000)
 
   return (
-    <div className='container'>
+    <div className='manager-page-container'>
       <header>
         <Input
           autoFocus
@@ -70,12 +76,14 @@ const manager: React.FC<managerProps> = props => {
         />
       </header>
       <main>
-        <History data={histroyRef.current} />
+        {showHistory && <History data={history} />}
         <SearchList data={searchList} />
         <div className='list-container'>
           <TreeMode
             data={bookmarks}
+            height={height}
             refresh={init}
+            updateHeight={showHistory}
           />
         </div>
       </main>
@@ -83,4 +91,4 @@ const manager: React.FC<managerProps> = props => {
   )
 }
 
-export default manager
+export default Manager

@@ -3,7 +3,7 @@ import React from 'react'
 const Dir = () => {
 
   return (
-    <svg className="w-12 h-12 sm:w-16 sm:h-16 inline-block" height="1em" id="file-directory" width="1em" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+    <svg height="1em" id="file-directory" width="1em" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="bgGradient-file-directory" gradientUnits="userSpaceOnUse" x1="15%" x2="85%" y1="15%" y2="85%">
           <stop style={{"stopColor":"rgb(255, 27, 107)","stopOpacity":"1"}} offset="0%"/>

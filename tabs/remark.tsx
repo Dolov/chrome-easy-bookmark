@@ -1,6 +1,8 @@
 import React from 'react'
 import { parse } from 'qs'
-import { Button, Form, Input } from 'antd';
+import Input from 'antd/es/input'
+import Form from 'antd/es/form'
+import Button from 'antd/es/button'
 import Tree from '../components/Tree'
 import { getDirTreeData, getOption, updateMoveBookMark, deleteBookMark } from '../utils'
 import './remark.less'
@@ -59,7 +61,7 @@ const remark: React.FC<remarkProps> = props => {
   }
 
   return (
-    <div className="container">
+    <div className="remark-page-container">
       <header></header>
       <Form form={form} style={{ width: "100%" }}>
         <Form.Item

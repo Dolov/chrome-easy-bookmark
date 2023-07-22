@@ -60,7 +60,7 @@ export const createBookMarkDir = (title: string, parentId, index) => {
   })
 }
 
-
+/** 格式化树结构数据 */
 export const formatTreeData = (treeData, parentChain, options?) => {
   if (!Array.isArray(treeData)) return []
   const { onClick = () => { }, jsxTitle = true } = options || {}
@@ -80,6 +80,7 @@ export const formatTreeData = (treeData, parentChain, options?) => {
   })
 }
 
+/** 获取目录结构书，方便展示 */
 export const getDirTreeData = (treeData) => {
   return treeData.reduce((currentValue, item) => {
     if (!item) return currentValue
@@ -95,6 +96,7 @@ export const getDirTreeData = (treeData) => {
   }, [])
 }
 
+/** 树结构编排化 */
 export const flat = treeData => {
   if (!Array.isArray(treeData)) return []
   return treeData.reduce((currentValue, itemValue) => {
@@ -103,6 +105,7 @@ export const flat = treeData => {
   }, [])
 }
 
+/** 获取树结构中的某项 */
 export const getOption = (id, treeData) => {
   if (!Array.isArray(treeData)) return null
   for (let index = 0; index < treeData.length; index++) {
@@ -114,25 +117,27 @@ export const getOption = (id, treeData) => {
   }
 }
 
+/** 根据 title 获取查询数据 */
 export const searchTreeData = (searchValue, treeData) => {
   if (!Array.isArray(treeData)) return []
-  const lowerValue = searchValue.toLowerCase().replace(/\s/g, "")
+  const lowerValue = fs(searchValue)
   return flat(treeData).filter(item => {
     if (!item.url) return false
-    return item.originalTitle.toLowerCase().replace(/\s/g, "").includes(lowerValue)
+    return fs(item.originalTitle).includes(lowerValue)
   })
 }
 
 /** 搜索匹配的文件夹 */
 export const searchMatchDir = (searchValue, treeData) => {
   if (!Array.isArray(treeData)) return []
-  const lowerValue = searchValue.toLowerCase().replace(/\s/g, "")
+  const lowerValue = fs(searchValue)
   return flat(treeData).filter(item => {
     if (item.url) return false
-    return item.title.toLowerCase().replace(/\s/g, "").includes(lowerValue)
+    return fs(item.title).includes(lowerValue)
   })
 }
 
+/** 根据 id 递归查询上级 id */
 export const getParentIds = (key, treeData) => {
   const ids = []
   const target = getOption(key, treeData)
@@ -155,8 +160,44 @@ export const mergeRootDir = treeData => {
   return rootData
 }
 
-
+/** 处理字符串 */
 export const fs = (str: string) => {
   if (typeof str !== 'string') return ''
   return str.replace(/\s*/g, "").toLowerCase()
+}
+
+/** 命名空间 */
+export enum Namespace {
+  // 配置项
+  SETTINGS = "settings",
+  // 访问记录
+  HISTORY = "history",
+  // 历史模块的颜色
+  HISTORY_COLOR = "history_color",
+}
+
+/** 获取浏览器位于窗口的位置信息 */
+const getCurrentPosition = (): Promise<chrome.windows.Window> => {
+  return new Promise(resolve => {
+    chrome.windows.getCurrent({ populate: true }, window => {
+      resolve(window)
+    });
+  })
+}
+
+/** 在当前页面的中心位置打开新页面 */
+export const openPage = async (url, options) => {
+  const window = await getCurrentPosition()
+  const { width, height, left, top } =  window
+  const pWidth = options.width
+  const pHeight = options.height
+  /** 打开重新选择标签存储位置的页面 */
+  chrome.windows.create({
+    url,
+    type: "popup",
+    width: pWidth,
+    height: options.height,
+    top: Math.floor(height / 2) + top - Math.floor(pHeight / 2),
+    left: Math.floor(width / 2) + left - Math.floor(pWidth / 2),
+  });
 }

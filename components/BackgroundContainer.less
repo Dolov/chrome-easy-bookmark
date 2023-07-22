@@ -1,0 +1,37 @@
+
+
+.bacground-container {
+  position: relative;
+  border: 1px solid transparent;
+  margin-bottom: 12px;
+  border-radius: 5px;
+  &:hover {
+    border-width: 1px;
+    .color-list-container {
+      display: inline-flex;
+    }
+  }
+  .color-list-container {
+    align-items: center;
+    border: 1px solid #f0f0f0;
+    padding: 0 4px;
+    position: absolute;
+    background: white;
+    border-radius: 3px;
+    top: -37px;
+    left: 0px;
+    z-index: 10;
+    box-shadow: 0 0 5px #bfbfbf;
+    display: none;
+    > div {
+      width: 18px;
+      height: 18px;
+      border-radius: 2px;
+      margin: 8px 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}

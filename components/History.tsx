@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button } from 'antd'
+import BackgroundContainer from './BackgroundContainer'
 
 export interface HistoryProps {
   data: any[]
@@ -7,17 +7,28 @@ export interface HistoryProps {
 
 const History: React.FC<HistoryProps> = props => {
   const { data } = props
-  if (data.length === 0) return null
+
+  const histroyData = React.useMemo(() => {
+    const ids = data.map(item => item.id)
+    const pureIds = Array.from(new Set(ids))
+    return pureIds.map(id => data.find(item => item.id === id))
+  }, [data])
+
+  if (histroyData.length === 0) return null
+  
   return (
-    <div className='history-container'>
-      {data.map(item => {
-        return (
-          <Button type="text" key={item.id}>
-            <a href={item.url} target="_blank">{item.title}</a>
-          </Button>  
-        )      
-      })}
-    </div>
+    <BackgroundContainer strore_key='history-color'>
+      <div className='history-container'>
+        {histroyData.map(item => {
+        const { title, id, url } = item
+          return (
+            <span title={title} className='history-item' key={id}>
+              <a href={url} target="_blank">{title}</a>
+            </span>  
+          )      
+        })}
+      </div>
+    </BackgroundContainer>
   )
 }
 

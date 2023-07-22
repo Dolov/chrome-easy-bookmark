@@ -1,31 +1,35 @@
 
 import React from 'react'
-import { Tree } from 'antd'
 import { debounce } from 'lodash'
 import type { TreeProps } from 'antd'
-import { moveBookMark, createBookMarkDir } from '../utils'
+import Tree from 'antd/es/tree'
+import { moveBookMark } from '../utils'
 
 export interface TreeModeProps {
   data: TreeProps["treeData"]
   refresh(): void
+  height?: number
+  updateHeight?: boolean
 }
 
 const TreeMode: React.FC<TreeModeProps> = props => {
-  const { data, refresh } = props
+  const { data, height: outHeight, refresh, updateHeight } = props
   const containerRef = React.useRef<HTMLDivElement>(null)
   const [height, setHeight] = React.useState(0)
 
   const calcHeight = debounce(() => {
     if (!containerRef.current) return
     const top = containerRef.current.offsetTop
+    if (outHeight) {
+      setHeight(outHeight - top - 65)
+      return
+    }
     setHeight(innerHeight - top)
   }, 1000)
 
-  const onElementMount = React.useCallback(element => {
-    if (!element) return
-    containerRef.current = element
+  React.useEffect(() => {
     calcHeight()
-  }, [])
+  }, [outHeight, updateHeight])
 
   React.useEffect(() => {
     window.addEventListener('resize', calcHeight)
@@ -70,7 +74,7 @@ const TreeMode: React.FC<TreeModeProps> = props => {
   };
 
   return (
-    <div ref={onElementMount} className='tree-mode-container'>
+    <div ref={containerRef} className="tree-mode-container">
       <Tree
         multiple
         showIcon

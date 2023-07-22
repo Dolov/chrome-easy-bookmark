@@ -1,8 +1,9 @@
 import React from 'react'
-import { Tree, Input } from 'antd'
 import { debounce } from 'lodash'
-import { SearchOutlined } from '@ant-design/icons'
+import SearchOutlined from '@ant-design/icons/SearchOutlined'
 import type { TreeProps } from 'antd'
+import Tree from 'antd/es/tree'
+import Input from 'antd/es/input'
 import { searchMatchDir, getParentIds, fs } from '../utils'
 
 const SearchTree: React.FC<TreeProps> = props => {
