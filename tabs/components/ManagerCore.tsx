@@ -2,27 +2,28 @@ import React from 'react'
 import { useStorage } from '@plasmohq/storage/hook'
 import { debounce } from 'lodash'
 import Input from 'antd/es/input'
+import classnames from 'classnames'
 import SearchOutlined from '@ant-design/icons/SearchOutlined'
 import History from '../components/History'
 import TreeMode from '../components/TreeMode'
 import SearchList from '../components/SearchList'
-import { getBookmarks, mergeRootDir, formatTreeData, searchTreeData, Namespace } from '../../utils'
+import { getBookmarks, mergeRootDir, formatTreeData, searchTreeData, Namespace, fs } from '../../utils'
 import './ManagerCore.less'
 
 export interface ManagerCoreProps {
   height?: number
-  showHistory?: boolean
+  historyVisible?: boolean
 }
 
 const ManagerCore: React.FC<ManagerCoreProps> = props => {
-  const { height, showHistory = true } = props
+  const { height, historyVisible = true } = props
 
   /**
    * 频繁的操作会导致报错
    * MAX_WRITE_OPERATIONS_PER_MINUTE
    */
   const [history = [], setHistroy] = useStorage(Namespace.HISTORY)
-
+  const [searchValue, setSearchValue] = React.useState("")
   const [bookmarks, setBookmarks] = React.useState<any>([])
   const [searchList, setSearchList] = React.useState([])
   const histroyRef = React.useRef(history)
@@ -55,16 +56,19 @@ const ManagerCore: React.FC<ManagerCoreProps> = props => {
 
   const handleChange = debounce((e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
+    setSearchValue(value)
     if (!value) {
       setSearchList([])
       return
     }
     const data = searchTreeData(value, bookmarks)
     setSearchList(data)
-  }, 1000)
+  }, 300)
+
+  const searchListVisible = !!searchValue
 
   return (
-    <div className='manager-page-container'>
+    <div className='manager-page-container flex-1'>
       <header>
         <Input
           autoFocus
@@ -73,15 +77,17 @@ const ManagerCore: React.FC<ManagerCoreProps> = props => {
           onChange={handleChange}
         />
       </header>
-      <main className="mt-6">
-        {showHistory && <History data={history} />}
-        <SearchList data={searchList} />
-        <div className='list-container'>
+      <main className="mt-6 flex flex-1 flex-col overflow-auto">
+        {historyVisible && <History data={history} />}
+        {searchListVisible && <SearchList data={searchList} />}
+        <div className={classnames("list-container", {
+          "hidden": searchListVisible,
+        })}>
           <TreeMode
             data={bookmarks}
             height={height}
             refresh={init}
-            updateHeight={showHistory}
+            updateHeight={historyVisible}
           />
         </div>
       </main>

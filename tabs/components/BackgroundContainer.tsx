@@ -1,4 +1,5 @@
 import React from 'react'
+import classnames from 'classnames'
 import CheckOutlined from '@ant-design/icons/CheckOutlined'
 import { useStorage } from '@plasmohq/storage/hook'
 import './BackgroundContainer.less'
@@ -48,10 +49,11 @@ const colorList = [
 
 export interface BackgroundContainerProps extends React.PropsWithChildren {
   strore_key: string
+  className?: string
 }
 
 const BackgroundContainer: React.FC<BackgroundContainerProps> = props => {
-  const { children, strore_key } = props
+  const { children, strore_key, className } = props
 
   const [color = colorList[0], setColor] = useStorage(strore_key)
   const [visible, setVisible] = React.useState(false)
@@ -65,7 +67,7 @@ const BackgroundContainer: React.FC<BackgroundContainerProps> = props => {
   return (
     <div
       onClick={() => setVisible(!visible)}
-      className='background-container'
+      className={classnames("background-container", className)}
       style={{ 
         background,
         borderColor: border,

@@ -174,6 +174,8 @@ export enum Namespace {
   HISTORY = "history",
   // 历史模块的颜色
   HISTORY_COLOR = "history_color",
+  // 搜索结果模块的颜色
+  SEARCH_COLOR = "search_color",
 }
 
 /** 获取浏览器位于窗口的位置信息 */
