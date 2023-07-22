@@ -3,15 +3,15 @@ import { parse } from 'qs'
 import Input from 'antd/es/input'
 import Form from 'antd/es/form'
 import Button from 'antd/es/button'
-import Tree from '../components/Tree'
+import Tree from './components/Tree'
 import { getDirTreeData, getOption, updateMoveBookMark, deleteBookMark } from '../utils'
 import './remark.less'
 
-export interface remarkProps {
+export interface RemarkProps {
 
 }
 
-const remark: React.FC<remarkProps> = props => {
+const Remark: React.FC<RemarkProps> = props => {
   const [treeData, setTreeData] = React.useState([])
   const [form] = Form.useForm();
   const bookmarkRef = React.useRef(null)
@@ -100,4 +100,4 @@ const remark: React.FC<remarkProps> = props => {
   )
 }
 
-export default remark
+export default Remark

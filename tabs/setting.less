@@ -1,8 +1,7 @@
-@tailwind components;
-@tailwind utilities;
 
+@import "./base.less";
 
-.options-modal {
+.setting-modal {
   .ant-modal {
     padding-bottom: 0;
     .ant-modal-content {
@@ -11,7 +10,7 @@
       flex-direction: column;
       .ant-modal-body {
         flex: 1;
-        overflow: hidden;
+        overflow: auto;
       }
     }
   }

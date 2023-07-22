@@ -4,7 +4,7 @@ import SearchOutlined from '@ant-design/icons/SearchOutlined'
 import type { TreeProps } from 'antd'
 import Tree from 'antd/es/tree'
 import Input from 'antd/es/input'
-import { searchMatchDir, getParentIds, fs } from '../utils'
+import { searchMatchDir, getParentIds, fs } from '../../utils'
 
 const SearchTree: React.FC<TreeProps> = props => {
   const { treeData, height = 385, selectedKeys, onSelect } = props

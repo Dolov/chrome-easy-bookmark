@@ -3,7 +3,7 @@ import React from 'react'
 import { debounce } from 'lodash'
 import type { TreeProps } from 'antd'
 import Tree from 'antd/es/tree'
-import { moveBookMark } from '../utils'
+import { moveBookMark } from '../../utils'
 
 export interface TreeModeProps {
   data: TreeProps["treeData"]

@@ -7,12 +7,12 @@ import InputNumber from 'antd/es/input-number'
 import Modal from 'antd/es/modal'
 import Checkbox from 'antd/es/checkbox'
 import { useStorage } from '@plasmohq/storage/hook'
-import Manager from './tabs/manager'
+import ManagerCore from './components/ManagerCore'
 import zh_CN from 'antd/locale/zh_CN'
-import { Namespace, openPage } from './utils'
-import './options.less'
+import { Namespace, openPage } from '../utils'
+import './setting.less'
 
-export interface optionsProps {
+export interface SettingProps {
 
 }
 
@@ -34,7 +34,7 @@ const options = [
   { label: '侧边栏', value: 'side_bar' },
 ];
 
-const Options: React.FC<optionsProps> = props => {
+const Setting: React.FC<SettingProps> = props => {
   const { } = props
   const [form] = Form.useForm()
   const [settings, setSettings] = useStorage(Namespace.SETTINGS)
@@ -95,9 +95,9 @@ const Options: React.FC<optionsProps> = props => {
           style={{ height, top: (innerHeight - height) / 2 }}
           title="书签管理"
           onCancel={() => setOpen(false)}
-          wrapClassName='options-modal'
+          wrapClassName='setting-modal'
         >
-          <Manager
+          <ManagerCore
             height={height}
             showHistory={history}
           />
@@ -107,4 +107,4 @@ const Options: React.FC<optionsProps> = props => {
   )
 }
 
-export default Options
+export default Setting

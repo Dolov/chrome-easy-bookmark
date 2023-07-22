@@ -1,6 +1,6 @@
 import React from 'react'
-import Icon from './components/Icon'
-import TreeTitle from './components/TreeTitle'
+import Icon from './tabs/components/Icon'
+import TreeTitle from './tabs/components/TreeTitle'
 
 /** 获取书签数据 */
 export const getBookmarks = () => {

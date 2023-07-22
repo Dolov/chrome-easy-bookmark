@@ -65,7 +65,7 @@ const BackgroundContainer: React.FC<BackgroundContainerProps> = props => {
   return (
     <div
       onClick={() => setVisible(!visible)}
-      className='bacground-container'
+      className='background-container'
       style={{ 
         background,
         borderColor: border,
