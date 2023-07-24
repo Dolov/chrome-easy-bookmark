@@ -30,11 +30,12 @@ const Icon: React.FC<{
   name: 'dir'
   size?: number
   style?: React.CSSProperties
+  className?: string
 }> = props => {
-  const { name, size = 16, style } = props
+  const { name, size = 16, style, className } = props
   const MatchIcon = iconMap[name]
   return (
-    <span style={{ fontSize: size, ...style }}>
+    <span className={className} style={{ fontSize: size, ...style }}>
       <MatchIcon />
     </span>
   )

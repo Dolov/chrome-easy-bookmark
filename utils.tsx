@@ -1,4 +1,5 @@
 import React from 'react'
+import { orderBy } from 'lodash'
 import Icon from './tabs/components/Icon'
 import TreeTitle from './tabs/components/TreeTitle'
 
@@ -118,11 +119,22 @@ export const getOption = (id, treeData) => {
 /** 根据 title 获取查询数据 */
 export const searchTreeData = (searchValue, treeData) => {
   if (!Array.isArray(treeData)) return []
-  const lowerValue = fs(searchValue)
-  return flat(treeData).filter(item => {
-    if (!item.url) return false
-    return fs(item.originalTitle).includes(lowerValue)
+  const sValue = fs(searchValue)
+  /** 展开后过滤符合条件的数据 */
+  const data = flat(treeData).filter(item => {
+    const sTitle = fs(item.originalTitle)
+    return sTitle.includes(sValue)
   })
+  /** 将文件夹放在顶部排序 */
+  const orderData = orderBy(data, obj => obj.hasOwnProperty('url'), ['asce']);
+  /** 获取并赋值文件夹内容 */
+  orderData.forEach(item => {
+    const { id, url } = item
+    if (url) return
+    const target = getOption(id, treeData)
+    item.children = target.children.filter(item => item.url)
+  })
+  return orderData
 }
 
 /** 搜索匹配的文件夹 */
@@ -188,7 +200,7 @@ const getCurrentPosition = (): Promise<chrome.windows.Window> => {
 /** 在当前页面的中心位置打开新页面 */
 export const openPage = async (url, options) => {
   const window = await getCurrentPosition()
-  const { width, height, left, top } =  window
+  const { width, height, left, top } = window
   const pWidth = options.width
   const pHeight = options.height
   /** 打开重新选择标签存储位置的页面 */

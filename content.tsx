@@ -42,7 +42,7 @@ const content: React.FC<contentProps> = props => {
         onCancel={() => setOpen(false)}
         wrapClassName='setting-modal'
       >
-        <ManagerCore />
+        <span>123</span>
       </Modal>
     </div>  
   )
