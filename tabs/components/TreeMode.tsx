@@ -24,7 +24,7 @@ const TreeMode: React.FC<TreeModeProps> = props => {
       setHeight(outHeight - top - 65)
       return
     }
-    setHeight(innerHeight - top)
+    setHeight(innerHeight - top - 24)
   }, 1000)
 
   React.useEffect(() => {

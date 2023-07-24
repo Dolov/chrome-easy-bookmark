@@ -1,8 +1,8 @@
 import React from 'react'
+import Popover from 'antd/es/popover'
 import classnames from 'classnames'
 import CheckOutlined from '@ant-design/icons/CheckOutlined'
 import { useStorage } from '@plasmohq/storage/hook'
-import './BackgroundContainer.less'
 
 const colorList = [
   {
@@ -54,7 +54,6 @@ export interface BackgroundContainerProps extends React.PropsWithChildren {
 
 const BackgroundContainer: React.FC<BackgroundContainerProps> = props => {
   const { children, strore_key, className } = props
-
   const [color = colorList[0], setColor] = useStorage(strore_key)
   const [visible, setVisible] = React.useState(false)
 
@@ -65,15 +64,8 @@ const BackgroundContainer: React.FC<BackgroundContainerProps> = props => {
   const { border, background } = color
 
   return (
-    <div
-      onClick={() => setVisible(!visible)}
-      className={classnames("background-container", className)}
-      style={{ 
-        background,
-        borderColor: border,
-      }}
-    >
-      <div className='color-list-container'>
+    <Popover trigger="click" content={(
+      <div className="flex items-center">
         {colorList.map(item => {
           const check = item.border === color.border
           return (
@@ -81,14 +73,25 @@ const BackgroundContainer: React.FC<BackgroundContainerProps> = props => {
               key={item.border}
               style={{ background: item.border }}
               onClick={e => handleColorChange(e, item)}
+              className="w-5 h-5 rounded-sm cursor-pointer mx-1 flex items-center justify-center"
             >
               {check && <CheckOutlined />}
             </div>
           )
         })}
       </div>
-      {children}
-    </div>
+    )}>
+      <div
+        onClick={() => setVisible(!visible)}
+        className={classnames(className, "relative rounded")}
+        style={{
+          background,
+          borderColor: border,
+        }}
+      >
+        {children}
+      </div>
+    </Popover>
   )
 }
 

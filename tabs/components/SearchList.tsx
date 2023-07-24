@@ -3,13 +3,15 @@ import List from 'antd/es/list'
 import Empty from 'antd/es/empty'
 import BackgroundContainer from './BackgroundContainer'
 import { Namespace } from '../../utils'
+import SearchText from './SearchText'
 
 export interface SearchProps {
   data: any[]
+  searchValue: string
 }
 
 const Search: React.FC<SearchProps> = props => {
-  const { data } = props
+  const { data, searchValue } = props
   if (data.length === 0) {
     return (
       <Empty
@@ -21,14 +23,13 @@ const Search: React.FC<SearchProps> = props => {
   }
   return (
     <BackgroundContainer
-      className="search-list-container"
+      className="search-list-container flex-1 overflow-auto"
       strore_key={Namespace.SEARCH_COLOR}
     >
       <List
         itemLayout="horizontal"
         dataSource={data}
         renderItem={(item, index) => {
-          console.log('item: ', item);
           const { originalTitle, id, parentChain, url } = item
           const parentDirs = parentChain.map(item => item.title)
           return (
@@ -37,7 +38,12 @@ const Search: React.FC<SearchProps> = props => {
                 className="px-4"
                 title={parentDirs.join(" / ")}
                 description={(
-                  <a className="hover:underline" target="_blank" href={url}>{originalTitle}</a>  
+                  <a className="hover:underline" target="_blank" href={url}>
+                    <SearchText
+                      text={originalTitle}
+                      searchValue={searchValue}
+                    />
+                  </a>  
                 )}
               />
             </List.Item>

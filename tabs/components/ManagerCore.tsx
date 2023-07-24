@@ -77,9 +77,14 @@ const ManagerCore: React.FC<ManagerCoreProps> = props => {
           onChange={handleChange}
         />
       </header>
-      <main className="mt-6 flex flex-1 flex-col overflow-auto">
+      <main className="mt-6 flex flex-1 flex-col overflow-hidden">
         {historyVisible && <History data={history} />}
-        {searchListVisible && <SearchList data={searchList} />}
+        {searchListVisible && (
+          <SearchList
+            data={searchList}
+            searchValue={searchValue}
+          />  
+        )}
         <div className={classnames("list-container", {
           "hidden": searchListVisible,
         })}>

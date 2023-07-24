@@ -17,7 +17,7 @@ const History: React.FC<HistoryProps> = props => {
   if (histroyData.length === 0) return null
   
   return (
-    <BackgroundContainer strore_key='history-color'>
+    <BackgroundContainer className="mb-3" strore_key='history-color'>
       <div className='history-container'>
         {histroyData.map(item => {
         const { title, id, url } = item

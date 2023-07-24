@@ -5,6 +5,7 @@ import type { TreeProps } from 'antd'
 import Tree from 'antd/es/tree'
 import Input from 'antd/es/input'
 import { searchMatchDir, getParentIds, fs } from '../../utils'
+import SearchText from './SearchText'
 
 const SearchTree: React.FC<TreeProps> = props => {
   const { treeData, height = 385, selectedKeys, onSelect } = props
@@ -38,32 +39,19 @@ const SearchTree: React.FC<TreeProps> = props => {
 
   const jsxTreeData = React.useMemo(() => {
     if (!searchValue) return treeData
-    const loop = treeData => treeData.map((item) => {
-        const strTitle = item.title || ""
-        const sTitle = fs(strTitle)
-        const sValue = fs(searchValue)
-        const index = sTitle.indexOf(sValue);
-        const beforeStr = sTitle.substring(0, index);
-        const afterStr = sTitle.slice(index + sValue.length);
-        const title =
-          index > -1 ? (
-            <span>
-              {beforeStr}
-              <span className="tree-item-search-value">{sValue}</span>
-              {afterStr}
-            </span>
-          ) : (
-            <span>{strTitle}</span>
-          );
-        if (item.children) {
-          return { title, key: item.key, children: loop(item.children) };
-        }
+    const loop = treeData => treeData.map(item => {
+      const title = (
+        <SearchText text={item.title} searchValue={searchValue} />
+      )
+      if (item.children) {
+        return { title, key: item.key, children: loop(item.children) };
+      }
 
-        return {
-          title,
-          key: item.key,
-        };
-      });
+      return {
+        title,
+        key: item.key,
+      };
+    });
 
     return loop(treeData)
   }, [searchValue, treeData])

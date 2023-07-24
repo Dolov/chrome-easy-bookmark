@@ -90,7 +90,7 @@ export const getDirTreeData = (treeData) => {
       ...item,
       key: id,
       children: getDirTreeData(children),
-      originalChildren: children,
+      // originalChildren: children,
     })
     return currentValue
   }, [])
