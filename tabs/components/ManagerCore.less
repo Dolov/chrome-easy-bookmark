@@ -10,7 +10,6 @@
     .search-input {
       height: 40px;
       border-radius: 20px;
-      // margin: 24px 0 16px;
 
       .ant-input-prefix {
         padding: 0 6px;
@@ -67,22 +66,29 @@
       align-items: center;
     }
 
+    .ant-tree-title {
+      width: 100%;
+    }
+
+    .tree-title-container {
+      &:hover {
+        .tree-actions {
+          visibility: visible;
+        }
+      }
+    }
+
     .ant-tree-node-content-wrapper {
       line-height: 36px !important;
       display: flex;
       align-items: center;
       padding-left: 16px !important;
+      padding-right: 16px !important;
     }
 
     .ant-tree-switcher {
       display: flex;
       align-items: center;
-    }
-
-    .tree-title-link {
-      &:hover {
-        text-decoration: underline;
-      }
     }
 
     .tree-title-dir-name {

@@ -1,6 +1,9 @@
+import { Storage } from "@plasmohq/storage"
+import { openPage, Namespace } from './utils'
 
-import { openPage } from './utils'
+const storage = new Storage()
 
+/** 定义右键菜单列表 */
 const menuList: (chrome.contextMenus.CreateProperties & { action?(tab: chrome.tabs.Tab): void })[] = [
   {
     id: "bookmark-manager",
@@ -39,12 +42,13 @@ const menuList: (chrome.contextMenus.CreateProperties & { action?(tab: chrome.ta
   },
 ]
 
+/** 创建右键菜单 */
 menuList.forEach(item => {
   const { action, ...menuProps } = item
   chrome.contextMenus.create(menuProps);
 })
 
-
+/** 监听右键菜单的点击事件，执行对应的行为 */
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   const { menuItemId } = info
   const menu = menuList.find(item => item.id === menuItemId)
@@ -54,12 +58,47 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 });
 
 
+let lastWindow: chrome.windows.Window
 /** 监听图标点击 */
 chrome.action.onClicked.addListener(async activeTab => {
-  openPage('./tabs/manager.html', {
-    width: 1000,
-    height: 700,
-  })
+  const settings = await storage.get(Namespace.SETTINGS) as any
+  if (!settings) return
+  const { showType, width, height } = settings
+  if (showType === "modal") {
+    // 只有 url 存在，才能通过 content_script 的方式打开
+    if (activeTab.url) {
+      chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          type: "open"
+        });
+      });
+      return
+    }
+    // 在无法注入 content_script 的页面通过打开新窗口来展示
+    openPage('./tabs/manager.html', {
+      width,
+      height,
+    })
+    return
+  }
+
+  if (showType === "window") {
+    if (lastWindow) {
+      try {
+        const win = await chrome.windows.get(lastWindow.id)
+        await chrome.windows.update(win.id, {
+          focused: true
+        })
+        return
+      } catch (error) {
+        // 被捕获到异常说明页面已经被销毁
+      }
+    }
+    lastWindow = await openPage('./tabs/manager.html', {
+      width,
+      height,
+    })
+  }
 });
 
 /** 监听创建书签的事件 */

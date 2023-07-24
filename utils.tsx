@@ -63,7 +63,7 @@ export const createBookMarkDir = (title: string, parentId, index) => {
 /** 格式化树结构数据 */
 export const formatTreeData = (treeData, parentChain, options?) => {
   if (!Array.isArray(treeData)) return []
-  const { onClick = () => { }, jsxTitle = true } = options || {}
+  const { onClick = () => { } } = options || {}
   return treeData.map(item => {
     const nextParentChain = [...parentChain, { id: item.id, title: item.title }]
     return {
@@ -71,9 +71,7 @@ export const formatTreeData = (treeData, parentChain, options?) => {
       parentChain,
       key: item.id,
       icon: item.url ? null : <Icon name="dir" size={20} />,
-      title: jsxTitle ? (
-        <TreeTitle item={item} onClick={onClick} />
-      ) : item.title,
+      title: <TreeTitle item={item} onClick={onClick} />,
       originalTitle: item.title || "",
       children: formatTreeData(item.children, nextParentChain, options)
     }
@@ -194,7 +192,7 @@ export const openPage = async (url, options) => {
   const pWidth = options.width
   const pHeight = options.height
   /** 打开重新选择标签存储位置的页面 */
-  chrome.windows.create({
+  return await chrome.windows.create({
     url,
     type: "popup",
     width: pWidth,

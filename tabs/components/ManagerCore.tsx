@@ -44,6 +44,7 @@ const ManagerCore: React.FC<ManagerCoreProps> = props => {
   const init = async () => {
     const books = await getBookmarks()
     const data = mergeRootDir(books)
+    
     const treeData = formatTreeData(data, [], {
       onClick: handleLinkClick,
     })

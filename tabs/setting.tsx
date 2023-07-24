@@ -2,6 +2,7 @@ import React from 'react'
 import ConfigProvider from 'antd/es/config-provider'
 import Radio from 'antd/es/radio'
 import Form from 'antd/es/form'
+import message from 'antd/es/message'
 import Button from 'antd/es/button'
 import InputNumber from 'antd/es/input-number'
 import Modal from 'antd/es/modal'
@@ -62,6 +63,12 @@ const Setting: React.FC<SettingProps> = props => {
     }
   }
 
+  const save = () => {
+    const currentSettings = form.getFieldsValue()
+    setSettings(currentSettings)
+    message.success("配置项保存成功")
+  }
+
   const { width, height, history } = currentSettingRef.current || {}
 
   return (
@@ -86,6 +93,7 @@ const Setting: React.FC<SettingProps> = props => {
             </Form.Item>
           </Form>
           <div className="flex flex-row-reverse">
+            <Button onClick={save}>保存</Button>
             <Button onClick={preview}>预览</Button>
           </div>
         </div>

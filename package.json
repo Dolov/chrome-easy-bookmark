@@ -38,6 +38,7 @@
       "helloworld": {}
     },
     "permissions": [
+      "tabs",
       "bookmarks",
       "contextMenus"
     ],
