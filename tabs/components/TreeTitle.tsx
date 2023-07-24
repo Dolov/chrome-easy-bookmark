@@ -28,8 +28,8 @@ const TreeTitle: React.FC<TreeTitleProps> = props => {
       <a
         href={url}
         target="_blank"
-        className='tree-title-link'
         onClick={handleClick}
+        className="hover:underline"
       >
         {title}
       </a>
