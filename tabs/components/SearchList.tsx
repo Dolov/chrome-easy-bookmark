@@ -16,20 +16,27 @@ export interface SearchProps {
 const DirItem: React.FC<{
   data: any[]
   title: string
+  parentChain: any[]
   searchValue: string
 }> = props => {
-  const { data, title, searchValue } = props
+  const { data, title, searchValue, parentChain } = props
+
+  let searchText = title
+  if (Array.isArray(parentChain) && parentChain.length) {
+    searchText = parentChain.map(item => item.title).join(' / ') + " / " + searchText
+  }
 
   const header = (
     <span className="flex items-center">
       <Icon className="flex items-center" name="dir" size={20} />
       <SearchText
-        text={title}
+        text={searchText}
         searchValue={searchValue}
         className="ml-1"
       />
     </span>  
   )
+
   return (
     <Collapse
       bordered={false}
@@ -48,7 +55,6 @@ const DirItem: React.FC<{
               <List.Item key={id}>
                 <List.Item.Meta
                   className="px-4"
-                  title={url && parentDirs.join(" / ")}
                   description={description}
                 />
               </List.Item>
@@ -97,10 +103,13 @@ const Search: React.FC<SearchProps> = props => {
         dataSource={data}
         renderItem={(item, index) => {
           const { originalTitle, id, parentChain, url, children } = item
+
+          if (!url && children.length === 0) return null
+
           const parentDirs = parentChain.map(item => item.title)
-          const description = url ? 
+          const description = url ?
             <UrlItem title={originalTitle} searchValue={searchValue} url={url}  />:
-            <DirItem title={originalTitle} searchValue={searchValue} data={children} />
+            <DirItem title={originalTitle} searchValue={searchValue} data={children} parentChain={parentChain} />
 
           return (
             <List.Item key={id}>
