@@ -83,6 +83,7 @@ const ManagerCore: React.FC<ManagerCoreProps> = props => {
         {searchListVisible && (
           <SearchList
             data={searchList}
+            onClick={handleLinkClick}
             searchValue={searchValue}
           />  
         )}

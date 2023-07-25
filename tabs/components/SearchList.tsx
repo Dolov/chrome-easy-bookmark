@@ -10,16 +10,18 @@ import Icon from './Icon'
 
 export interface SearchProps {
   data: any[]
+  onClick(item: any): void
   searchValue: string
 }
 
 const DirItem: React.FC<{
   data: any[]
   title: string
+  onClick(item: any): void
   parentChain: any[]
   searchValue: string
 }> = props => {
-  const { data, title, searchValue, parentChain } = props
+  const { data, title, onClick, searchValue, parentChain } = props
 
   let searchText = title
   if (Array.isArray(parentChain) && parentChain.length) {
@@ -47,9 +49,15 @@ const DirItem: React.FC<{
           itemLayout="horizontal"
           dataSource={data}
           renderItem={(item, index) => {
-            const { originalTitle, id, parentChain, url } = item
-            const parentDirs = parentChain.map(item => item.title)
-            const description = <UrlItem title={originalTitle} searchValue={searchValue} url={url}  />
+            const { originalTitle, id, url } = item
+            const description = (
+              <UrlItem
+                url={url}
+                title={originalTitle}
+                onClick={onClick}
+                searchValue={searchValue}
+              />  
+            )
 
             return (
               <List.Item key={id}>
@@ -69,11 +77,12 @@ const DirItem: React.FC<{
 const UrlItem: React.FC<{
   url: string
   title: string
+  onClick(item: any): void
   searchValue: string
 }> = props => {
-  const { url, title, searchValue } = props
+  const { url, onClick, title, searchValue } = props
   return (
-    <a className="hover:underline" target="_blank" href={url}>
+    <a onClick={onClick} className="hover:underline" target="_blank" href={url}>
       <SearchText
         text={title}
         searchValue={searchValue}
@@ -83,7 +92,7 @@ const UrlItem: React.FC<{
 }
 
 const Search: React.FC<SearchProps> = props => {
-  const { data, searchValue } = props
+  const { data, searchValue, onClick } = props
   if (data.length === 0) {
     return (
       <Empty
@@ -108,8 +117,19 @@ const Search: React.FC<SearchProps> = props => {
 
           const parentDirs = parentChain.map(item => item.title)
           const description = url ?
-            <UrlItem title={originalTitle} searchValue={searchValue} url={url}  />:
-            <DirItem title={originalTitle} searchValue={searchValue} data={children} parentChain={parentChain} />
+            <UrlItem
+              url={url}
+              title={originalTitle}
+              onClick={() => onClick(item)}
+              searchValue={searchValue}
+            />:
+            <DirItem
+              data={children}
+              title={originalTitle}
+              onClick={() => onClick(item)}
+              searchValue={searchValue}
+              parentChain={parentChain}
+            />
 
           return (
             <List.Item key={id}>
