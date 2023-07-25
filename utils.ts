@@ -1,7 +1,4 @@
-import React from 'react'
 import { orderBy } from 'lodash'
-import Icon from './tabs/components/Icon'
-import TreeTitle from './tabs/components/TreeTitle'
 
 /** 获取书签数据 */
 export const getBookmarks = () => {
@@ -58,24 +55,6 @@ export const createBookMarkDir = (title: string, parentId, index) => {
     chrome.bookmarks.create({ title, parentId, index }, newFolder => {
       resolve(newFolder)
     });
-  })
-}
-
-/** 格式化树结构数据 */
-export const formatTreeData = (treeData, parentChain, options?) => {
-  if (!Array.isArray(treeData)) return []
-  const { onClick = () => { } } = options || {}
-  return treeData.map(item => {
-    const nextParentChain = [...parentChain, { id: item.id, title: item.title }]
-    return {
-      ...item,
-      parentChain,
-      key: item.id,
-      icon: item.url ? null : <Icon name="dir" size={20} />,
-      title: <TreeTitle item={item} onClick={onClick} />,
-      originalTitle: item.title || "",
-      children: formatTreeData(item.children, nextParentChain, options)
-    }
   })
 }
 

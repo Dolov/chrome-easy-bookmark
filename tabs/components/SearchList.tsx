@@ -10,18 +10,19 @@ import Icon from './Icon'
 
 export interface SearchProps {
   data: any[]
-  onClick(item: any): void
   searchValue: string
+  onLinkClick(item: any): void
+  onDirNameClick(item: any): void
 }
 
 const DirItem: React.FC<{
   data: any[]
   title: string
-  onClick(item: any): void
+  onLinkClick(item: any): void
   parentChain: any[]
   searchValue: string
 }> = props => {
-  const { data, title, onClick, searchValue, parentChain } = props
+  const { data, title, onLinkClick, searchValue, parentChain } = props
 
   let searchText = title
   if (Array.isArray(parentChain) && parentChain.length) {
@@ -54,7 +55,7 @@ const DirItem: React.FC<{
               <UrlItem
                 url={url}
                 title={originalTitle}
-                onClick={onClick}
+                onLinkClick={onLinkClick}
                 searchValue={searchValue}
               />  
             )
@@ -77,12 +78,12 @@ const DirItem: React.FC<{
 const UrlItem: React.FC<{
   url: string
   title: string
-  onClick(item: any): void
+  onLinkClick(item: any): void
   searchValue: string
 }> = props => {
-  const { url, onClick, title, searchValue } = props
+  const { url, onLinkClick, title, searchValue } = props
   return (
-    <a onClick={onClick} className="hover:underline" target="_blank" href={url}>
+    <a onClick={onLinkClick} className="hover:underline" target="_blank" href={url}>
       <SearchText
         text={title}
         searchValue={searchValue}
@@ -92,7 +93,7 @@ const UrlItem: React.FC<{
 }
 
 const Search: React.FC<SearchProps> = props => {
-  const { data, searchValue, onClick } = props
+  const { data, searchValue, onLinkClick, onDirNameClick } = props
   if (data.length === 0) {
     return (
       <Empty
@@ -115,27 +116,44 @@ const Search: React.FC<SearchProps> = props => {
 
           if (!url && children.length === 0) return null
 
-          const parentDirs = parentChain.map(item => item.title)
           const description = url ?
             <UrlItem
               url={url}
               title={originalTitle}
-              onClick={() => onClick(item)}
+              onLinkClick={() => onLinkClick(item)}
               searchValue={searchValue}
             />:
             <DirItem
               data={children}
               title={originalTitle}
-              onClick={() => onClick(item)}
+              onLinkClick={() => onLinkClick(item)}
               searchValue={searchValue}
               parentChain={parentChain}
             />
 
+          const title = url && (
+            parentChain.map((item, index) => {
+              const separator = index < parentChain.length - 1 ? " / ": ""
+              return (
+                <>
+                  <span
+                    key={item.id}
+                    // onClick={() => onDirNameClick(item)}
+                    // className="hover:underline cursor-pointer"
+                  >
+                    {item.title}
+                  </span>
+                  {separator}
+                </>
+              )
+            })
+          )
+
           return (
             <List.Item key={id}>
               <List.Item.Meta
+                title={title}
                 className="px-4"
-                title={url && parentDirs.join(" / ")}
                 description={description}
               />
             </List.Item>

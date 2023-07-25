@@ -15,9 +15,9 @@ export interface TreeModeProps {
 const TreeMode: React.FC<TreeModeProps> = props => {
   const { data, height: outHeight, refresh, updateHeight } = props
   const containerRef = React.useRef<HTMLDivElement>(null)
-  const [height, setHeight] = React.useState(undefined)
+  const [height, setHeight] = React.useState(0)
 
-  const calcHeight = debounce(() => {
+  const calcHeight = () => {
     if (!containerRef.current) return
     const top = containerRef.current.offsetTop
     if (outHeight) {
@@ -25,16 +25,24 @@ const TreeMode: React.FC<TreeModeProps> = props => {
       return
     }
     setHeight(innerHeight - top - 24)
-  }, 1000)
+  }
+
+  const calcHeightDebounce = debounce(calcHeight, 1000)
 
   React.useEffect(() => {
     calcHeight()
   }, [outHeight, updateHeight])
 
+  const getElement = React.useCallback(element => {
+    if (!element) return
+    containerRef.current = element
+    calcHeight()
+  }, [])
+
   React.useEffect(() => {
-    window.addEventListener('resize', calcHeight)
+    window.addEventListener('resize', calcHeightDebounce)
     return () => {
-      window.removeEventListener('resize', calcHeight)
+      window.removeEventListener('resize', calcHeightDebounce)
     }
   }, [])
 
@@ -74,17 +82,20 @@ const TreeMode: React.FC<TreeModeProps> = props => {
   };
 
   return (
-    <div ref={containerRef} className="tree-mode-container">
-      <Tree
-        multiple
-        showIcon
-        draggable
-        blockNode
-        defaultExpandAll
-        height={height}
-        onDrop={onDrop}
-        treeData={data}
-      />
+    <div ref={getElement} className="tree-mode-container">
+      {/* 如果高度为 0 或者为 undefined 会有性能问题，卡顿 */}
+      {!!height && (
+        <Tree
+          multiple
+          showIcon
+          draggable
+          blockNode
+          defaultExpandAll
+          height={height}
+          onDrop={onDrop}
+          treeData={data}
+        />
+      )}
     </div>
   )
 }

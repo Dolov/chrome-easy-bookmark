@@ -4,10 +4,12 @@ import { debounce } from 'lodash'
 import Input from 'antd/es/input'
 import classnames from 'classnames'
 import SearchOutlined from '@ant-design/icons/SearchOutlined'
+import Icon from '../components/Icon'
 import History from '../components/History'
 import TreeMode from '../components/TreeMode'
+import TreeTitle from '../components/TreeTitle'
 import SearchList from '../components/SearchList'
-import { getBookmarks, mergeRootDir, formatTreeData, searchTreeData, Namespace, fs } from '../../utils'
+import { getBookmarks, mergeRootDir, searchTreeData, Namespace } from '../../utils'
 import './ManagerCore.less'
 
 export interface ManagerCoreProps {
@@ -41,13 +43,31 @@ const ManagerCore: React.FC<ManagerCoreProps> = props => {
     setHistroy(histroyRef.current)
   }
 
+  const handleDirNameClick = item => {
+    setSearchValue("")
+  }
+
   const init = async () => {
     const books = await getBookmarks()
     const data = mergeRootDir(books)
-    
-    const treeData = formatTreeData(data, [], {
-      onClick: handleLinkClick,
-    })
+    const formatTreeData = (treeData, parentChain) => {
+      if (!Array.isArray(treeData)) return []
+      return treeData.map(item => {
+        const nextParentChain = [...parentChain, { id: item.id, title: item.title }]
+        return {
+          ...item,
+          parentChain,
+          key: item.id,
+          icon: item.url ? null : <Icon name="dir" size={20} />,
+          title: (
+            <TreeTitle item={item} onClick={handleLinkClick} refresh={init} />  
+          ),
+          originalTitle: item.title || "",
+          children: formatTreeData(item.children, nextParentChain)
+        }
+      })
+    }
+    const treeData = formatTreeData(data, [])
     setBookmarks(treeData)
   }
 
@@ -55,6 +75,7 @@ const ManagerCore: React.FC<ManagerCoreProps> = props => {
     init()
   }, [])
 
+  /** 搜索 */
   const handleChange = debounce((e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     setSearchValue(value)
@@ -74,8 +95,8 @@ const ManagerCore: React.FC<ManagerCoreProps> = props => {
         <Input
           autoFocus
           prefix={<SearchOutlined />}
-          className="search-input"
           onChange={handleChange}
+          className="search-input"
         />
       </header>
       <main className="mt-6 flex flex-1 flex-col overflow-hidden">
@@ -83,8 +104,9 @@ const ManagerCore: React.FC<ManagerCoreProps> = props => {
         {searchListVisible && (
           <SearchList
             data={searchList}
-            onClick={handleLinkClick}
             searchValue={searchValue}
+            onLinkClick={handleLinkClick}
+            onDirNameClick={handleDirNameClick}
           />  
         )}
         <div className={classnames("list-container", {

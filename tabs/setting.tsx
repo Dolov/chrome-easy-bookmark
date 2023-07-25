@@ -18,7 +18,7 @@ export interface SettingProps {
 }
 
 const initialValues = {
-  showType: "modal",
+  showType: "window",
   width: 1000,
   height: 700,
   history: true,
