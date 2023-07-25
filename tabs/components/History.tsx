@@ -1,5 +1,6 @@
 import React from 'react'
 import BackgroundContainer from './BackgroundContainer'
+import { Namespace } from '../../utils'
 
 export interface HistoryProps {
   data: any[]
@@ -17,17 +18,30 @@ const History: React.FC<HistoryProps> = props => {
   if (histroyData.length === 0) return null
   
   return (
-    <BackgroundContainer className="mb-3" strore_key='history-color'>
-      <div className='history-container'>
-        {histroyData.map(item => {
-        const { title, id, url } = item
-          return (
-            <span title={title} className='history-item' key={id}>
-              <a href={url} target="_blank">{title}</a>
-            </span>  
-          )      
-        })}
-      </div>
+    <BackgroundContainer
+      margin
+      padding
+      className="history-container flex flex-wrap"
+      strore_key={Namespace.HISTORY_COLOR}
+    >
+      {histroyData.map(item => {
+      const { title, id, url } = item
+        return (
+          <span
+            key={id}
+            title={title}
+            className="w-[120px] overflow-hidden inline-block"
+          >
+            <a
+              href={url}
+              target="_blank"
+              className="w-full whitespace-nowrap text-ellipsis underline overflow-hidden block hover:text-[#1677ff]"
+            >
+              {title}
+            </a>
+          </span>  
+        )      
+      })}
     </BackgroundContainer>
   )
 }

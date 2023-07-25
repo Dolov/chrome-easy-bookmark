@@ -165,6 +165,8 @@ export enum Namespace {
   HISTORY_COLOR = "history_color",
   // 搜索结果模块的颜色
   SEARCH_COLOR = "search_color",
+  // 批量操作模块的颜色
+  BATCH_ACTIONS_COLOR = "batch_actions_color",
 }
 
 /** 获取浏览器位于窗口的位置信息 */

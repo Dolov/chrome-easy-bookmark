@@ -17,16 +17,32 @@ const TreeTitle: React.FC<TreeTitleProps> = props => {
 
   const items: MenuProps['items'] = [
     {
-      label: '1st menu item',
-      key: '1',
+      label: '在新标签页中打开',
+      key: 'open_new_tab',
     },
     {
-      label: '2nd menu item',
-      key: '2',
+      label: '在新窗口中打开',
+      key: 'open_new_window',
     },
     {
-      label: '3rd menu item',
-      key: '3',
+      label: '在隐身窗口中打开',
+      key: 'open_incognito',
+    },
+    {
+      label: '重命名',
+      key: 'rename',
+    },
+    {
+      label: '修改',
+      key: 'update',
+    },
+    {
+      label: '添加文件夹',
+      key: 'create_dir',
+    },
+    {
+      label: '删除',
+      key: 'delete',
     },
   ];
 

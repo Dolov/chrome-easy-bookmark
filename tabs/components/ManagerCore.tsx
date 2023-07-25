@@ -9,6 +9,7 @@ import History from '../components/History'
 import TreeMode from '../components/TreeMode'
 import TreeTitle from '../components/TreeTitle'
 import SearchList from '../components/SearchList'
+import BatchActions from '../components/BatchActions'
 import { getBookmarks, mergeRootDir, searchTreeData, Namespace } from '../../utils'
 import './ManagerCore.less'
 
@@ -60,7 +61,7 @@ const ManagerCore: React.FC<ManagerCoreProps> = props => {
           key: item.id,
           icon: item.url ? null : <Icon name="dir" size={20} />,
           title: (
-            <TreeTitle item={item} onClick={handleLinkClick} refresh={init} />  
+            <TreeTitle item={item} onClick={handleLinkClick} refresh={init} />
           ),
           originalTitle: item.title || "",
           children: formatTreeData(item.children, nextParentChain)
@@ -90,13 +91,13 @@ const ManagerCore: React.FC<ManagerCoreProps> = props => {
   const searchListVisible = !!searchValue
 
   return (
-    <div className='manager-page-container flex-1'>
+    <div className='manager-page-container flex-1 flex flex-col overflow-hidden'>
       <header>
         <Input
           autoFocus
           prefix={<SearchOutlined />}
           onChange={handleChange}
-          className="search-input"
+          className="h-[40px] rounded-[20px]"
         />
       </header>
       <main className="mt-6 flex flex-1 flex-col overflow-hidden">
@@ -107,9 +108,10 @@ const ManagerCore: React.FC<ManagerCoreProps> = props => {
             searchValue={searchValue}
             onLinkClick={handleLinkClick}
             onDirNameClick={handleDirNameClick}
-          />  
+          />
         )}
-        <div className={classnames("list-container", {
+        <BatchActions />
+        <div className={classnames({
           "hidden": searchListVisible,
         })}>
           <TreeMode

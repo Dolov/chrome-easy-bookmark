@@ -48,12 +48,14 @@ const colorList = [
 ]
 
 export interface BackgroundContainerProps extends React.PropsWithChildren {
+  margin?: boolean
+  padding?: boolean
   strore_key: string
   className?: string
 }
 
 const BackgroundContainer: React.FC<BackgroundContainerProps> = props => {
-  const { children, strore_key, className } = props
+  const { children, strore_key, className, margin, padding } = props
   const [color = colorList[0], setColor] = useStorage(strore_key)
   const [visible, setVisible] = React.useState(false)
 
@@ -83,7 +85,10 @@ const BackgroundContainer: React.FC<BackgroundContainerProps> = props => {
     )}>
       <div
         onClick={() => setVisible(!visible)}
-        className={classnames(className, "relative rounded")}
+        className={classnames(className, "relative rounded", {
+          "p-3": padding,
+          "mb-3": margin,
+        })}
         style={{
           background,
           borderColor: border,
