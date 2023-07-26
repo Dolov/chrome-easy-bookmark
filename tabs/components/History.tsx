@@ -30,12 +30,12 @@ const History: React.FC<HistoryProps> = props => {
           <span
             key={id}
             title={title}
-            className="w-[120px] overflow-hidden inline-block"
+            className="w-[120px] overflow-hidden inline-block mr-2"
           >
             <a
               href={url}
               target="_blank"
-              className="w-full whitespace-nowrap text-ellipsis underline overflow-hidden block hover:text-[#1677ff]"
+              className="w-full whitespace-nowrap text-ellipsis underline overflow-hidden block hover:text-blue-600"
             >
               {title}
             </a>

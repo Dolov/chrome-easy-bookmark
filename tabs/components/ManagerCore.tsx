@@ -21,6 +21,8 @@ export interface ManagerCoreProps {
 const ManagerCore: React.FC<ManagerCoreProps> = props => {
   const { height, historyVisible = true } = props
 
+  const [selectedKeys, onSelectedKeysChange] = React.useState([])
+
   /**
    * 频繁的操作会导致报错
    * MAX_WRITE_OPERATIONS_PER_MINUTE
@@ -102,6 +104,9 @@ const ManagerCore: React.FC<ManagerCoreProps> = props => {
       </header>
       <main className="mt-6 flex flex-1 flex-col overflow-hidden">
         {historyVisible && <History data={history} />}
+        {!searchListVisible && (
+          <BatchActions selectedKeys={selectedKeys} />  
+        )}
         {searchListVisible && (
           <SearchList
             data={searchList}
@@ -110,7 +115,6 @@ const ManagerCore: React.FC<ManagerCoreProps> = props => {
             onDirNameClick={handleDirNameClick}
           />
         )}
-        <BatchActions />
         <div className={classnames({
           "hidden": searchListVisible,
         })}>
@@ -118,6 +122,8 @@ const ManagerCore: React.FC<ManagerCoreProps> = props => {
             data={bookmarks}
             height={height}
             refresh={init}
+            onSelect={onSelectedKeysChange}
+            selectedKeys={selectedKeys}
             updateHeight={historyVisible}
           />
         </div>

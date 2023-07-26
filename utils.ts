@@ -194,3 +194,10 @@ export const openPage = async (url, options) => {
     left: Math.floor(width / 2) + left - Math.floor(pWidth / 2),
   });
 }
+
+export const initialSettings = {
+  showType: "window",
+  width: 1000,
+  height: 700,
+  history: true,
+}

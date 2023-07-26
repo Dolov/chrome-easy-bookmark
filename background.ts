@@ -1,5 +1,5 @@
 import { Storage } from "@plasmohq/storage"
-import { openPage, Namespace } from './utils'
+import { openPage, Namespace, initialSettings } from './utils'
 
 const storage = new Storage()
 
@@ -61,7 +61,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 let lastWindow: chrome.windows.Window
 /** 监听图标点击 */
 chrome.action.onClicked.addListener(async activeTab => {
-  const settings = await storage.get(Namespace.SETTINGS) as any
+  const settings = await storage.get(Namespace.SETTINGS) as any || initialSettings
   if (!settings) return
   const { showType, width, height } = settings
   if (showType === "modal") {

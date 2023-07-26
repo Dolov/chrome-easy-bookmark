@@ -29,19 +29,19 @@ const TreeTitle: React.FC<TreeTitleProps> = props => {
       key: 'open_incognito',
     },
     {
-      label: '重命名',
-      key: 'rename',
-    },
-    {
       label: '修改',
       key: 'update',
+    },
+    {
+      label: '重命名',
+      key: 'rename',
     },
     {
       label: '添加文件夹',
       key: 'create_dir',
     },
     {
-      label: '删除',
+      label: <div className="text-red-600 font-bold">删除</div>,
       key: 'delete',
     },
   ];

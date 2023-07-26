@@ -10,18 +10,11 @@ import Checkbox from 'antd/es/checkbox'
 import { useStorage } from '@plasmohq/storage/hook'
 import ManagerCore from './components/ManagerCore'
 import zh_CN from 'antd/locale/zh_CN'
-import { Namespace, openPage } from '../utils'
+import { Namespace, openPage, initialSettings } from '../utils'
 import './setting.less'
 
 export interface SettingProps {
 
-}
-
-const initialValues = {
-  showType: "window",
-  width: 1000,
-  height: 700,
-  history: true,
 }
 
 const layout = {
@@ -40,7 +33,7 @@ const Setting: React.FC<SettingProps> = props => {
   const [form] = Form.useForm()
   const [settings, setSettings] = useStorage(Namespace.SETTINGS)
   const [open, setOpen] = React.useState(false)
-  const currentSettingRef = React.useRef(initialValues)
+  const currentSettingRef = React.useRef(initialSettings)
 
   const [] = React.useState()
 
@@ -75,7 +68,7 @@ const Setting: React.FC<SettingProps> = props => {
     <ConfigProvider locale={zh_CN}>
       <div className="flex justify-center">
         <div className="w-10/12 mt-6">
-          <Form {...layout} form={form} initialValues={initialValues}>
+          <Form {...layout} form={form} initialValues={initialSettings}>
             <Form.Item label="展示方式" name="showType">
               <Radio.Group
                 options={options}

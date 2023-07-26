@@ -105,7 +105,7 @@ const Search: React.FC<SearchProps> = props => {
   }
   return (
     <BackgroundContainer
-      className="flex-1 overflow-auto"
+      className="flex-1 overflow-auto px-3"
       strore_key={Namespace.SEARCH_COLOR}
     >
       <List

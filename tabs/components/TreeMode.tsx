@@ -8,12 +8,14 @@ import { moveBookMark } from '../../utils'
 export interface TreeModeProps {
   data: TreeProps["treeData"]
   refresh(): void
+  onSelect(keys: string[]): void
+  selectedKeys: string[]
   height?: number
   updateHeight?: boolean
 }
 
 const TreeMode: React.FC<TreeModeProps> = props => {
-  const { data, height: outHeight, refresh, updateHeight } = props
+  const { data, height: outHeight, refresh, updateHeight, onSelect, selectedKeys } = props
   const containerRef = React.useRef<HTMLDivElement>(null)
   const [height, setHeight] = React.useState(0)
 
@@ -94,6 +96,8 @@ const TreeMode: React.FC<TreeModeProps> = props => {
           height={height}
           onDrop={onDrop}
           treeData={data}
+          onSelect={onSelect}
+          selectedKeys={selectedKeys}
         />
       )}
     </div>
