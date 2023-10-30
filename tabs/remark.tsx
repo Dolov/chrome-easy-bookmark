@@ -4,7 +4,7 @@ import Input from 'antd/es/input'
 import Form from 'antd/es/form'
 import Button from 'antd/es/button'
 import Tree from './components/Tree'
-import { getDirTreeData, getOption, updateMoveBookMark, deleteBookMark } from '../utils'
+import { assignTreeItemKey, getOption, updateMoveBookMark, deleteBookMark } from '../utils'
 import './remark.less'
 
 export interface RemarkProps {
@@ -34,7 +34,7 @@ const Remark: React.FC<RemarkProps> = props => {
   React.useEffect(() => {
     chrome.bookmarks.getTree().then(res => {
       setFieldsValue(res)
-      const treeData = getDirTreeData(res)
+      const treeData = assignTreeItemKey(res)
       setTreeData(treeData[0].children)
     })
   }, [])

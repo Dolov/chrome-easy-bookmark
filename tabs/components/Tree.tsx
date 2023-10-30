@@ -25,36 +25,61 @@ const SearchTree: React.FC<TreeProps> = props => {
   const onSearchInputChange = debounce(e => {
     const { value } = e.target;
     setSearchValue(value)
-    if (!value) return
-    // const keys = searchMatchDir(value, treeData).map(item => item.key)
-
-    const items = searchMatchDir(value, treeData)
-    const keys = items.reduce((currentValue, item) => {
-      const ids = getParentIds(item.key, treeData)
-      return currentValue.concat(ids)
-    }, [])
-    const expandedKeys = Array.from(new Set(keys))
-    setExpandedKeys(expandedKeys)
   }, 150)
 
   const jsxTreeData = React.useMemo(() => {
     if (!searchValue) return treeData
-    const loop = treeData => treeData.map(item => {
-      const title = (
-        <SearchText text={item.title} searchValue={searchValue} />
-      )
-      if (item.children) {
-        return { title, key: item.key, children: loop(item.children) };
-      }
+    const sValue = fs(searchValue)
 
-      return {
-        title,
-        key: item.key,
-      };
-    });
+    const loop = treeData => {
+      if (!Array.isArray(treeData)) return []
+      return treeData.reduce((previousValue, currentItem) => {
+        const { title, children, key, url } = currentItem
+        const sText = fs(title)
+        const index = sText.indexOf(sValue);
+        const match = index >= 0
+        const jsxChildren = loop(children)
+
+        if (!match && jsxChildren.length === 0) {
+          return previousValue
+        }
+
+        let jsxTitle = match ? (
+          <SearchText text={title} searchValue={searchValue} />
+        ) : title
+
+        previousValue.push({
+          key,
+          title: jsxTitle,
+          children: jsxChildren,
+        })
+
+        return previousValue
+      }, [])
+    }
 
     return loop(treeData)
   }, [searchValue, treeData])
+
+  React.useEffect(() => {
+    if (!searchValue) return
+    const getIds = treeData => {
+      return treeData.reduce((currentValue, item) => {
+        const { children, key, url } = item
+        if (url) return currentValue
+        currentValue.push(key)
+        if (Array.isArray(children)) {
+          const ids = getIds(children)
+          currentValue.push(...ids)
+        }
+        return currentValue
+      }, [])
+    }
+
+    const ids = getIds(jsxTreeData)
+    const expandedKeys = Array.from(new Set(ids))
+    setExpandedKeys(expandedKeys)
+  }, [jsxTreeData])
 
   const onExpand = keys => {
     setExpandedKeys(keys)

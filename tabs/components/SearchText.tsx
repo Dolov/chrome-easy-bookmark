@@ -12,8 +12,8 @@ const SearchText: React.FC<SearchTextProps> = props => {
   const sText = fs(text)
   const sValue = fs(searchValue)
   const index = sText.indexOf(sValue);
-  const beforeStr = sText.substring(0, index);
-  const afterStr = sText.slice(index + sValue.length);
+  const beforeStr = text.substring(0, index);
+  const afterStr = text.slice(index + sValue.length);
   if (index < 0) {
     return sText
   }

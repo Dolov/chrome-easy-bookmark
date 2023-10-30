@@ -74,6 +74,21 @@ export const getDirTreeData = (treeData) => {
   }, [])
 }
 
+export const assignTreeItemKey = treeData => {
+  if (!Array.isArray(treeData)) return []
+  return treeData.reduce((currentValue, item) => {
+    if (!item) return currentValue
+    const { id, url, children } = item
+    currentValue.push({
+      ...item,
+      key: id,
+      disabled: !!url,
+      children: assignTreeItemKey(children),
+    })
+    return currentValue
+  }, [])
+}
+
 /** 树结构编排化 */
 export const flat = treeData => {
   if (!Array.isArray(treeData)) return []
