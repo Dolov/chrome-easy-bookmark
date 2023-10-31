@@ -25,7 +25,8 @@ const History: React.FC<HistoryProps> = props => {
       strore_key={Namespace.HISTORY_COLOR}
     >
       {histroyData.map(item => {
-      const { title, id, url } = item
+        const { title, id, url, originalTitle } = item
+        const renderTitle = originalTitle || title
         return (
           <span
             key={id}
@@ -37,7 +38,7 @@ const History: React.FC<HistoryProps> = props => {
               target="_blank"
               className="w-full whitespace-nowrap text-ellipsis underline overflow-hidden block hover:text-blue-600"
             >
-              {title}
+              {renderTitle}
             </a>
           </span>  
         )      

@@ -28,6 +28,7 @@ const ManagerCore: React.FC<ManagerCoreProps> = props => {
    * MAX_WRITE_OPERATIONS_PER_MINUTE
    */
   const [history = [], setHistroy] = useStorage(Namespace.HISTORY)
+  
   const [searchValue, setSearchValue] = React.useState("")
   const [bookmarks, setBookmarks] = React.useState<any>([])
   const [searchList, setSearchList] = React.useState([])
@@ -39,6 +40,7 @@ const ManagerCore: React.FC<ManagerCoreProps> = props => {
     histroyRef.current = [
       {
         ...item,
+        title: item.originalTitle || item.title,
         time: new Date().getTime(),
       },
       ...histroyRef.current

@@ -166,7 +166,8 @@ export const mergeRootDir = treeData => {
 /** 处理字符串 */
 export const fs = (str: string) => {
   if (typeof str !== 'string') return ''
-  return str.replace(/\s*/g, "").toLowerCase()
+  // return str.replace(/\s*/g, "").toLowerCase()
+  return str.toLowerCase()
 }
 
 /** 命名空间 */
