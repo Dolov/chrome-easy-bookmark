@@ -78,11 +78,10 @@ export const assignTreeItemKey = treeData => {
   if (!Array.isArray(treeData)) return []
   return treeData.reduce((currentValue, item) => {
     if (!item) return currentValue
-    const { id, url, children } = item
+    const { id, children } = item
     currentValue.push({
       ...item,
       key: id,
-      disabled: !!url,
       children: assignTreeItemKey(children),
     })
     return currentValue

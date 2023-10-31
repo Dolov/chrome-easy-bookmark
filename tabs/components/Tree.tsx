@@ -25,7 +25,7 @@ const SearchTree: React.FC<TreeProps> = props => {
   const onSearchInputChange = debounce(e => {
     const { value } = e.target;
     setSearchValue(value)
-  }, 150)
+  }, 300)
 
   const jsxTreeData = React.useMemo(() => {
     if (!searchValue) return treeData
@@ -51,6 +51,7 @@ const SearchTree: React.FC<TreeProps> = props => {
         previousValue.push({
           key,
           title: jsxTitle,
+          disabled: !!url,
           children: jsxChildren,
         })
 
