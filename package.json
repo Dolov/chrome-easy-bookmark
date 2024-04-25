@@ -1,9 +1,9 @@
 {
-  "name": "suffer-frail-lynx",
-  "displayName": "Suffer frail lynx",
+  "name": "easy-bookmark",
+  "displayName": "Easy Bookmark",
   "version": "0.0.1",
-  "description": "A basic Plasmo extension.",
-  "author": "Plasmo Corp. <foss@plasmo.com>",
+  "description": "Easily manage your bookmarks.",
+  "author": "shisongyan. <songyan_shi@163.com>",
   "scripts": {
     "dev": "plasmo dev",
     "build": "plasmo build",
