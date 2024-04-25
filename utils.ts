@@ -7,12 +7,14 @@ export const useBoolean = (defaultValue = false) => {
   const toggle = () => {
     setValue(!valueRef.current)
   }
-  return [value, setValue, toggle] as const
+  return [value, toggle, setValue] as const
 }
 
 
 export enum MessageActionEnum {
-  GET_BOOK_MARK_TREE = "GET_BOOK_MARK_TREE"
+  GET_BOOKMARK_TREE = "GET_BOOKMARK_TREE",
+  CREATE_BOOKMARK = "CREATE_BOOKMARK",
+  UPDATE_BOOKMARK = "UPDATE_BOOKMARK",
 }
 
 export const formatBookmarkTreeNodes = (treeData) => {
@@ -28,4 +30,15 @@ export const formatBookmarkTreeNodes = (treeData) => {
     })
     return currentValue
   }, [])
+}
+
+export const findTreeNode = (url: string, treeData: chrome.bookmarks.BookmarkTreeNode[]): 
+chrome.bookmarks.BookmarkTreeNode | undefined => {
+  if (!treeData || !treeData.length) return
+  for (let index = 0; index < treeData.length; index++) {
+    const item = treeData[index];
+    if (item.url === url) return item
+    const target = findTreeNode(url, item.children)
+    if (target) return target
+  }
 }

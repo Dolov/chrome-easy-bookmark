@@ -50,11 +50,24 @@ chrome.bookmarks.onCreated.addListener(async bookmark => {
 
 // chrome.runtime.connect()
 
-chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-  // 处理消息
-  if (message.action === MessageActionEnum.GET_BOOK_MARK_TREE) {
+chrome.runtime.onMessage.addListener(function(params, sender, sendResponse) {
+  if (params.action === MessageActionEnum.GET_BOOKMARK_TREE) {
     chrome.bookmarks.getTree(function(bookmarkTreeNodes) {
       sendResponse(bookmarkTreeNodes);
     });
+    return
+  }
+  if (params.action === MessageActionEnum.CREATE_BOOKMARK) {
+    chrome.bookmarks.create(params.payload).then(res => {
+      sendResponse(res)
+    })
+    return
+  }
+  if (params.action === MessageActionEnum.UPDATE_BOOKMARK) {
+    const { id, ...rest } = params.payload
+    chrome.bookmarks.update(id, rest).then(res => {
+      sendResponse(res)
+    })
+    return
   }
 });
