@@ -50,7 +50,7 @@ chrome.bookmarks.onCreated.addListener(async bookmark => {
 
 // chrome.runtime.connect()
 
-chrome.runtime.onMessage.addListener(function(params, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(async (params, sender, sendResponse) => {
   if (params.action === MessageActionEnum.GET_BOOKMARK_TREE) {
     chrome.bookmarks.getTree(function(bookmarkTreeNodes) {
       sendResponse(bookmarkTreeNodes);
@@ -68,6 +68,13 @@ chrome.runtime.onMessage.addListener(function(params, sender, sendResponse) {
     chrome.bookmarks.update(id, rest).then(res => {
       sendResponse(res)
     })
+    return
+  }
+  if (params.action === MessageActionEnum.MOVE_BOOKMARK) {
+    const { id, url, title, parentId, index } = params.payload
+    await chrome.bookmarks.update(id, { url, title })
+    const res = await chrome.bookmarks.move(id, { parentId, index })
+    sendResponse(res)
     return
   }
 });

@@ -5,9 +5,10 @@ export const useBoolean = (defaultValue = false) => {
   const valueRef = React.useRef<boolean>()
   valueRef.current = value
   const toggle = () => {
-    setValue(!valueRef.current)
+    valueRef.current = !valueRef.current
+    setValue(valueRef.current)
   }
-  return [value, toggle, setValue] as const
+  return [value, toggle, valueRef] as const
 }
 
 
@@ -15,6 +16,7 @@ export enum MessageActionEnum {
   GET_BOOKMARK_TREE = "GET_BOOKMARK_TREE",
   CREATE_BOOKMARK = "CREATE_BOOKMARK",
   UPDATE_BOOKMARK = "UPDATE_BOOKMARK",
+  MOVE_BOOKMARK = "MOVE_BOOKMARK",
 }
 
 export const formatBookmarkTreeNodes = (treeData) => {

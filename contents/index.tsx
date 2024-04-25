@@ -14,11 +14,10 @@ export const config: PlasmoCSConfig = {
 	// all_frames: true
 }
 
-
 const AnchorTypePrinter: React.FC<PlasmoCSUIProps> = (props) => {
 
 	const formRef = React.useRef<FormApi>()
-	const [visible, toggle] = useBoolean()
+	const [visible, toggle, visibleRef] = useBoolean()
 	const [disabled, setDisabled] = React.useState(false)
 	const [treeNodes, setTreeNodes] = React.useState([])
 	const [treeNodeDirs, setTreeNodeDirs] = React.useState([])
@@ -27,12 +26,10 @@ const AnchorTypePrinter: React.FC<PlasmoCSUIProps> = (props) => {
 	React.useEffect(() => {
 		Mousetrap.bind(['command+s', 'ctrl+s'], function () {
 			toggle()
+			if (!visibleRef.current) return false
+			init()
 			return false;
 		});
-	}, [])
-
-	React.useEffect(() => {
-		init()
 	}, [])
 
 	const init = () => {
@@ -49,15 +46,26 @@ const AnchorTypePrinter: React.FC<PlasmoCSUIProps> = (props) => {
 	}
 
 	const save = () => {
-		const action = bookmark ? MessageActionEnum.UPDATE_BOOKMARK: MessageActionEnum.CREATE_BOOKMARK
-		const values = formRef.current.getValues()
+		const { parentId, title } = formRef.current.getValues()
+		const payload: Partial<chrome.bookmarks.BookmarkTreeNode> = {
+			title,
+			url: location.href,
+		}
+		let action = MessageActionEnum.CREATE_BOOKMARK
+		if (bookmark) {
+			payload.id = bookmark.id
+			action = MessageActionEnum.UPDATE_BOOKMARK
+			if (bookmark.parentId !== parentId) {
+				action = MessageActionEnum.MOVE_BOOKMARK
+				payload.parentId = parentId
+			}
+		} else {
+			payload.parentId = parentId
+		}
+
 		chrome.runtime.sendMessage({
 			action,
-			payload: {
-				id: bookmark?.id,
-				url: location.href,
-				title: values.title,
-			},
+			payload,
 		}, res => {
 			init()
 			toggle()
@@ -69,9 +77,9 @@ const AnchorTypePrinter: React.FC<PlasmoCSUIProps> = (props) => {
 		setDisabled(disabled)
 	}
 
-	const modalType = bookmark ? "新建书签": "编辑书签"
+	const modalType = bookmark ? "编辑书签": "新建书签"
 
-	const { title = document.title, parentId = "1" } = bookmark || {}
+	const { title = document.title, parentId } = bookmark || {}
 
 	return (
 		<div>
