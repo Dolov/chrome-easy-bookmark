@@ -1,6 +1,7 @@
 import React from 'react'
 import Mousetrap from 'mousetrap'
-import { Modal, Form } from '@douyinfe/semi-ui'
+import { Modal, Form, Button } from '@douyinfe/semi-ui'
+import { IconBookmark } from '@douyinfe/semi-icons'
 import { type FormApi } from '@douyinfe/semi-ui/lib/es/form'
 import type { PlasmoCSConfig, PlasmoGetShadowHostId, PlasmoCSUIProps } from "plasmo"
 import { useBoolean, MessageActionEnum, formatBookmarkTreeNodes, findTreeNode } from '../utils'
@@ -13,6 +14,8 @@ export const config: PlasmoCSConfig = {
 	matches: ["<all_urls>"],
 	// all_frames: true
 }
+
+const defaultParentId = "1"
 
 const AnchorTypePrinter: React.FC<PlasmoCSUIProps> = (props) => {
 
@@ -46,7 +49,7 @@ const AnchorTypePrinter: React.FC<PlasmoCSUIProps> = (props) => {
 	}
 
 	const save = () => {
-		const { parentId, title } = formRef.current.getValues()
+		const { parentId = defaultParentId, title } = formRef.current.getValues()
 		const payload: Partial<chrome.bookmarks.BookmarkTreeNode> = {
 			title,
 			url: location.href,
@@ -77,21 +80,38 @@ const AnchorTypePrinter: React.FC<PlasmoCSUIProps> = (props) => {
 		setDisabled(disabled)
 	}
 
-	const modalType = bookmark ? "编辑书签": "新建书签"
+	const handleDelete = () => {
+		chrome.runtime.sendMessage({
+			id: bookmark.id,
+			action: MessageActionEnum.DELETE_BOOKMARK,
+		}, res => {
+			init()
+			toggle()
+		});
+	}
 
-	const { title = document.title, parentId } = bookmark || {}
+	const showAll = () => {
+		
+	}
+
+	const create = !bookmark
+	const modalType = create ? "新建书签" : "编辑书签"
+
+	const { title = document.title, parentId = defaultParentId } = bookmark || {}
 
 	return (
 		<div>
 			<Modal
-				title={modalType}
+				title={(
+					<div style={{ display: "flex", alignItems: "center" }}>
+						<Button type="primary" onClick={showAll}><IconBookmark /></Button>
+						<span style={{ marginLeft: 16 }}>{modalType}</span>
+					</div>
+				)}
 				visible={visible}
 				onOk={save}
 				onCancel={toggle}
-				okButtonProps={{
-					disabled,
-					autoFocus: true,
-				}}
+				footer={<ModalFooter handleDelete={handleDelete} save={save} toggle={toggle} disabled={disabled} create={create} />}
 			>
 				<Form
 					onValueChange={onValueChange}
@@ -120,6 +140,35 @@ const AnchorTypePrinter: React.FC<PlasmoCSUIProps> = (props) => {
 					/>
 				</Form>
 			</Modal>
+		</div>
+	)
+}
+
+const ModalFooter = props => {
+	const { handleDelete, save, toggle, disabled, create } = props
+	return (
+		<div style={{ display: "flex", justifyContent: "space-between" }}>
+			{!create && (
+				<Button
+					type="danger"
+					style={{ marginLeft: 0 }}
+					onClick={handleDelete}
+				>
+					删除
+				</Button>
+			)}
+			<div style={{ flex: 1 }}>
+				<Button onClick={toggle}>取消</Button>
+				<Button
+					autoFocus
+					theme='solid'
+					type='primary'
+					disabled={disabled}
+					onClick={save}
+				>
+					保存
+				</Button>
+			</div>
 		</div>
 	)
 }

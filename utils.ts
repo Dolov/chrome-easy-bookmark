@@ -17,6 +17,7 @@ export enum MessageActionEnum {
   CREATE_BOOKMARK = "CREATE_BOOKMARK",
   UPDATE_BOOKMARK = "UPDATE_BOOKMARK",
   MOVE_BOOKMARK = "MOVE_BOOKMARK",
+  DELETE_BOOKMARK = "DELETE_BOOKMARK",
 }
 
 export const formatBookmarkTreeNodes = (treeData) => {

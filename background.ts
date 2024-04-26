@@ -52,28 +52,31 @@ chrome.bookmarks.onCreated.addListener(async bookmark => {
 
 chrome.runtime.onMessage.addListener(async (params, sender, sendResponse) => {
   if (params.action === MessageActionEnum.GET_BOOKMARK_TREE) {
-    chrome.bookmarks.getTree(function(bookmarkTreeNodes) {
+    chrome.bookmarks.getTree(bookmarkTreeNodes => {
       sendResponse(bookmarkTreeNodes);
     });
     return
   }
   if (params.action === MessageActionEnum.CREATE_BOOKMARK) {
-    chrome.bookmarks.create(params.payload).then(res => {
-      sendResponse(res)
-    })
+    const res = await chrome.bookmarks.create(params.payload)
+    sendResponse(res)
     return
   }
   if (params.action === MessageActionEnum.UPDATE_BOOKMARK) {
     const { id, ...rest } = params.payload
-    chrome.bookmarks.update(id, rest).then(res => {
-      sendResponse(res)
-    })
+    const res = await chrome.bookmarks.update(id, rest)
+    sendResponse(res)
     return
   }
   if (params.action === MessageActionEnum.MOVE_BOOKMARK) {
     const { id, url, title, parentId, index } = params.payload
     await chrome.bookmarks.update(id, { url, title })
     const res = await chrome.bookmarks.move(id, { parentId, index })
+    sendResponse(res)
+    return
+  }
+  if (params.action === MessageActionEnum.DELETE_BOOKMARK) {
+    const res = await chrome.bookmarks.remove(params.id)
     sendResponse(res)
     return
   }
