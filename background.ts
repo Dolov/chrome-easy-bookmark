@@ -9,7 +9,7 @@ const menuList: (chrome.contextMenus.CreateProperties & { action?(tab: chrome.ta
     title: "书签管理",
     contexts: ["action"],
     action() {
-      
+
     }
   },
   {
@@ -17,7 +17,7 @@ const menuList: (chrome.contextMenus.CreateProperties & { action?(tab: chrome.ta
     title: "书签设置",
     contexts: ["action"],
     action() {
-      
+
     }
   },
 ]
@@ -37,45 +37,54 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   action && action(tab)
 });
 
-/** 监听图标点击 */
-chrome.action.onClicked.addListener(async activeTab => {
-  console.log('activeTab: ', activeTab);
-});
+
 
 /** 监听创建书签的事件 */
 chrome.bookmarks.onCreated.addListener(async bookmark => {
-  
+
 });
 
 
 // chrome.runtime.connect()
 
+/** 监听图标点击 */
+chrome.action.onClicked.addListener(async activeTab => {
+  // 发送消息到内容脚本
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, {
+      action: MessageActionEnum.ACTION_ON_CLICKED,
+      payload: activeTab
+    }, function (response) {
+    });
+  });
+});
+
 chrome.runtime.onMessage.addListener(async (params, sender, sendResponse) => {
-  if (params.action === MessageActionEnum.GET_BOOKMARK_TREE) {
+  if (params.action === MessageActionEnum.BOOKMARK_GET_TREE) {
     chrome.bookmarks.getTree(bookmarkTreeNodes => {
       sendResponse(bookmarkTreeNodes);
     });
     return
   }
-  if (params.action === MessageActionEnum.CREATE_BOOKMARK) {
+  if (params.action === MessageActionEnum.BOOKMARK_CREATE) {
     const res = await chrome.bookmarks.create(params.payload)
     sendResponse(res)
     return
   }
-  if (params.action === MessageActionEnum.UPDATE_BOOKMARK) {
+  if (params.action === MessageActionEnum.BOOKMARK_UPDATE) {
     const { id, ...rest } = params.payload
     const res = await chrome.bookmarks.update(id, rest)
     sendResponse(res)
     return
   }
-  if (params.action === MessageActionEnum.MOVE_BOOKMARK) {
+  if (params.action === MessageActionEnum.BOOKMARK_MOVE) {
     const { id, url, title, parentId, index } = params.payload
     await chrome.bookmarks.update(id, { url, title })
     const res = await chrome.bookmarks.move(id, { parentId, index })
     sendResponse(res)
     return
   }
-  if (params.action === MessageActionEnum.DELETE_BOOKMARK) {
+  if (params.action === MessageActionEnum.BOOKMARK_DELETE) {
     const res = await chrome.bookmarks.remove(params.id)
     sendResponse(res)
     return
