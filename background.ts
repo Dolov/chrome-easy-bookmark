@@ -59,6 +59,20 @@ chrome.action.onClicked.addListener(async activeTab => {
   });
 });
 
+chrome.commands.onCommand.addListener((command, tab) => {
+  // 发送消息到内容脚本
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, {
+      action: MessageActionEnum.COMMAND,
+      payload: {
+        ...tab,
+        command,
+      }
+    }, function (response) {
+    });
+  });
+})
+
 chrome.runtime.onMessage.addListener(async (params, sender, sendResponse) => {
   if (params.action === MessageActionEnum.BOOKMARK_GET_TREE) {
     chrome.bookmarks.getTree(bookmarkTreeNodes => {

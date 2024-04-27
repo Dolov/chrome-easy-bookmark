@@ -13,6 +13,7 @@ export const useBoolean = (defaultValue = false) => {
 
 
 export enum MessageActionEnum {
+  COMMAND = "COMMAND",
   BOOKMARK_GET_TREE = "BOOKMARK_GET_TREE",
   BOOKMARK_CREATE = "BOOKMARK_CREATE",
   BOOKMARK_UPDATE = "BOOKMARK_UPDATE",

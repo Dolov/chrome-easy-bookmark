@@ -28,6 +28,22 @@
     "typescript": "5.3.3"
   },
   "manifest": {
+    "commands": {
+      "create-bookmark": {
+        "suggested_key": {
+          "default": "Ctrl+D",
+          "mac": "Command+D"
+        },
+        "description": "Create or edit bookmark"
+      },
+      "show-all-bookmarks": {
+        "suggested_key": {
+          "default": "Ctrl+K",
+          "mac": "Command+K"
+        },
+        "description": "Display all bookmarks"
+      }
+    },
     "permissions": [
       "bookmarks",
       "contextMenus",
