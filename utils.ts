@@ -28,6 +28,7 @@ export const formatBookmarkTreeNodes = (treeData) => {
     currentValue.push({
       ...item,
       key: id,
+      value: id,
       label: title,
       children: formatBookmarkTreeNodes(children),
     })
