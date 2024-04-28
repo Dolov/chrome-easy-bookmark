@@ -1,6 +1,6 @@
 import React from "react"
 import { Button, Modal, Form, Input, TreeSelect } from 'antd'
-import { MessageActionEnum, formatBookmarkTreeNodes, findTreeNode } from '~/utils'
+import { MessageActionEnum, formatBookmarkTreeNodes, findTreeNode, baseZIndex } from '~/utils'
 
 
 const DEFAULT_PARENT_ID = "1"
@@ -101,6 +101,7 @@ const Create: React.FC<CreateProps> = props => {
 
   return (
     <Modal
+      zIndex={baseZIndex}
       open={visible}
       title={(
         <div style={{ display: 'flex', alignItems: 'center' }}>

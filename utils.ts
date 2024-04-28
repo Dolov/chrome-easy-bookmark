@@ -11,6 +11,7 @@ export const useBoolean = (defaultValue = false) => {
   return [value, toggle, valueRef] as const
 }
 
+export const baseZIndex = 2000
 
 export enum MessageActionEnum {
   COMMAND = "COMMAND",
