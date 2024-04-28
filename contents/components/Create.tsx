@@ -13,15 +13,16 @@ interface CreateProps {
 
 const Create: React.FC<CreateProps> = props => {
   const { visible, toggleVisible, toggleListVisible } = props
-  const [form] = Form.useForm();
+  const [form] = Form.useForm()
   const [disabled, setDisabled] = React.useState(false)
   const [treeNodes, setTreeNodes] = React.useState([])
   const [treeNodeDirs, setTreeNodeDirs] = React.useState([])
-  const [bookmark, setBookmark] = React.useState<chrome.bookmarks.BookmarkTreeNode>()
+  const [editBookmark, setEditBookmark] = React.useState<chrome.bookmarks.BookmarkTreeNode>()
 
   React.useEffect(() => {
     if (!visible) return
     init()
+    setFormInitialValues()
   }, [visible])
 
   const init = () => {
@@ -29,9 +30,6 @@ const Create: React.FC<CreateProps> = props => {
       action: MessageActionEnum.BOOKMARK_GET_TREE
     }, treeNodes => {
       const formattedTreeNodes = formatBookmarkTreeNodes(treeNodes)
-      const url = location.href
-      const node = findTreeNode(url, treeNodes)
-      setBookmark(node)
       setTreeNodes(treeNodes)
       setTreeNodeDirs(formattedTreeNodes[0].children)
     });
@@ -44,10 +42,10 @@ const Create: React.FC<CreateProps> = props => {
       url: location.href,
     }
     let action = MessageActionEnum.BOOKMARK_CREATE
-    if (bookmark) {
-      payload.id = bookmark.id
+    if (editBookmark) {
+      payload.id = editBookmark.id
       action = MessageActionEnum.BOOKMARK_UPDATE
-      if (bookmark.parentId !== parentId) {
+      if (editBookmark.parentId !== parentId) {
         action = MessageActionEnum.BOOKMARK_MOVE
         payload.parentId = parentId
       }
@@ -79,10 +77,27 @@ const Create: React.FC<CreateProps> = props => {
     });
   }
 
-  const create = !bookmark
-  const modalType = create ? "新建书签" : "编辑书签"
+  const setFormInitialValues = () => {
+    if (!form) return
+    const url = location.href
+    const node = findTreeNode(url, treeNodes)
+    if (node) {
+      const { title, parentId } = node
+      setEditBookmark(node)
+      form.setFieldsValue({
+        title,
+        parentId,
+      })
+      return
+    }
+    form.setFieldsValue({
+      title: document.title,
+      parentId: DEFAULT_PARENT_ID,
+    })
+  }
 
-  const { title = document.title, parentId = DEFAULT_PARENT_ID } = bookmark || {}
+  const create = !editBookmark
+  const modalType = create ? "新建书签" : "编辑书签"
 
   return (
     <Modal
@@ -112,7 +127,6 @@ const Create: React.FC<CreateProps> = props => {
         style={{ margin: "24px 0" }}
         labelCol={{ span: 4 }}
         labelAlign="left"
-        initialValues={{ title, parentId }}
         onValuesChange={onValueChange}
       >
         <Form.Item name="title" label="名称">
@@ -120,9 +134,6 @@ const Create: React.FC<CreateProps> = props => {
         </Form.Item>
         <Form.Item name="parentId" label="文件夹">
           <TreeSelect
-            ref={ref => {
-              ref?.focus?.()
-            }}
             showSearch
             treeData={treeNodeDirs}
             treeNodeFilterProp="title"

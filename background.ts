@@ -5,16 +5,8 @@ import { MessageActionEnum } from './utils'
 /** 定义右键菜单列表 */
 const menuList: (chrome.contextMenus.CreateProperties & { action?(tab: chrome.tabs.Tab): void })[] = [
   {
-    id: "bookmark-manager",
-    title: "书签管理",
-    contexts: ["action"],
-    action() {
-
-    }
-  },
-  {
-    id: "bookmark-setting",
-    title: "书签设置",
+    id: "setting",
+    title: "个性化设置",
     contexts: ["action"],
     action() {
 

@@ -1,5 +1,4 @@
 import React from "react"
-import Mousetrap from 'mousetrap'
 import { StyleProvider } from "@ant-design/cssinjs"
 import antdResetCssText from "data-text:antd/dist/reset.css"
 import type { PlasmoCSConfig, PlasmoGetShadowHostId, PlasmoCSUIProps } from "plasmo"
@@ -12,6 +11,11 @@ const HOST_ID = "easy-bookmark-host"
 
 export const getShadowHostId: PlasmoGetShadowHostId = () => HOST_ID
 
+export const config: PlasmoCSConfig = {
+	run_at: "document_start",
+	matches: ["<all_urls>"],
+}
+
 const getRoot = () => document.getElementById(HOST_ID).shadowRoot as unknown as HTMLElement
 
 export const getStyle = () => {
@@ -21,7 +25,6 @@ export const getStyle = () => {
     .create-modal .ant-modal-close {
       top: 24px !important;
     }
-    
   `
   return style
 }
@@ -31,16 +34,19 @@ const App = () => {
   const [createVisible, toggleCreateVisible] = useBoolean()
 
   React.useEffect(() => {
-    // Mousetrap.bind(['command+s', 'ctrl+s'], function () {
-    //   toggleCreateVisible()
-    //   return false;
-    // });
-  }, [])
-
-  React.useEffect(() => {
     chrome.runtime.onMessage.addListener((params, sender, sendResponse) => {
-      if (params.action === MessageActionEnum.ACTION_ON_CLICKED) {
+      const { action, payload } = params
+      if (action === MessageActionEnum.ACTION_ON_CLICKED) {
         toggleCreateVisible()
+        return
+      }
+      if (action === MessageActionEnum.COMMAND && payload.command === "create-bookmark") {
+        toggleCreateVisible()
+        return
+      }
+      if (action === MessageActionEnum.COMMAND && payload.command === "show-all-bookmarks") {
+        toggleListVisible()
+        return
       }
     })
   }, [])
