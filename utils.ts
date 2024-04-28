@@ -22,17 +22,18 @@ export enum MessageActionEnum {
   ACTION_ON_CLICKED = "ACTION_ON_CLICKED",
 }
 
-export const formatBookmarkTreeNodes = (treeData) => {
+export const formatBookmarkTreeNodes = (treeData, withLeaf = false) => {
   return treeData.reduce((currentValue, item) => {
     if (!item) return currentValue
-    const { children, url, id, title } = item
-    if (url) return currentValue
+    const { children = [], url, id, title } = item
+    if (!withLeaf && url) return currentValue
     currentValue.push({
       ...item,
       key: id,
       value: id,
       label: title,
-      children: formatBookmarkTreeNodes(children),
+      children: formatBookmarkTreeNodes(children, withLeaf),
+      isLeaf: !!url
     })
     return currentValue
   }, [])
