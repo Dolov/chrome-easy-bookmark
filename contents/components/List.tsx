@@ -2,7 +2,7 @@ import React from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 import { Tooltip, Modal, Button, Input, Tree } from 'antd'
 import { type TreeDataNode, type InputRef } from 'antd'
-import { SearchOutlined, AlignLeftOutlined, AlignRightOutlined, AlignCenterOutlined } from '@ant-design/icons'
+import { SearchOutlined, AlignLeftOutlined, AlignRightOutlined, AlignCenterOutlined, DeleteOutlined, DeleteFilled } from '@ant-design/icons'
 import { debounce } from 'radash'
 import {
   MessageActionEnum, formatBookmarkTreeNodes, baseZIndex,
@@ -30,7 +30,7 @@ const getKeys = (treeNode = []) => {
 const matchSearch = (searchValue: string, treeNode = [], options) => {
   const { sensitive, parentMatched, searchType } = options
   return treeNode.reduce((currentValue, item) => {
-    const { url, originalTitle, children = [] } = item
+    const { url, originalTitle, children = [], title } = item
     if (!originalTitle) return currentValue
     const strTitle = originalTitle as string
     const lTitle = sensitive ? strTitle : strTitle.toLowerCase()
@@ -57,7 +57,7 @@ const matchSearch = (searchValue: string, treeNode = [], options) => {
 
       currentValue.push({
         ...item,
-        title: matched ? newTitle : originalTitle,
+        title: matched ? newTitle : title,
         children: matchedChildren
       })
     }
@@ -86,27 +86,41 @@ const matchSearch = (searchValue: string, treeNode = [], options) => {
         return currentValue
       }
     }
-    
+
     return currentValue
   }, [])
 }
 
-const formattedTreeNodesTitle = (treeNodes = []) => {
+const formattedTreeNodesTitle = (treeNodes = [], options) => {
+  const { onSuccess } = options
   return treeNodes.reduce((currentValue, item) => {
     const { children = [], url, title } = item
     if (url) {
       currentValue.push({
         ...item,
         title: (
-          <a style={{ color: "inherit" }} type="link" href={url} target="_blank">
-            {title}
-          </a>
+          <TreeNodeTitleContainer
+            node={item}
+            onSuccess={onSuccess}
+            title={(
+              <a style={{ color: "inherit" }} type="link" href={url} target="_blank">
+                {title}
+              </a>
+            )}
+          />
         ),
       })
     } else {
       currentValue.push({
         ...item,
-        children: formattedTreeNodesTitle(children),
+        title: (
+          <TreeNodeTitleContainer
+            onSuccess={onSuccess}
+            node={item}
+            title={title}
+          />
+        ),
+        children: formattedTreeNodesTitle(children, options),
       })
     }
     return currentValue
@@ -126,8 +140,16 @@ const List: React.FC<ListProps> = props => {
   const [autoExpandParent, setAutoExpandParent] = React.useState(true);
   const [sensitive] = useStorage(StorageKeyEnum.CASE_SENSITIVE, false)
   const [searchType] = useStorage(StorageKeyEnum.SEARCH_TYPE, SearchTypeEnum.MIXIN)
-
   const searchInputRef = React.useRef<InputRef>()
+
+  const init = () => {
+    chrome.runtime.sendMessage({
+      action: MessageActionEnum.BOOKMARK_GET_TREE
+    }, treeNodes => {
+      const formattedTreeNodes = formatBookmarkTreeNodes(treeNodes, true)[0].children
+      setDataSource(formattedTreeNodes)
+    });
+  }
 
   React.useEffect(() => {
     if (!visible) return
@@ -138,12 +160,20 @@ const List: React.FC<ListProps> = props => {
   }, [visible])
 
   const matchedNodes = React.useMemo(() => {
-    if (!searchValue) return dataSource
+    if (!searchValue) {
+      const jsxNodes = formattedTreeNodesTitle(dataSource, {
+        onSuccess: init
+      })
+      return jsxNodes
+    }
+
     const matchedNodes = matchSearch(searchValue, dataSource, {
       sensitive,
       searchType,
     })
-    return formattedTreeNodesTitle(matchedNodes)
+    return formattedTreeNodesTitle(matchedNodes, {
+      onSuccess: init
+    })
   }, [searchValue, dataSource, sensitive, searchType])
 
   React.useEffect(() => {
@@ -153,17 +183,7 @@ const List: React.FC<ListProps> = props => {
     }
     const keys = getKeys(matchedNodes)
     setExpandedKeys(keys)
-  }, [matchedNodes, searchValue])
-
-  const init = () => {
-    chrome.runtime.sendMessage({
-      action: MessageActionEnum.BOOKMARK_GET_TREE
-    }, treeNodes => {
-      const formattedTreeNodes = formatBookmarkTreeNodes(treeNodes, true)[0].children
-      const jsxNodes = formattedTreeNodesTitle(formattedTreeNodes)
-      setDataSource(jsxNodes)
-    });
-  }
+  }, [searchValue])
 
   const onExpand = (newExpandedKeys: React.Key[]) => {
     setExpandedKeys(newExpandedKeys);
@@ -220,7 +240,7 @@ const List: React.FC<ListProps> = props => {
 
 const CaseSensitive = () => {
   const [sensitive, setSensitive] = useStorage(StorageKeyEnum.CASE_SENSITIVE, false)
-  const title = sensitive ? "区分大小写": "不区分大小写"
+  const title = sensitive ? "区分大小写" : "不区分大小写"
   return (
     <Tooltip zIndex={baseZIndex} title={title}>
       <Button
@@ -262,6 +282,37 @@ const SearchType = () => {
         {type === SearchTypeEnum.MIXIN && <AlignCenterOutlined />}
       </Button>
     </Tooltip>
+  )
+}
+
+const TreeNodeTitleContainer = props => {
+  const { title, node, onSuccess } = props
+  const { url } = node
+
+  const handleDelete = e => {
+    e.stopPropagation()
+    chrome.runtime.sendMessage({
+      action: MessageActionEnum.BOOKMARK_DELETE,
+      id: node.id
+    }).then(res => {
+      onSuccess()
+    })
+  }
+
+  return (
+    <div style={{ display: "flex" }}>
+      <span>{title}</span>
+      <div style={{ flex: 1, justifyContent: "flex-end", display: "flex" }}>
+        <Button
+          danger
+          type="text"
+          shape="circle"
+          onClick={handleDelete}
+          style={{ width: 24, height: 24, minWidth: 24, display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <DeleteOutlined />
+        </Button>
+      </div>
+    </div>
   )
 }
 

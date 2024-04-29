@@ -1,8 +1,6 @@
 import React from "react"
-import { Button, Modal, Form, Input, TreeSelect, Popconfirm } from 'antd'
-import { FolderAddOutlined, ExclamationCircleFilled } from '@ant-design/icons'
+import { Button, Modal, Form, Input, TreeSelect } from 'antd'
 import { MessageActionEnum, formatBookmarkTreeNodes, findTreeNode, baseZIndex } from '~/utils'
-
 
 const DEFAULT_PARENT_ID = "1"
 

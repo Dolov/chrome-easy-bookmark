@@ -31,4 +31,11 @@ $prefixCls2: list-container;
       text-decoration: underline;
     }
   }
+
+  .ant-tree-node-content-wrapper {
+    display: flex;
+    .ant-tree-title {
+      flex: 1;
+    }
+  }
 }
