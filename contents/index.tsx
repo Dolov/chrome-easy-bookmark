@@ -2,7 +2,8 @@ import React from "react"
 import { StyleProvider } from "@ant-design/cssinjs"
 import antdResetCssText from "data-text:antd/dist/reset.css"
 import contentCss from "data-text:./style.scss"
-import type { PlasmoCSConfig, PlasmoGetShadowHostId, PlasmoCSUIProps } from "plasmo"
+import tailwindcss from "data-text:~style.css"
+import type { PlasmoCSConfig, PlasmoGetShadowHostId } from "plasmo"
 import { GlobalAntdProvider } from "~GlobalAntdProvider"
 import { useBoolean, MessageActionEnum } from '~/utils'
 import List from './components/List'
@@ -13,8 +14,8 @@ const HOST_ID = "easy-bookmark-host"
 export const getShadowHostId: PlasmoGetShadowHostId = () => HOST_ID
 
 export const config: PlasmoCSConfig = {
-	run_at: "document_start",
-	matches: ["<all_urls>"],
+  run_at: "document_start",
+  matches: ["<all_urls>"],
 }
 
 const getRoot = () => document.getElementById(HOST_ID).shadowRoot as unknown as HTMLElement
@@ -22,8 +23,9 @@ const getRoot = () => document.getElementById(HOST_ID).shadowRoot as unknown as 
 export const getStyle = () => {
   const style = document.createElement("style")
   style.textContent = `
+    ${tailwindcss}\n
     ${antdResetCssText}\n
-    ${contentCss}
+    ${contentCss}\n
   `
   return style
 }
@@ -53,7 +55,7 @@ const App = () => {
   return (
     <GlobalAntdProvider getPopupContainer={getRoot}>
       <StyleProvider container={getRoot()}>
-        <List 
+        <List
           visible={listVisible}
           toggleVisible={toggleListVisible}
         />

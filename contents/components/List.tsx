@@ -48,7 +48,7 @@ const matchSearch = (searchValue: string, treeNode = [], options) => {
       const newTitle = (
         <span>
           {beforeStr}
-          <span style={{ color: "red", fontWeight: 900 }}>
+          <span className="text-red-500 font-black">
             {searchValue}
           </span>
           {afterStr}
@@ -103,7 +103,7 @@ const formattedTreeNodesTitle = (treeNodes = [], options) => {
             node={item}
             onSuccess={onSuccess}
             title={(
-              <a style={{ color: "inherit" }} type="link" href={url} target="_blank">
+              <a className="hover:text-blue-500 hover:underline text-inherit" type="link" href={url} target="_blank">
                 {title}
               </a>
             )}
@@ -209,16 +209,16 @@ const List: React.FC<ListProps> = props => {
         <Input
           ref={searchInputRef}
           size="middle"
-          style={{ margin: "8px 0 16px 0", borderRadius: 24 }}
+          className="flex rounded-3xl mt-2 mb-4"
           onKeyUp={e => e.stopPropagation()}
           onKeyDown={e => e.stopPropagation()}
           placeholder="搜索书签"
           onChange={debounce({ delay: 300 }, onChange)}
-          prefix={<SearchOutlined style={{ color: 'rgba(0,0,0,.25)', marginRight: 4 }} />}
+          prefix={<SearchOutlined className="mr-1 text-slate-500" />}
           suffix={
             <div className="actions">
               <CaseSensitive />
-              <span style={{ marginLeft: 4 }}>
+              <span className="ml-1">
                 <SearchType />
               </span>
             </div>
@@ -245,7 +245,7 @@ const CaseSensitive = () => {
     <Tooltip zIndex={baseZIndex} title={title}>
       <Button
         type="text"
-        style={{ color: 'rgba(0,0,0,.45)', background: sensitive ? "rgba(0, 0, 0, 0.15)" : "" }}
+        className={`text-slate-500 ${sensitive ? "bg-slate-200" : ""} hover:!bg-slate-200`}
         shape="circle"
         onClick={() => setSensitive(!sensitive)}
       >
@@ -273,7 +273,7 @@ const SearchType = () => {
     <Tooltip zIndex={baseZIndex} title={titleMap[type]}>
       <Button
         type="text"
-        style={{ color: 'rgba(0,0,0,.45)', background: "rgba(0, 0, 0, 0.15)" }}
+        className="text-slate-500 bg-slate-200 hover:!bg-slate-200"
         shape="circle"
         onClick={toggleType}
       >
@@ -300,15 +300,15 @@ const TreeNodeTitleContainer = props => {
   }
 
   return (
-    <div style={{ display: "flex" }}>
+    <div className="flex group">
       <span>{title}</span>
-      <div style={{ flex: 1, justifyContent: "flex-end", display: "flex" }}>
+      <div className="flex-1 justify-end flex">
         <Button
-          danger
           type="text"
           shape="circle"
           onClick={handleDelete}
-          style={{ width: 24, height: 24, minWidth: 24, display: "flex", justifyContent: "center", alignItems: "center" }}>
+          className="w-6 h-6 !min-w-6 justify-center items-center hidden group-hover:flex"
+        >
           <DeleteOutlined />
         </Button>
       </div>

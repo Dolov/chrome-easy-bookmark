@@ -3,35 +3,17 @@ $prefixCls2: list-container;
 
 .#{$prefixCls}-modal {
   .ant-modal-close {
-    top: 24px !important;
-  }
-
-  .ant-select-selector .actions {
-    display: none;
+    top: 22px !important;
   }
 }
 
 .#{$prefixCls}-tree-select-popup {
   .ant-select-tree-title {
-    .actions {
-      flex: 1;
-      display: none;
-    }
-
-    &:hover .actions {
-      display: flex;
-      justify-content: flex-end;
-    }
+    
   }
 }
 
 .#{$prefixCls2}-modal {
-  a {
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-
   .ant-tree-node-content-wrapper {
     display: flex;
     .ant-tree-title {

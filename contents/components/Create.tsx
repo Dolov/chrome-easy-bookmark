@@ -14,7 +14,7 @@ const setTreeNodeTitle = (nodes = [], options) => {
       ...node,
       isLeaf: !children.length,
       title: (
-        <div style={{ display: "flex" }}>
+        <div className="flex">
           <span>{title}</span>
           <div className="actions">
             
@@ -134,9 +134,9 @@ const Create: React.FC<CreateProps> = props => {
       zIndex={baseZIndex}
       open={visible}
       title={(
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div className="flex items-center">
           <div
-            style={{ fontSize: 32, cursor: 'pointer', marginRight: 16 }}
+            className="cursor-pointer mr-4 text-3xl"
             onClick={() => {
               toggleListVisible()
               toggleVisible()
@@ -155,7 +155,7 @@ const Create: React.FC<CreateProps> = props => {
       <Form
         form={form}
         colon={false}
-        style={{ margin: "24px 0" }}
+        className="my-6"
         labelCol={{ span: 4 }}
         labelAlign="left"
         onValuesChange={onValueChange}
@@ -184,25 +184,24 @@ const Create: React.FC<CreateProps> = props => {
 const ModalFooter = props => {
   const { handleDelete, save, toggle, disabled, create } = props
   return (
-    <div style={{ display: "flex", justifyContent: "space-between" }}>
+    <div className="flex justify-between">
       {!create && (
         <Button
           danger
           shape="round"
-          style={{ marginLeft: 0 }}
+          className="ml-0"
           onClick={handleDelete}
         >
           移除
         </Button>
       )}
-      <div style={{ flex: 1 }}>
+      <div className="flex-1">
         <Button onClick={toggle} shape="round">取消</Button>
         <Button
           type='primary'
           shape="round"
           disabled={disabled}
           onClick={save}
-          style={{ marginLeft: 8 }}
         >
           保存
         </Button>
