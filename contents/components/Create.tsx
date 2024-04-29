@@ -69,7 +69,7 @@ const Create: React.FC<CreateProps> = props => {
 
   const handleDelete = () => {
     chrome.runtime.sendMessage({
-      id: bookmark.id,
+      id: editBookmark.id,
       action: MessageActionEnum.BOOKMARK_DELETE,
     }, res => {
       init()
