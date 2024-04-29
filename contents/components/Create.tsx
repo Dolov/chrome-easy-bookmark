@@ -131,7 +131,10 @@ const Create: React.FC<CreateProps> = props => {
         onValuesChange={onValueChange}
       >
         <Form.Item name="title" label="名称">
-          <Input />
+          <Input
+            onKeyUp={e => e.stopPropagation()}
+            onKeyDown={e => e.stopPropagation()}
+          />
         </Form.Item>
         <Form.Item name="parentId" label="文件夹">
           <TreeSelect
