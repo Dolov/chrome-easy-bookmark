@@ -189,8 +189,10 @@ const List: React.FC<ListProps> = props => {
         <Input
           ref={searchInputRef}
           size="middle"
-          placeholder="搜索书签"
           style={{ margin: "8px 0 16px 0", borderRadius: 24 }}
+          onKeyUp={e => e.stopPropagation()}
+          onKeyDown={e => e.stopPropagation()}
+          placeholder="搜索书签"
           onChange={debounce({ delay: 300 }, onChange)}
           prefix={<SearchOutlined style={{ color: 'rgba(0,0,0,.25)', marginRight: 4 }} />}
           suffix={
