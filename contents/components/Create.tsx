@@ -172,6 +172,8 @@ const Create: React.FC<CreateProps> = props => {
           <TreeSelect
             showSearch
             treeData={treeNodeDirs}
+            onKeyUp={e => e.stopPropagation()}
+            onKeyDown={e => e.stopPropagation()}
             treeNodeFilterProp="originalTitle"
             popupClassName={`${prefixCls}-tree-select-popup`}
           />
