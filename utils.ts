@@ -23,6 +23,36 @@ export enum MessageActionEnum {
   ACTION_ON_CLICKED = "ACTION_ON_CLICKED",
 }
 
+export enum StorageKeyEnum {
+  SEARCH_TYPE = "SEARCH_TYPE",
+  CASE_SENSITIVE = "CASE_SENSITIVE"
+}
+
+export enum SearchTypeEnum {
+  URL = "URL",
+  DIR = "DIR",
+  MIXIN = "MIXIN",
+}
+
+export const searchTypeState = {
+  [SearchTypeEnum.URL]: {
+    next() {
+      return SearchTypeEnum.DIR
+    }
+  },
+  [SearchTypeEnum.DIR]: {
+    next() {
+      return SearchTypeEnum.MIXIN
+    }
+  },
+  [SearchTypeEnum.MIXIN]: {
+    next() {
+      return SearchTypeEnum.URL
+    }
+  }
+}
+
+
 export const formatBookmarkTreeNodes = (treeData, withLeaf = false) => {
   return treeData.reduce((currentValue, item) => {
     if (!item) return currentValue

@@ -2,9 +2,12 @@ import React from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 import { Tooltip, Modal, Button, Input, Tree } from 'antd'
 import { type TreeDataNode, type InputRef } from 'antd'
-import { SearchOutlined } from '@ant-design/icons'
+import { SearchOutlined, AlignLeftOutlined, AlignRightOutlined, AlignCenterOutlined } from '@ant-design/icons'
 import { debounce } from 'radash'
-import { MessageActionEnum, formatBookmarkTreeNodes, baseZIndex, removeEmptyNode } from '~/utils'
+import {
+  MessageActionEnum, formatBookmarkTreeNodes, baseZIndex,
+  StorageKeyEnum, SearchTypeEnum, searchTypeState,
+} from '~/utils'
 
 const { DirectoryTree } = Tree;
 
@@ -25,7 +28,7 @@ const getKeys = (treeNode = []) => {
 }
 
 const matchSearch = (searchValue: string, treeNode = [], options) => {
-  const { sensitive, parentMatched } = options
+  const { sensitive, parentMatched, searchType } = options
   return treeNode.reduce((currentValue, item) => {
     const { url, originalTitle, children = [] } = item
     if (!originalTitle) return currentValue
@@ -59,14 +62,31 @@ const matchSearch = (searchValue: string, treeNode = [], options) => {
       })
     }
 
-    if (parentMatched) {
-      push()
-      return currentValue
+    if (searchType === SearchTypeEnum.URL) {
+      if (matched || matchedChildren.length) {
+        push()
+        return currentValue
+      }
     }
-    if (matched || matchedChildren.length) {
-      push()
-      return currentValue
+
+    if (searchType === SearchTypeEnum.DIR) {
+      if (url && parentMatched) {
+        push()
+        return currentValue
+      }
+      if (!url && (matched || parentMatched || matchedChildren.length)) {
+        push()
+        return currentValue
+      }
     }
+
+    if (searchType === SearchTypeEnum.MIXIN) {
+      if (matched || matchedChildren.length || parentMatched) {
+        push()
+        return currentValue
+      }
+    }
+    
     return currentValue
   }, [])
 }
@@ -104,7 +124,8 @@ const List: React.FC<ListProps> = props => {
   const [searchValue, setSearchValue] = React.useState('');
   const [expandedKeys, setExpandedKeys] = React.useState<React.Key[]>([]);
   const [autoExpandParent, setAutoExpandParent] = React.useState(true);
-  const [sensitive, setSensitive] = useStorage("case-sensitive", false)
+  const [sensitive] = useStorage(StorageKeyEnum.CASE_SENSITIVE, false)
+  const [searchType] = useStorage(StorageKeyEnum.SEARCH_TYPE, SearchTypeEnum.MIXIN)
 
   const searchInputRef = React.useRef<InputRef>()
 
@@ -119,13 +140,11 @@ const List: React.FC<ListProps> = props => {
   const matchedNodes = React.useMemo(() => {
     if (!searchValue) return dataSource
     const matchedNodes = matchSearch(searchValue, dataSource, {
-      sensitive
+      sensitive,
+      searchType,
     })
     return formattedTreeNodesTitle(matchedNodes)
-    // const filteredNodes = removeEmptyNode(matchedNodes)
-    // return matchedNodes
-  }, [searchValue, dataSource, sensitive])
-  console.log('matchedNodes: ', matchedNodes);
+  }, [searchValue, dataSource, sensitive, searchType])
 
   React.useEffect(() => {
     if (!searchValue) {
@@ -175,17 +194,11 @@ const List: React.FC<ListProps> = props => {
           onChange={debounce({ delay: 300 }, onChange)}
           prefix={<SearchOutlined style={{ color: 'rgba(0,0,0,.25)', marginRight: 4 }} />}
           suffix={
-            <div>
-              <Tooltip zIndex={baseZIndex} title="是否区分大小写">
-                <Button
-                  type="text"
-                  style={{ color: 'rgba(0,0,0,.45)', background: sensitive ? "rgba(0, 0, 0, 0.15)" : "" }}
-                  shape="circle"
-                  onClick={() => setSensitive(!sensitive)}
-                >
-                  Aa
-                </Button>
-              </Tooltip>
+            <div className="actions">
+              <CaseSensitive />
+              <span style={{ marginLeft: 4 }}>
+                <SearchType />
+              </span>
             </div>
           }
         />
@@ -200,6 +213,53 @@ const List: React.FC<ListProps> = props => {
         />
       </div>
     </Modal>
+  )
+}
+
+const CaseSensitive = () => {
+  const [sensitive, setSensitive] = useStorage(StorageKeyEnum.CASE_SENSITIVE, false)
+  const title = sensitive ? "区分大小写": "不区分大小写"
+  return (
+    <Tooltip zIndex={baseZIndex} title={title}>
+      <Button
+        type="text"
+        style={{ color: 'rgba(0,0,0,.45)', background: sensitive ? "rgba(0, 0, 0, 0.15)" : "" }}
+        shape="circle"
+        onClick={() => setSensitive(!sensitive)}
+      >
+        Aa
+      </Button>
+    </Tooltip>
+  )
+}
+
+const SearchType = () => {
+  const [type, setType] = useStorage(StorageKeyEnum.SEARCH_TYPE, SearchTypeEnum.MIXIN)
+
+  const titleMap = {
+    [SearchTypeEnum.URL]: "标题匹配",
+    [SearchTypeEnum.DIR]: "目录匹配",
+    [SearchTypeEnum.MIXIN]: "混合匹配",
+  }
+
+  const toggleType = () => {
+    const nextType = searchTypeState[type].next()
+    setType(nextType)
+  }
+
+  return (
+    <Tooltip zIndex={baseZIndex} title={titleMap[type]}>
+      <Button
+        type="text"
+        style={{ color: 'rgba(0,0,0,.45)', background: "rgba(0, 0, 0, 0.15)" }}
+        shape="circle"
+        onClick={toggleType}
+      >
+        {type === SearchTypeEnum.URL && <AlignLeftOutlined />}
+        {type === SearchTypeEnum.DIR && <AlignRightOutlined />}
+        {type === SearchTypeEnum.MIXIN && <AlignCenterOutlined />}
+      </Button>
+    </Tooltip>
   )
 }
 
