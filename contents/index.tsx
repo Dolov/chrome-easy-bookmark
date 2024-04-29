@@ -1,6 +1,7 @@
 import React from "react"
 import { StyleProvider } from "@ant-design/cssinjs"
 import antdResetCssText from "data-text:antd/dist/reset.css"
+import contentCss from "data-text:./style.scss"
 import type { PlasmoCSConfig, PlasmoGetShadowHostId, PlasmoCSUIProps } from "plasmo"
 import { GlobalAntdProvider } from "~GlobalAntdProvider"
 import { useBoolean, MessageActionEnum } from '~/utils'
@@ -22,9 +23,7 @@ export const getStyle = () => {
   const style = document.createElement("style")
   style.textContent = `
     ${antdResetCssText}\n
-    .create-modal .ant-modal-close {
-      top: 24px !important;
-    }
+    ${contentCss}
   `
   return style
 }
@@ -57,7 +56,6 @@ const App = () => {
         <List 
           visible={listVisible}
           toggleVisible={toggleListVisible}
-          
         />
         <Create
           visible={createVisible}

@@ -1,9 +1,32 @@
 import React from "react"
-import { Button, Modal, Form, Input, TreeSelect } from 'antd'
+import { Button, Modal, Form, Input, TreeSelect, Popconfirm } from 'antd'
+import { FolderAddOutlined, ExclamationCircleFilled } from '@ant-design/icons'
 import { MessageActionEnum, formatBookmarkTreeNodes, findTreeNode, baseZIndex } from '~/utils'
 
 
 const DEFAULT_PARENT_ID = "1"
+
+const prefixCls = "create-container"
+
+const setTreeNodeTitle = (nodes = [], options) => {
+  const { init } = options
+  return nodes.map(node => {
+    const { title, children } = node
+    return {
+      ...node,
+      isLeaf: !children.length,
+      title: (
+        <div style={{ display: "flex" }}>
+          <span>{title}</span>
+          <div className="actions">
+            
+          </div>
+        </div>
+      ),
+      children: setTreeNodeTitle(children, options)
+    }
+  })
+}
 
 interface CreateProps {
   visible: boolean
@@ -21,18 +44,26 @@ const Create: React.FC<CreateProps> = props => {
 
   React.useEffect(() => {
     if (!visible) return
-    init()
-    setFormInitialValues()
+    init().then(treeNodes => {
+      setFormInitialValues(treeNodes)
+    })
   }, [visible])
 
-  const init = () => {
-    chrome.runtime.sendMessage({
-      action: MessageActionEnum.BOOKMARK_GET_TREE
-    }, treeNodes => {
-      const formattedTreeNodes = formatBookmarkTreeNodes(treeNodes)
-      setTreeNodes(treeNodes)
-      setTreeNodeDirs(formattedTreeNodes[0].children)
-    });
+  const init = async () => {
+    return new Promise(resolve => {
+      chrome.runtime.sendMessage({
+        action: MessageActionEnum.BOOKMARK_GET_TREE
+      }, treeNodes => {
+        const formattedTreeNodes = formatBookmarkTreeNodes(treeNodes)
+        setTreeNodes(treeNodes)
+        const nodes = formattedTreeNodes[0].children
+        const jsxTitleNodes = setTreeNodeTitle(nodes, {
+          init,
+        })
+        setTreeNodeDirs(jsxTitleNodes)
+        resolve(treeNodes)
+      });
+    })
   }
 
   const save = () => {
@@ -74,10 +105,11 @@ const Create: React.FC<CreateProps> = props => {
     }, res => {
       init()
       toggleVisible()
+      setEditBookmark(undefined)
     });
   }
 
-  const setFormInitialValues = () => {
+  const setFormInitialValues = treeNodes => {
     if (!form) return
     const url = location.href
     const node = findTreeNode(url, treeNodes)
@@ -119,7 +151,7 @@ const Create: React.FC<CreateProps> = props => {
       )}
       onOk={save}
       onCancel={toggleVisible}
-      className="create-modal"
+      className={`${prefixCls}-modal`}
       footer={<ModalFooter handleDelete={handleDelete} save={save} toggle={toggleVisible} disabled={disabled} create={create} />}
     >
       <Form
@@ -140,7 +172,8 @@ const Create: React.FC<CreateProps> = props => {
           <TreeSelect
             showSearch
             treeData={treeNodeDirs}
-            treeNodeFilterProp="title"
+            treeNodeFilterProp="originalTitle"
+            popupClassName={`${prefixCls}-tree-select-popup`}
           />
         </Form.Item>
       </Form>

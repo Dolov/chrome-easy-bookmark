@@ -1,0 +1,25 @@
+$prefixCls: create-container;
+
+.#{$prefixCls}-modal {
+  .ant-modal-close {
+    top: 24px !important;
+  }
+
+  .ant-select-selector .actions {
+    display: none;
+  }
+}
+
+.#{$prefixCls}-tree-select-popup {
+  .ant-select-tree-title {
+    .actions {
+      flex: 1;
+      display: none;
+    }
+
+    &:hover .actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+  }
+}
