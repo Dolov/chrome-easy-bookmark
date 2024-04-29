@@ -32,7 +32,7 @@ export const formatBookmarkTreeNodes = (treeData, withLeaf = false) => {
       ...item,
       key: id,
       value: id,
-      label: title,
+      originalTitle: title,
       children: formatBookmarkTreeNodes(children, withLeaf),
       isLeaf: !!url
     })
@@ -49,4 +49,25 @@ chrome.bookmarks.BookmarkTreeNode | undefined => {
     const target = findTreeNode(url, item.children)
     if (target) return target
   }
+}
+
+export const removeEmptyNode = (treeData = []) => {
+  return treeData.reduce((currentValue, item) => {
+    if (!item) return currentValue
+    const { children = [], url } = item
+    if (url) {
+      currentValue.push(item)
+      return currentValue
+    }
+    if (children.length) {
+      const nodes = removeEmptyNode(children)
+      if (nodes) {
+        currentValue.push({
+          ...item,
+          children: nodes
+        })
+      }
+    }
+    return currentValue
+  }, [])
 }

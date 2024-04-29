@@ -4,36 +4,39 @@ import { Tooltip, Modal, Button, Input, Tree } from 'antd'
 import { type TreeDataNode, type InputRef } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { debounce } from 'radash'
-import { MessageActionEnum, formatBookmarkTreeNodes, baseZIndex } from '~/utils'
+import { MessageActionEnum, formatBookmarkTreeNodes, baseZIndex, removeEmptyNode } from '~/utils'
 
 const { DirectoryTree } = Tree;
 
-const getKeys = (value: string, treeNode = [], parentKey?) => {
+
+type TreeNodeProps = TreeDataNode & chrome.bookmarks.BookmarkTreeNode
+
+const getKeys = (treeNode = []) => {
   return treeNode.reduce((currentValue, item) => {
-    const { title, children, key, url } = item
-    if (title.includes(value)) {
-      if (url) {
-        currentValue.push(parentKey)
-      } else {
-        currentValue.push(key)
-      }
+    const { children, key, url } = item
+    if (!url) {
+      currentValue.push(key)
     }
-    const keys = getKeys(value, children, key)
+    const keys = getKeys(children)
     currentValue.push(...keys)
     return currentValue
   }, [])
 }
 
-const matchTitle = (searchValue: string, treeNode: TreeDataNode[] = [], sensitive) => {
+const matchSearch = (searchValue: string, treeNode = [], options) => {
+  const { sensitive, parentMatched } = options
   return treeNode.reduce((currentValue, item) => {
-    const { title, children } = item
-    if (!title) return currentValue
-    const strTitle = title as string
+    const { url, originalTitle, children = [] } = item
+    if (!originalTitle) return currentValue
+    const strTitle = originalTitle as string
     const lTitle = sensitive ? strTitle : strTitle.toLowerCase()
     const lSearchValue = sensitive ? searchValue : searchValue.toLowerCase()
     const matched = lTitle.includes(lSearchValue)
-    const matchedChildren = matchTitle(searchValue, children, sensitive)
-    
+    const matchedChildren = matchSearch(searchValue, children as TreeNodeProps[], {
+      ...options,
+      parentMatched: matched
+    })
+
     if (matched || matchedChildren.length) {
       const index = lTitle.indexOf(lSearchValue);
       const beforeStr = strTitle.substring(0, index);
@@ -41,10 +44,7 @@ const matchTitle = (searchValue: string, treeNode: TreeDataNode[] = [], sensitiv
       const newTitle = (
         <span>
           {beforeStr}
-          <span
-            style={{ color: "red", fontWeight: 900 }}
-            className="site-tree-search-value"
-          >
+          <span style={{ color: "red", fontWeight: 900 }}>
             {searchValue}
           </span>
           {afterStr}
@@ -53,30 +53,34 @@ const matchTitle = (searchValue: string, treeNode: TreeDataNode[] = [], sensitiv
 
       currentValue.push({
         ...item,
-        title: matched ? newTitle : title,
+        title: matched ? newTitle : originalTitle,
         children: matchedChildren
       })
     }
+    // if (!matched && parentMatched) {
+    //   currentValue.push(item)
+    // }
     return currentValue
   }, [])
 }
 
-const removeEmptyNode = (treeData = []) => {
-  return treeData.reduce((currentValue, item) => {
-    if (!item) return currentValue
-    const { children = [], url } = item
+const formattedTreeNodesTitle = (treeNodes = []) => {
+  return treeNodes.reduce((currentValue, item) => {
+    const { children = [], url, title } = item
     if (url) {
-      currentValue.push(item)
-      return currentValue
-    }
-    if (children.length) {
-      const nodes = removeEmptyNode(children)
-      if (nodes) {
-        currentValue.push({
-          ...item,
-          children: nodes
-        })
-      }
+      currentValue.push({
+        ...item,
+        title: (
+          <a style={{ color: "inherit" }} type="link" href={url} target="_blank">
+            {title}
+          </a>
+        ),
+      })
+    } else {
+      currentValue.push({
+        ...item,
+        children: formattedTreeNodesTitle(children),
+      })
     }
     return currentValue
   }, [])
@@ -94,7 +98,6 @@ const List: React.FC<ListProps> = props => {
   const [expandedKeys, setExpandedKeys] = React.useState<React.Key[]>([]);
   const [autoExpandParent, setAutoExpandParent] = React.useState(true);
   const [sensitive, setSensitive] = useStorage("case-sensitive", false)
-  console.log('sensitive: =====', sensitive);
 
   const searchInputRef = React.useRef<InputRef>()
 
@@ -108,17 +111,30 @@ const List: React.FC<ListProps> = props => {
 
   const matchedNodes = React.useMemo(() => {
     if (!searchValue) return dataSource
-    const matchedNodes = matchTitle(searchValue, dataSource, sensitive)
-    const filteredNodes = removeEmptyNode(matchedNodes)
-    return filteredNodes
+    const matchedNodes = matchSearch(searchValue, dataSource, {
+      sensitive
+    })
+    return formattedTreeNodesTitle(matchedNodes)
+    // const filteredNodes = removeEmptyNode(matchedNodes)
+    // return matchedNodes
   }, [searchValue, dataSource, sensitive])
+
+  React.useEffect(() => {
+    if (!searchValue) {
+      setExpandedKeys([])
+      return
+    }
+    const keys = getKeys(matchedNodes)
+    setExpandedKeys(keys)
+  }, [matchedNodes, searchValue])
 
   const init = () => {
     chrome.runtime.sendMessage({
       action: MessageActionEnum.BOOKMARK_GET_TREE
     }, treeNodes => {
       const formattedTreeNodes = formatBookmarkTreeNodes(treeNodes, true)[0].children
-      setDataSource(formattedTreeNodes)
+      const jsxNodes = formattedTreeNodesTitle(formattedTreeNodes)
+      setDataSource(jsxNodes)
     });
   }
 
@@ -130,12 +146,6 @@ const List: React.FC<ListProps> = props => {
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target
     setSearchValue(value)
-    if (!value) {
-      setExpandedKeys([])
-      return
-    }
-    const keys = getKeys(value, dataSource)
-    setExpandedKeys(keys)
   };
 
   return (
@@ -160,7 +170,7 @@ const List: React.FC<ListProps> = props => {
             <Tooltip zIndex={baseZIndex} title="区分大小写">
               <Button
                 type="text"
-                style={{ color: 'rgba(0,0,0,.45)', background: sensitive ? "rgba(0, 0, 0, 0.15)": "" }}
+                style={{ color: 'rgba(0,0,0,.45)', background: sensitive ? "rgba(0, 0, 0, 0.15)" : "" }}
                 shape="circle"
                 onClick={() => setSensitive(!sensitive)}
               >
@@ -172,6 +182,7 @@ const List: React.FC<ListProps> = props => {
         <DirectoryTree
           draggable
           blockNode
+          checkedKeys={[]}
           onExpand={onExpand}
           treeData={matchedNodes}
           expandedKeys={expandedKeys}
