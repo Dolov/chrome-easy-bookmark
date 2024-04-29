@@ -8,6 +8,7 @@ import { MessageActionEnum, formatBookmarkTreeNodes, baseZIndex, removeEmptyNode
 
 const { DirectoryTree } = Tree;
 
+const prefixCls = "list-container"
 
 type TreeNodeProps = TreeDataNode & chrome.bookmarks.BookmarkTreeNode
 
@@ -34,10 +35,10 @@ const matchSearch = (searchValue: string, treeNode = [], options) => {
     const matched = lTitle.includes(lSearchValue)
     const matchedChildren = matchSearch(searchValue, children as TreeNodeProps[], {
       ...options,
-      parentMatched: matched
+      parentMatched: parentMatched || matched
     })
 
-    if (matched || matchedChildren.length) {
+    const push = () => {
       const index = lTitle.indexOf(lSearchValue);
       const beforeStr = strTitle.substring(0, index);
       const afterStr = strTitle.slice(index + searchValue.length);
@@ -57,9 +58,15 @@ const matchSearch = (searchValue: string, treeNode = [], options) => {
         children: matchedChildren
       })
     }
-    // if (!matched && parentMatched) {
-    //   currentValue.push(item)
-    // }
+
+    if (parentMatched) {
+      push()
+      return currentValue
+    }
+    if (matched || matchedChildren.length) {
+      push()
+      return currentValue
+    }
     return currentValue
   }, [])
 }
@@ -118,6 +125,7 @@ const List: React.FC<ListProps> = props => {
     // const filteredNodes = removeEmptyNode(matchedNodes)
     // return matchedNodes
   }, [searchValue, dataSource, sensitive])
+  console.log('matchedNodes: ', matchedNodes);
 
   React.useEffect(() => {
     if (!searchValue) {
@@ -156,7 +164,7 @@ const List: React.FC<ListProps> = props => {
       footer={null}
       title="书签列表"
       onCancel={toggleVisible}
-      className="bookmark-list-modal"
+      className={`${prefixCls}-modal`}
     >
       <div>
         <Input
@@ -167,16 +175,18 @@ const List: React.FC<ListProps> = props => {
           onChange={debounce({ delay: 300 }, onChange)}
           prefix={<SearchOutlined style={{ color: 'rgba(0,0,0,.25)', marginRight: 4 }} />}
           suffix={
-            <Tooltip zIndex={baseZIndex} title="区分大小写">
-              <Button
-                type="text"
-                style={{ color: 'rgba(0,0,0,.45)', background: sensitive ? "rgba(0, 0, 0, 0.15)" : "" }}
-                shape="circle"
-                onClick={() => setSensitive(!sensitive)}
-              >
-                Aa
-              </Button>
-            </Tooltip>
+            <div>
+              <Tooltip zIndex={baseZIndex} title="是否区分大小写">
+                <Button
+                  type="text"
+                  style={{ color: 'rgba(0,0,0,.45)', background: sensitive ? "rgba(0, 0, 0, 0.15)" : "" }}
+                  shape="circle"
+                  onClick={() => setSensitive(!sensitive)}
+                >
+                  Aa
+                </Button>
+              </Tooltip>
+            </div>
           }
         />
         <DirectoryTree

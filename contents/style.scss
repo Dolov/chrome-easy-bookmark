@@ -1,4 +1,5 @@
 $prefixCls: create-container;
+$prefixCls2: list-container;
 
 .#{$prefixCls}-modal {
   .ant-modal-close {
@@ -20,6 +21,14 @@ $prefixCls: create-container;
     &:hover .actions {
       display: flex;
       justify-content: flex-end;
+    }
+  }
+}
+
+.#{$prefixCls2}-modal {
+  a {
+    &:hover {
+      text-decoration: underline;
     }
   }
 }

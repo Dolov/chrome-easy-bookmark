@@ -5,6 +5,14 @@ import { MessageActionEnum } from './utils'
 /** 定义右键菜单列表 */
 const menuList: (chrome.contextMenus.CreateProperties & { action?(tab: chrome.tabs.Tab): void })[] = [
   {
+    id: "issues",
+    title: "功能申请与问题反馈",
+    contexts: ["action"],
+    action() {
+      
+    }
+  },
+  {
     id: "setting",
     title: "个性化设置",
     contexts: ["action"],
