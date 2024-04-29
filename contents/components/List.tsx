@@ -213,6 +213,7 @@ const List: React.FC<ListProps> = props => {
           onKeyUp={e => e.stopPropagation()}
           onKeyDown={e => e.stopPropagation()}
           placeholder="搜索书签"
+          onPressEnter={init}
           onChange={debounce({ delay: 300 }, onChange)}
           prefix={<SearchOutlined className="mr-1 text-slate-500" />}
           suffix={

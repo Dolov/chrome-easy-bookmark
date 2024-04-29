@@ -1,8 +1,8 @@
 import React from "react"
 import { StyleProvider } from "@ant-design/cssinjs"
-import antdResetCssText from "data-text:antd/dist/reset.css"
 import contentCss from "data-text:./style.scss"
-import tailwindcss from "data-text:~style.css"
+import tailwindcss from "data-text:~tailwindcss.css"
+import antdResetCssText from "data-text:antd/dist/reset.css"
 import type { PlasmoCSConfig, PlasmoGetShadowHostId } from "plasmo"
 import { GlobalAntdProvider } from "~GlobalAntdProvider"
 import { useBoolean, MessageActionEnum } from '~/utils'
@@ -14,7 +14,7 @@ const HOST_ID = "easy-bookmark-host"
 export const getShadowHostId: PlasmoGetShadowHostId = () => HOST_ID
 
 export const config: PlasmoCSConfig = {
-  run_at: "document_start",
+  run_at: "document_end",
   matches: ["<all_urls>"],
 }
 
