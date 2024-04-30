@@ -338,7 +338,10 @@ const TreeNodeTitleContainer = props => {
       )}
       <Modal
         open={visible}
-        onOk={() => deleteNode(true)}
+        onOk={e => {
+          e.stopPropagation()
+          deleteNode(true)
+        }}
         okText="确定"
         cancelText="取消"
         title={(
@@ -347,10 +350,13 @@ const TreeNodeTitleContainer = props => {
             <span>确定删除该目录？</span>
           </p>
         )}
-        onCancel={() => setVisible(false)}
+        onCancel={e => {
+          e.stopPropagation()
+          setVisible(false)
+        }}
       >
         <div>
-          该目录下存在 {children.length} 个书签，删除后无法恢复，请谨慎操作。
+          该目录下存在 {children.length} 个书签和子目录，删除后无法恢复，请谨慎操作。
         </div>
       </Modal>
     </div>
