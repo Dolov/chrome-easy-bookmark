@@ -28,12 +28,17 @@ const setTreeNodeTitle = (nodes = [], options) => {
 
 interface CreateProps {
   visible: boolean
+  url?: string
+  title?: string
   toggleVisible?: () => void
   toggleListVisible?: () => void
 }
 
 const Create: React.FC<CreateProps> = props => {
-  const { visible, toggleVisible, toggleListVisible = () => {} } = props
+  const {
+    url = location.href, title = document.title,
+    visible, toggleVisible, toggleListVisible = () => {},
+  } = props
   const [form] = Form.useForm()
   const [disabled, setDisabled] = React.useState(false)
   const [treeNodes, setTreeNodes] = React.useState([])
@@ -69,8 +74,8 @@ const Create: React.FC<CreateProps> = props => {
   const save = () => {
     const { parentId = DEFAULT_PARENT_ID, title } = form.getFieldsValue()
     const payload: Partial<chrome.bookmarks.BookmarkTreeNode> = {
+      url,
       title,
-      url: location.href,
     }
     let action = MessageActionEnum.BOOKMARK_CREATE
     if (editBookmark) {
@@ -111,7 +116,6 @@ const Create: React.FC<CreateProps> = props => {
 
   const setFormInitialValues = treeNodes => {
     if (!form) return
-    const url = location.href
     const node = findTreeNode(url, treeNodes)
     if (node) {
       const { title, parentId } = node
@@ -123,7 +127,7 @@ const Create: React.FC<CreateProps> = props => {
       return
     }
     form.setFieldsValue({
-      title: document.title,
+      title,
       parentId: DEFAULT_PARENT_ID,
     })
   }
@@ -140,8 +144,8 @@ const Create: React.FC<CreateProps> = props => {
           <div
             className="cursor-pointer mr-4 text-3xl"
             onClick={() => {
-              toggleListVisible()
               closable && toggleVisible()
+              toggleListVisible && toggleListVisible()
             }}
           >
             🔖

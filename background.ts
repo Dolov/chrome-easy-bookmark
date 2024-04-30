@@ -63,6 +63,7 @@ chrome.action.onClicked.addListener(async activeTab => {
 
 chrome.commands.onCommand.addListener((command, tab) => {
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    const { url, title } = tabs[0]
     chrome.tabs.sendMessage(tabs[0].id, {
       action: MessageActionEnum.COMMAND,
       payload: {
@@ -75,7 +76,7 @@ chrome.commands.onCommand.addListener((command, tab) => {
         "create-bookmark": "Create",
         "show-all-bookmarks": "List",
       }
-      chrome.tabs.create({ url: `./tabs/${typeMap[command]}.html` })
+      chrome.tabs.create({ url: `./tabs/${typeMap[command]}.html?url=${url}&title=${title}` })
     })
   });
 })
