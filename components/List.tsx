@@ -1,8 +1,11 @@
 import React from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 import { Tooltip, Modal, Button, Input, Tree } from 'antd'
-import { type TreeDataNode, type InputRef } from 'antd'
-import { SearchOutlined, AlignLeftOutlined, AlignRightOutlined, AlignCenterOutlined, DeleteOutlined, InfoCircleFilled } from '@ant-design/icons'
+import { type TreeDataNode, type InputRef, type TreeProps } from 'antd'
+import {
+  SearchOutlined, AlignLeftOutlined, AlignRightOutlined,
+  AlignCenterOutlined, DeleteOutlined, InfoCircleFilled
+} from '@ant-design/icons'
 import { debounce } from 'radash'
 import {
   MessageActionEnum, formatBookmarkTreeNodes, baseZIndex,
@@ -195,6 +198,42 @@ const List: React.FC<ListProps> = props => {
     setSearchValue(value)
   };
 
+  const allowDrop: TreeProps['allowDrop'] = info => {
+    if (!info.dropNode.isLeaf) return true
+    // 不允许拖拽到叶子节点内
+    if (
+      info.dropNode.isLeaf &&
+      info.dropPosition === 0
+    ) {
+      return false
+    }
+    return true
+  }
+
+  const onDrop: TreeProps['onDrop'] = info => {
+    console.log('info: ', info);
+    const index = info.dropPosition
+    const dragKey = info.dragNode.key
+    // 同级为 true, 子级为 false
+    const dropToGap = info.dropToGap
+    const dropParentId = (info.node as any).parentId
+    const payload = {
+      index,
+      id: dragKey,
+      parentId: dropParentId
+    }
+    if (!dropToGap && [0, 1, 2].includes(index)) {
+      payload.index = 0
+      payload.parentId = info.node.key
+    }
+    chrome.runtime.sendMessage({
+      payload,
+      action: MessageActionEnum.BOOKMARK_MOVE,
+    }).then(res => {
+      init()
+    })
+  };
+
   return (
     <Modal
       zIndex={baseZIndex}
@@ -229,9 +268,10 @@ const List: React.FC<ListProps> = props => {
         <DirectoryTree
           draggable
           blockNode
-          checkedKeys={[]}
+          onDrop={onDrop}
           onExpand={onExpand}
           treeData={matchedNodes}
+          allowDrop={allowDrop}
           expandedKeys={expandedKeys}
           autoExpandParent={autoExpandParent}
         />
@@ -336,29 +376,26 @@ const TreeNodeTitleContainer = props => {
           </Button>
         </div>
       )}
-      <Modal
-        open={visible}
-        onOk={e => {
-          e.stopPropagation()
-          deleteNode(true)
-        }}
-        okText="确定"
-        cancelText="取消"
-        title={(
-          <p className="flex items-center">
-            <InfoCircleFilled className="text-yellow-500 mr-2 text-xl" />
-            <span>确定删除该目录？</span>
-          </p>
-        )}
-        onCancel={e => {
-          e.stopPropagation()
-          setVisible(false)
-        }}
-      >
-        <div>
-          该目录下存在 {children.length} 个书签和子目录，删除后无法恢复，请谨慎操作。
-        </div>
-      </Modal>
+      <div onClick={e => e.stopPropagation()}>
+        <Modal
+          centered
+          open={visible}
+          onOk={e => deleteNode(true)}
+          okText="确定"
+          cancelText="取消"
+          title={(
+            <p className="flex items-center">
+              <InfoCircleFilled className="text-yellow-500 mr-2 text-xl" />
+              <span>确定删除该目录？</span>
+            </p>
+          )}
+          onCancel={e => setVisible(false)}
+        >
+          <div>
+            该目录下存在 {children.length} 个书签和子目录，删除后无法恢复，请谨慎操作。
+          </div>
+        </Modal>
+      </div>
     </div>
   )
 }
