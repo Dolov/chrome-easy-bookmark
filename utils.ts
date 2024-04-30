@@ -54,7 +54,7 @@ export const searchTypeState = {
 }
 
 
-export const formatBookmarkTreeNodes = (treeData, withLeaf = false) => {
+export const formatBookmarkTreeNodes = (treeData = [], withLeaf = false) => {
   return treeData.reduce((currentValue, item) => {
     if (!item) return currentValue
     const { children = [], url, id, title } = item
