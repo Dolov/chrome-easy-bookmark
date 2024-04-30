@@ -28,17 +28,19 @@ const setTreeNodeTitle = (nodes = [], options) => {
 
 interface CreateProps {
   visible: boolean
-  toggleVisible: () => void
-  toggleListVisible: () => void
+  toggleVisible?: () => void
+  toggleListVisible?: () => void
 }
 
 const Create: React.FC<CreateProps> = props => {
-  const { visible, toggleVisible, toggleListVisible } = props
+  const { visible, toggleVisible, toggleListVisible = () => {} } = props
   const [form] = Form.useForm()
   const [disabled, setDisabled] = React.useState(false)
   const [treeNodes, setTreeNodes] = React.useState([])
   const [treeNodeDirs, setTreeNodeDirs] = React.useState([])
   const [editBookmark, setEditBookmark] = React.useState<chrome.bookmarks.BookmarkTreeNode>()
+
+  const closable = !!toggleVisible
 
   React.useEffect(() => {
     if (!visible) return
@@ -87,7 +89,7 @@ const Create: React.FC<CreateProps> = props => {
       payload,
     }, res => {
       init()
-      toggleVisible()
+      closable && toggleVisible()
     });
   }
 
@@ -102,7 +104,7 @@ const Create: React.FC<CreateProps> = props => {
       action: MessageActionEnum.BOOKMARK_REMOVE,
     }, res => {
       init()
-      toggleVisible()
+      closable && toggleVisible()
       setEditBookmark(undefined)
     });
   }
@@ -139,7 +141,7 @@ const Create: React.FC<CreateProps> = props => {
             className="cursor-pointer mr-4 text-3xl"
             onClick={() => {
               toggleListVisible()
-              toggleVisible()
+              closable && toggleVisible()
             }}
           >
             🔖
@@ -148,9 +150,19 @@ const Create: React.FC<CreateProps> = props => {
         </div>
       )}
       onOk={save}
+      closable={closable}
       onCancel={toggleVisible}
       className={`${prefixCls}-modal`}
-      footer={<ModalFooter handleDelete={handleDelete} save={save} toggle={toggleVisible} disabled={disabled} create={create} />}
+      footer={(
+        <ModalFooter
+          save={save}
+          create={create}
+          toggle={toggleVisible}
+          disabled={disabled}
+          closable={closable}
+          handleDelete={handleDelete}
+        />
+      )}
     >
       <Form
         form={form}
@@ -182,7 +194,7 @@ const Create: React.FC<CreateProps> = props => {
 }
 
 const ModalFooter = props => {
-  const { handleDelete, save, toggle, disabled, create } = props
+  const { handleDelete, save, toggle, disabled, create, closable } = props
   return (
     <div className="flex justify-between">
       {!create && (
@@ -196,7 +208,9 @@ const ModalFooter = props => {
         </Button>
       )}
       <div className="flex-1">
-        <Button onClick={toggle} shape="round">取消</Button>
+        {closable && (
+          <Button onClick={toggle} shape="round">取消</Button>
+        )}
         <Button
           type='primary'
           shape="round"

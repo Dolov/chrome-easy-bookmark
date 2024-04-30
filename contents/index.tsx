@@ -1,13 +1,13 @@
 import React from "react"
+import type { PlasmoCSConfig, PlasmoGetShadowHostId } from "plasmo"
 import { StyleProvider } from "@ant-design/cssinjs"
-import contentCss from "data-text:./style.scss"
+import contentCss from "data-text:~components/style.scss"
 import tailwindcss from "data-text:~tailwindcss.css"
 import antdResetCssText from "data-text:antd/dist/reset.css"
-import type { PlasmoCSConfig, PlasmoGetShadowHostId } from "plasmo"
+import List from '~/components/List'
+import Create from '~/components/Create'
 import { GlobalAntdProvider } from "~GlobalAntdProvider"
 import { useBoolean, MessageActionEnum } from '~/utils'
-import List from './components/List'
-import Create from './components/Create'
 
 const HOST_ID = "easy-bookmark-host"
 
@@ -36,9 +36,10 @@ const App = () => {
 
   React.useEffect(() => {
     chrome.runtime.onMessage.addListener((params, sender, sendResponse) => {
+      sendResponse()
       const { action, payload } = params
       if (action === MessageActionEnum.ACTION_ON_CLICKED) {
-        toggleCreateVisible()
+        toggleListVisible()
         return
       }
       if (action === MessageActionEnum.COMMAND && payload.command === "create-bookmark") {

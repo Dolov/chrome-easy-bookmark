@@ -9,7 +9,7 @@ const menuList: (chrome.contextMenus.CreateProperties & { action?(tab: chrome.ta
     title: "功能申请与问题反馈",
     contexts: ["action"],
     action() {
-      
+      chrome.tabs.create({ url: "https://github.com/Dolov/chrome-easy-bookmark/issues" })
     }
   },
   {
@@ -17,7 +17,7 @@ const menuList: (chrome.contextMenus.CreateProperties & { action?(tab: chrome.ta
     title: "个性化设置",
     contexts: ["action"],
     action() {
-
+      chrome.tabs.create({ url: "./tabs/Settings.html" })
     }
   },
 ]
@@ -55,12 +55,13 @@ chrome.action.onClicked.addListener(async activeTab => {
       action: MessageActionEnum.ACTION_ON_CLICKED,
       payload: activeTab
     }, function (response) {
+      if (!chrome.runtime.lastError) return
+      chrome.tabs.create({ url: `./tabs/List.html` })
     });
   });
 });
 
 chrome.commands.onCommand.addListener((command, tab) => {
-  // 发送消息到内容脚本
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     chrome.tabs.sendMessage(tabs[0].id, {
       action: MessageActionEnum.COMMAND,
@@ -69,7 +70,13 @@ chrome.commands.onCommand.addListener((command, tab) => {
         command,
       }
     }, function (response) {
-    });
+      if (!chrome.runtime.lastError) return
+      const typeMap = {
+        "create-bookmark": "Create",
+        "show-all-bookmarks": "List",
+      }
+      chrome.tabs.create({ url: `./tabs/${typeMap[command]}.html` })
+    })
   });
 })
 

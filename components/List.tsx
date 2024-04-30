@@ -2,7 +2,7 @@ import React from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 import { Tooltip, Modal, Button, Input, Tree } from 'antd'
 import { type TreeDataNode, type InputRef } from 'antd'
-import { SearchOutlined, AlignLeftOutlined, AlignRightOutlined, AlignCenterOutlined, DeleteOutlined, InfoCircleOutlined, InfoCircleFilled } from '@ant-design/icons'
+import { SearchOutlined, AlignLeftOutlined, AlignRightOutlined, AlignCenterOutlined, DeleteOutlined, InfoCircleFilled } from '@ant-design/icons'
 import { debounce } from 'radash'
 import {
   MessageActionEnum, formatBookmarkTreeNodes, baseZIndex,
@@ -129,7 +129,7 @@ const formattedTreeNodesTitle = (treeNodes = [], options) => {
 
 interface ListProps {
   visible: boolean
-  toggleVisible: () => void
+  toggleVisible?: () => void
 }
 
 const List: React.FC<ListProps> = props => {
@@ -202,6 +202,7 @@ const List: React.FC<ListProps> = props => {
       open={visible}
       footer={null}
       title="书签列表"
+      closable={!!toggleVisible}
       onCancel={toggleVisible}
       className={`${prefixCls}-modal`}
     >
