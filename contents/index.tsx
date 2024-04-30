@@ -42,11 +42,11 @@ const App = () => {
         toggleListVisible()
         return
       }
-      if (action === MessageActionEnum.COMMAND && payload.command === "create-bookmark") {
+      if (action === MessageActionEnum.COMMAND && payload.command === "create-or-edit") {
         toggleCreateVisible()
         return
       }
-      if (action === MessageActionEnum.COMMAND && payload.command === "show-all-bookmarks") {
+      if (action === MessageActionEnum.COMMAND && payload.command === "manage-or-search") {
         toggleListVisible()
         return
       }

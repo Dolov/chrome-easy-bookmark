@@ -34,19 +34,19 @@
   },
   "manifest": {
     "commands": {
-      "create-bookmark": {
+      "create-or-edit": {
         "suggested_key": {
           "default": "Ctrl+D",
           "mac": "Command+D"
         },
-        "description": "Create or edit bookmark"
+        "description": "Create or edit"
       },
-      "show-all-bookmarks": {
+      "manage-or-search": {
         "suggested_key": {
           "default": "Ctrl+K",
           "mac": "Command+K"
         },
-        "description": "Display all bookmarks"
+        "description": "Manage or search"
       }
     },
     "permissions": [

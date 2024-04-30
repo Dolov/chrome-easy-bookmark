@@ -73,8 +73,8 @@ chrome.commands.onCommand.addListener((command, tab) => {
     }, function (response) {
       if (!chrome.runtime.lastError) return
       const typeMap = {
-        "create-bookmark": "Create",
-        "show-all-bookmarks": "List",
+        "create-or-edit": "Create",
+        "manage-or-search": "List",
       }
       chrome.tabs.create({ url: `./tabs/${typeMap[command]}.html?url=${url}&title=${title}` })
     })
