@@ -99,7 +99,7 @@ const Create: React.FC<CreateProps> = props => {
   const handleDelete = () => {
     chrome.runtime.sendMessage({
       id: editBookmark.id,
-      action: MessageActionEnum.BOOKMARK_DELETE,
+      action: MessageActionEnum.BOOKMARK_REMOVE,
     }, res => {
       init()
       toggleVisible()
@@ -202,6 +202,7 @@ const ModalFooter = props => {
           shape="round"
           disabled={disabled}
           onClick={save}
+          className="ml-2"
         >
           保存
         </Button>

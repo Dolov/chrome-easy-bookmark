@@ -2,7 +2,7 @@ import React from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 import { Tooltip, Modal, Button, Input, Tree } from 'antd'
 import { type TreeDataNode, type InputRef } from 'antd'
-import { SearchOutlined, AlignLeftOutlined, AlignRightOutlined, AlignCenterOutlined, DeleteOutlined, DeleteFilled } from '@ant-design/icons'
+import { SearchOutlined, AlignLeftOutlined, AlignRightOutlined, AlignCenterOutlined, DeleteOutlined, InfoCircleOutlined, InfoCircleFilled } from '@ant-design/icons'
 import { debounce } from 'radash'
 import {
   MessageActionEnum, formatBookmarkTreeNodes, baseZIndex,
@@ -288,31 +288,70 @@ const SearchType = () => {
 
 const TreeNodeTitleContainer = props => {
   const { title, node, onSuccess } = props
-  const { url } = node
+  const { url, id, children } = node
+  const [visible, setVisible] = React.useState(false)
 
-  const handleDelete = e => {
-    e.stopPropagation()
+  /** 两个根节点不能操作 */
+  const actionVisible = !["1", "2"].includes(id)
+
+  const deleteNode = (folder = false) => {
+    const action = folder ? MessageActionEnum.BOOKMARK_REMOVE_TREE : MessageActionEnum.BOOKMARK_REMOVE
     chrome.runtime.sendMessage({
-      action: MessageActionEnum.BOOKMARK_DELETE,
+      action,
       id: node.id
     }).then(res => {
       onSuccess()
     })
   }
 
+  const handleDelete = e => {
+    e.stopPropagation()
+    if (url) {
+      deleteNode()
+      return
+    }
+    if (
+      !children.length ||
+      children.length === 1
+    ) {
+      deleteNode(true)
+      return
+    }
+    setVisible(true)
+  }
+
   return (
     <div className="flex group">
       <span>{title}</span>
-      <div className="flex-1 justify-end flex">
-        <Button
-          type="text"
-          shape="circle"
-          onClick={handleDelete}
-          className="w-6 h-6 !min-w-6 justify-center items-center hidden group-hover:flex"
-        >
-          <DeleteOutlined />
-        </Button>
-      </div>
+      {actionVisible && (
+        <div className="flex-1 justify-end flex">
+          <Button
+            type="text"
+            shape="circle"
+            onClick={handleDelete}
+            className="w-6 h-6 !min-w-6 justify-center items-center hidden group-hover:flex"
+          >
+            <DeleteOutlined />
+          </Button>
+        </div>
+      )}
+      <Modal
+        open={visible}
+        onOk={() => deleteNode(true)}
+        okText="确定"
+        cancelText="取消"
+        title={(
+          <p className="flex items-center">
+            <InfoCircleFilled className="text-yellow-500 mr-2 text-xl" />
+            <span>确定删除该目录？</span>
+          </p>
+        )}
+        onCancel={() => setVisible(false)}
+      >
+        <div>
+          该目录下存在 {children.length} 个书签，删除后无法恢复，请谨慎操作。
+        </div>
+      </Modal>
     </div>
   )
 }

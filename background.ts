@@ -98,9 +98,15 @@ chrome.runtime.onMessage.addListener(async (params, sender, sendResponse) => {
     sendResponse(res)
     return
   }
-  if (params.action === MessageActionEnum.BOOKMARK_DELETE) {
+  if (params.action === MessageActionEnum.BOOKMARK_REMOVE) {
     const res = await chrome.bookmarks.remove(params.id)
     sendResponse(res)
     return
   }
+  if (params.action === MessageActionEnum.BOOKMARK_REMOVE_TREE) {
+    const res = await chrome.bookmarks.removeTree(params.id)
+    sendResponse(res)
+    return
+  }
+  
 });
