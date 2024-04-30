@@ -130,12 +130,12 @@ const formattedTreeNodesTitle = (treeNodes = [], options) => {
   }, [])
 }
 
-interface ListProps {
+interface ManageProps {
   visible: boolean
   toggleVisible?: () => void
 }
 
-const List: React.FC<ListProps> = props => {
+const Manage: React.FC<ManageProps> = props => {
   const { visible, toggleVisible } = props
   const [dataSource, setDataSource] = React.useState([])
   const [searchValue, setSearchValue] = React.useState('');
@@ -403,4 +403,4 @@ const TreeNodeTitleContainer = props => {
 }
 
 
-export default List
+export default Manage

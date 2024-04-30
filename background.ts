@@ -56,7 +56,7 @@ chrome.action.onClicked.addListener(async activeTab => {
       payload: activeTab
     }, function (response) {
       if (!chrome.runtime.lastError) return
-      chrome.tabs.create({ url: `./tabs/List.html` })
+      chrome.tabs.create({ url: `./tabs/Manage.html` })
     });
   });
 });
@@ -74,7 +74,7 @@ chrome.commands.onCommand.addListener((command, tab) => {
       if (!chrome.runtime.lastError) return
       const typeMap = {
         "create-or-edit": "Create",
-        "manage-or-search": "List",
+        "manage-or-search": "Manage",
       }
       chrome.tabs.create({ url: `./tabs/${typeMap[command]}.html?url=${url}&title=${title}` })
     })

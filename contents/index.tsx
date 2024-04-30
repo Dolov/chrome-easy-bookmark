@@ -4,7 +4,7 @@ import { StyleProvider } from "@ant-design/cssinjs"
 import contentCss from "data-text:~components/style.scss"
 import tailwindcss from "data-text:~tailwindcss.css"
 import antdResetCssText from "data-text:antd/dist/reset.css"
-import List from '~/components/List'
+import Manage from '~components/Manage'
 import Create from '~/components/Create'
 import { GlobalAntdProvider } from "~GlobalAntdProvider"
 import { useBoolean, MessageActionEnum } from '~/utils'
@@ -56,7 +56,7 @@ const App = () => {
   return (
     <GlobalAntdProvider getPopupContainer={getRoot}>
       <StyleProvider container={getRoot()}>
-        <List
+        <Manage
           visible={listVisible}
           toggleVisible={toggleListVisible}
         />
