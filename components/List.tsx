@@ -268,6 +268,8 @@ const List: React.FC<ListProps> = props => {
         <DirectoryTree
           draggable
           blockNode
+          selectedKeys={[]}
+          checkedKeys={[]}
           onDrop={onDrop}
           onExpand={onExpand}
           treeData={matchedNodes}
