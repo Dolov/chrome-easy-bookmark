@@ -149,6 +149,7 @@ const Manage: React.FC<ManageProps> = props => {
     chrome.runtime.sendMessage({
       action: MessageActionEnum.BOOKMARK_GET_TREE
     }, treeNodes => {
+      if (!treeNodes) return
       const formattedTreeNodes = formatBookmarkTreeNodes(treeNodes, true)[0].children
       setDataSource(formattedTreeNodes)
     });

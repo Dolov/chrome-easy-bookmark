@@ -59,6 +59,7 @@ const Create: React.FC<CreateProps> = props => {
       chrome.runtime.sendMessage({
         action: MessageActionEnum.BOOKMARK_GET_TREE
       }, treeNodes => {
+        if (!treeNodes) return
         const formattedTreeNodes = formatBookmarkTreeNodes(treeNodes)
         setTreeNodes(treeNodes)
         const nodes = formattedTreeNodes[0].children

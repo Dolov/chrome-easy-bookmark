@@ -2,6 +2,8 @@
 
 import { MessageActionEnum } from './utils'
 
+
+
 /** 定义右键菜单列表 */
 const menuList: (chrome.contextMenus.CreateProperties & { action?(tab: chrome.tabs.Tab): void })[] = [
   {
@@ -81,40 +83,51 @@ chrome.commands.onCommand.addListener((command, tab) => {
   });
 })
 
-chrome.runtime.onMessage.addListener(async (params, sender, sendResponse) => {
+
+/**
+ * 1. 不能使用 async/await，否则会导致 onMessage 事件无法响应
+ * 2. 必须 return true，否则会导致 onMessage 事件无法响应
+ */
+chrome.runtime.onMessage.addListener((params, sender, sendResponse) => {
   if (params.action === MessageActionEnum.BOOKMARK_GET_TREE) {
     chrome.bookmarks.getTree(bookmarkTreeNodes => {
       sendResponse(bookmarkTreeNodes);
     });
-    return
+    return true
   }
+
   if (params.action === MessageActionEnum.BOOKMARK_CREATE) {
-    const res = await chrome.bookmarks.create(params.payload)
-    sendResponse(res)
-    return
+    chrome.bookmarks.create(params.payload).then(res => {
+      sendResponse(res)
+    })
+    return true
   }
   if (params.action === MessageActionEnum.BOOKMARK_UPDATE) {
     const { id, ...rest } = params.payload
-    const res = await chrome.bookmarks.update(id, rest)
-    sendResponse(res)
-    return
+    chrome.bookmarks.update(id, rest).then(res => {
+      sendResponse(res)
+    })
+    return true
   }
   if (params.action === MessageActionEnum.BOOKMARK_MOVE) {
     const { id, url, title, parentId, index } = params.payload
-    await chrome.bookmarks.update(id, { url, title })
-    const res = await chrome.bookmarks.move(id, { parentId, index })
-    sendResponse(res)
-    return
+    chrome.bookmarks.update(id, { url, title }).then(res => {
+      chrome.bookmarks.move(id, { parentId, index }).then(res => {
+        sendResponse(res)
+      })
+    })
+    return true
   }
   if (params.action === MessageActionEnum.BOOKMARK_REMOVE) {
-    const res = await chrome.bookmarks.remove(params.id)
-    sendResponse(res)
-    return
+    chrome.bookmarks.remove(params.id).then(res => {
+      sendResponse(res)
+    })
+    return true
   }
   if (params.action === MessageActionEnum.BOOKMARK_REMOVE_TREE) {
-    const res = await chrome.bookmarks.removeTree(params.id)
-    sendResponse(res)
-    return
+    chrome.bookmarks.removeTree(params.id).then(res => {
+      sendResponse(res)
+    })
+    return true
   }
-  
 });
