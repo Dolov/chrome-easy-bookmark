@@ -1,5 +1,8 @@
 This is a [Plasmo extension](https://docs.plasmo.com/) project bootstrapped with [`plasmo init`](https://www.npmjs.com/package/plasmo).
 
+![GitHub commit activity](https://img.shields.io/github/commit-activity/y/dolov/chrome-easy-bookmark)
+
+
 ## Getting Started
 
 First, run the development server:
