@@ -260,7 +260,7 @@ const Manage: React.FC<ManageProps> = props => {
       width={800}
       open={visible}
       footer={null}
-      title="书签列表"
+      title="书签管理"
       closable={!!toggleVisible}
       onCancel={toggleVisible}
       className={`${prefixCls}-modal`}

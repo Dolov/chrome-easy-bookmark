@@ -8,7 +8,7 @@ import { MessageActionEnum } from './utils'
 const menuList: (chrome.contextMenus.CreateProperties & { action?(tab: chrome.tabs.Tab): void })[] = [
   {
     id: "issues",
-    title: "功能申请与问题反馈",
+    title: "功能申请 && 问题反馈",
     contexts: ["action"],
     action() {
       chrome.tabs.create({ url: "https://github.com/Dolov/chrome-easy-bookmark/issues" })
