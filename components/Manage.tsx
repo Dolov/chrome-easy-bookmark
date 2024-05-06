@@ -228,21 +228,24 @@ const Manage: React.FC<ManageProps> = props => {
   }
 
   const onDrop: TreeProps['onDrop'] = info => {
-    console.log('info: ', info);
+    // drop 元素的末级顺序
     const index = info.dropPosition
+    // 被拖拽元素的 key
     const dragKey = info.dragNode.key
-    // 同级为 true, 子级为 false
+    // 平为 true, 缩为 false
     const dropToGap = info.dropToGap
-    const dropParentId = (info.node as any).parentId
-    const payload = {
-      index,
+    const payload: Record<string, any> = {
       id: dragKey,
-      parentId: dropParentId
     }
-    if (!dropToGap && [0, 1, 2].includes(index)) {
+
+    if (dropToGap) {
+      payload.index = index
+      payload.parentId = info.node.parentId
+    } else {
       payload.index = 0
       payload.parentId = info.node.key
     }
+
     chrome.runtime.sendMessage({
       payload,
       action: MessageActionEnum.BOOKMARK_MOVE,
