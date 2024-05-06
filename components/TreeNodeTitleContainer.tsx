@@ -9,8 +9,8 @@ import { MessageActionEnum } from '~/utils'
 import TextInput from './TextInput'
 
 const TreeNodeTitleContainer = props => {
-  const { title, node, onSuccess, editingBookmark, setEditingBookmark } = props
-  const { url, id, children } = node
+  const { node, onSuccess, editingBookmark, setEditingBookmark, children: jsxTitleChildren } = props
+  const { url, id, children, originalTitle } = node
   const [visible, setVisible] = React.useState(false)
 
   /** 两个根节点 */
@@ -114,7 +114,9 @@ const TreeNodeTitleContainer = props => {
   return (
     <Dropdown menu={{ items: menuItems, onClick: handleContextMenu }} trigger={['contextMenu']}>
       <div className="flex group">
-        <TextInput value={title} editing={editing} onSave={onSave} />
+        <TextInput value={originalTitle} editing={editing} onSave={onSave}>
+          {jsxTitleChildren}
+        </TextInput>
         {!rootNode && (
           <div className="flex-1 justify-end flex items-center">
             <Button

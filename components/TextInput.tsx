@@ -5,10 +5,11 @@ export interface TextInputProps {
   value: string
   editing: boolean
   onSave(value: string): void
+  children?: React.ReactNode
 }
 
 const TextInput: React.FC<TextInputProps> = props => {
-  const { editing, value, onSave } = props
+  const { editing, value, onSave, children } = props
 
   const [inputValue, setInputValue] = React.useState<string>(value)
   const inputRef = React.useRef<InputRef>()
@@ -27,6 +28,7 @@ const TextInput: React.FC<TextInputProps> = props => {
     return (
       <Input
         autoFocus
+        size="small"
         ref={inputRef}
         value={inputValue}
         onClick={e => e.stopPropagation()}
@@ -38,7 +40,7 @@ const TextInput: React.FC<TextInputProps> = props => {
   }
 
   return (
-    <span>{value}</span>
+    <span>{children}</span>
   )
 }
 

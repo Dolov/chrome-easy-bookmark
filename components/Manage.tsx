@@ -100,38 +100,28 @@ const formattedTreeNodesTitle = (treeNodes = [], options) => {
   const { onSuccess, editingBookmark, setEditingBookmark } = options
   return treeNodes.reduce((currentValue, item) => {
     const { children = [], url, title } = item
+    let titleJsx = title
     if (url) {
-      currentValue.push({
-        ...item,
-        title: (
-          <TreeNodeTitleContainer
-            node={item}
-            title={(
-              <a className="hover:text-blue-500 hover:underline text-inherit" type="link" href={url} target="_blank">
-                {title}
-              </a>
-            )}
-            onSuccess={onSuccess}
-            editingBookmark={editingBookmark}
-            setEditingBookmark={setEditingBookmark}
-          />
-        ),
-      })
-    } else {
-      currentValue.push({
-        ...item,
-        title: (
-          <TreeNodeTitleContainer
-            node={item}
-            title={title}
-            onSuccess={onSuccess}
-            editingBookmark={editingBookmark}
-            setEditingBookmark={setEditingBookmark}
-          />
-        ),
-        children: formattedTreeNodesTitle(children, options),
-      })
+      titleJsx = (
+        <a className="hover:text-blue-500 hover:underline text-inherit" type="link" href={url} target="_blank">
+          {title}
+        </a>
+      )
     }
+    currentValue.push({
+      ...item,
+      title: (
+        <TreeNodeTitleContainer
+          node={item}
+          onSuccess={onSuccess}
+          editingBookmark={editingBookmark}
+          setEditingBookmark={setEditingBookmark}
+        >
+          {titleJsx}
+        </TreeNodeTitleContainer>
+      ),
+      children: formattedTreeNodesTitle(children, options),
+    })
     return currentValue
   }, [])
 }
