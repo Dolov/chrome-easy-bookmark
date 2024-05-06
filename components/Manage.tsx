@@ -368,12 +368,12 @@ const TreeNodeTitleContainer = props => {
     <div className="flex group">
       <span>{title}</span>
       {actionVisible && (
-        <div className="flex-1 justify-end flex">
+        <div className="flex-1 justify-end flex items-center">
           <Button
             type="text"
             shape="circle"
             onClick={handleDelete}
-            className="w-6 h-6 !min-w-6 justify-center items-center hidden group-hover:flex"
+            className="w-6 h-6 !min-w-6 flex justify-center items-center invisible group-hover:visible"
           >
             <DeleteOutlined />
           </Button>
