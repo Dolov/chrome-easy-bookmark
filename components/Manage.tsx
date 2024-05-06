@@ -1,16 +1,17 @@
 import React from "react"
 import { useStorage } from "@plasmohq/storage/hook"
-import { Tooltip, Modal, Button, Input, Tree } from 'antd'
-import { type TreeDataNode, type InputRef, type TreeProps } from 'antd'
+import { Tooltip, Modal, Button, Input, Tree, Dropdown } from 'antd'
+import { type TreeDataNode, type InputRef, type TreeProps, type MenuProps } from 'antd'
 import {
-  SearchOutlined, AlignLeftOutlined, AlignRightOutlined,
-  AlignCenterOutlined, DeleteOutlined, InfoCircleFilled
+  SearchOutlined, AlignLeftOutlined, AlignRightOutlined, AlignCenterOutlined, DeleteOutlined,
+  InfoCircleFilled, DeleteFilled, FolderAddFilled, EditFilled
 } from '@ant-design/icons'
 import { debounce } from 'radash'
 import {
   MessageActionEnum, formatBookmarkTreeNodes, baseZIndex,
   StorageKeyEnum, SearchTypeEnum, searchTypeState,
 } from '~/utils'
+import TextInput from './TextInput'
 
 const { DirectoryTree } = Tree;
 
@@ -95,7 +96,7 @@ const matchSearch = (searchValue: string, treeNode = [], options) => {
 }
 
 const formattedTreeNodesTitle = (treeNodes = [], options) => {
-  const { onSuccess } = options
+  const { onSuccess, editingBookmark, setEditingBookmark } = options
   return treeNodes.reduce((currentValue, item) => {
     const { children = [], url, title } = item
     if (url) {
@@ -104,12 +105,14 @@ const formattedTreeNodesTitle = (treeNodes = [], options) => {
         title: (
           <TreeNodeTitleContainer
             node={item}
-            onSuccess={onSuccess}
             title={(
               <a className="hover:text-blue-500 hover:underline text-inherit" type="link" href={url} target="_blank">
                 {title}
               </a>
             )}
+            onSuccess={onSuccess}
+            editingBookmark={editingBookmark}
+            setEditingBookmark={setEditingBookmark}
           />
         ),
       })
@@ -118,9 +121,11 @@ const formattedTreeNodesTitle = (treeNodes = [], options) => {
         ...item,
         title: (
           <TreeNodeTitleContainer
-            onSuccess={onSuccess}
             node={item}
             title={title}
+            onSuccess={onSuccess}
+            editingBookmark={editingBookmark}
+            setEditingBookmark={setEditingBookmark}
           />
         ),
         children: formattedTreeNodesTitle(children, options),
@@ -140,6 +145,7 @@ const Manage: React.FC<ManageProps> = props => {
   const [dataSource, setDataSource] = React.useState([])
   const [searchValue, setSearchValue] = React.useState('');
   const [expandedKeys, setExpandedKeys] = React.useState<React.Key[]>([]);
+  const [editingBookmark, setEditingBookmark] = React.useState<chrome.bookmarks.BookmarkTreeNode>()
   const [autoExpandParent, setAutoExpandParent] = React.useState(true);
   const [sensitive] = useStorage(StorageKeyEnum.CASE_SENSITIVE, false)
   const [searchType] = useStorage(StorageKeyEnum.SEARCH_TYPE, SearchTypeEnum.MIXIN)
@@ -166,7 +172,9 @@ const Manage: React.FC<ManageProps> = props => {
   const matchedNodes = React.useMemo(() => {
     if (!searchValue) {
       const jsxNodes = formattedTreeNodesTitle(dataSource, {
-        onSuccess: init
+        onSuccess: init,
+        editingBookmark,
+        setEditingBookmark,
       })
       return jsxNodes
     }
@@ -175,10 +183,16 @@ const Manage: React.FC<ManageProps> = props => {
       sensitive,
       searchType,
     })
+
     return formattedTreeNodesTitle(matchedNodes, {
-      onSuccess: init
+      onSuccess: init,
+      editingBookmark,
+      setEditingBookmark,
     })
-  }, [searchValue, dataSource, sensitive, searchType])
+  }, [
+    searchValue, dataSource, sensitive, searchType,
+    editingBookmark,
+  ])
 
   React.useEffect(() => {
     if (!searchValue) {
@@ -331,12 +345,12 @@ const SearchType = () => {
 }
 
 const TreeNodeTitleContainer = props => {
-  const { title, node, onSuccess } = props
+  const { title, node, onSuccess, editingBookmark, setEditingBookmark } = props
   const { url, id, children } = node
   const [visible, setVisible] = React.useState(false)
 
-  /** 两个根节点不能操作 */
-  const actionVisible = !["1", "2"].includes(id)
+  /** 两个根节点 */
+  const rootNode = ["1", "2"].includes(id)
 
   const deleteNode = (folder = false) => {
     const action = folder ? MessageActionEnum.BOOKMARK_REMOVE_TREE : MessageActionEnum.BOOKMARK_REMOVE
@@ -364,42 +378,113 @@ const TreeNodeTitleContainer = props => {
     setVisible(true)
   }
 
+  const menuItems: MenuProps['items'] = React.useMemo(() => {
+    const renameItem = {
+      label: <div><EditFilled className="mr-2" />重命名</div>,
+      key: 'rename',
+    }
+    const addFolderItem = {
+      label: <div><FolderAddFilled className="mr-2" />添加文件夹</div>,
+      key: 'add-folder',
+    }
+    const deleteItem = {
+      label: <div className="text-red-500 font-medium"><DeleteFilled className="mr-2" />删除</div>,
+      key: 'delete',
+    }
+
+    if (url) {
+      return [renameItem, deleteItem]
+    }
+
+    if (rootNode) {
+      return [
+        addFolderItem,
+      ]
+    }
+
+    return [
+      renameItem,
+      addFolderItem,
+      deleteItem,
+    ]
+  }, [])
+
+  const handleContextMenu = async e => {
+    e.domEvent.stopPropagation()
+    const { key } = e
+    if (key === "rename") {
+      setEditingBookmark(node)
+    }
+    if (key === "add-folder") {
+      const newFolder = await chrome.runtime.sendMessage({
+        action: MessageActionEnum.BOOKMARK_CREATE,
+        payload: {
+          title: "新建文件夹",
+          parentId: id,
+        }
+      })
+      setEditingBookmark(newFolder)
+      onSuccess()
+    }
+    if (key === "delete") {
+      handleDelete(e.domEvent)
+    }
+  }
+
+  const onSave = async (value: string) => {
+    if (!value) return
+    setEditingBookmark(undefined)
+    const res = await chrome.runtime.sendMessage({
+      action: MessageActionEnum.BOOKMARK_UPDATE,
+      payload: {
+        id: editingBookmark.id,
+        title: value
+      }
+    })
+    onSuccess()
+  }
+
+  const { id: editId } = editingBookmark || {}
+  const editing = editId === id
+
   return (
-    <div className="flex group">
-      <span>{title}</span>
-      {actionVisible && (
-        <div className="flex-1 justify-end flex items-center">
-          <Button
-            type="text"
-            shape="circle"
-            onClick={handleDelete}
-            className="w-6 h-6 !min-w-6 flex justify-center items-center invisible group-hover:visible"
-          >
-            <DeleteOutlined />
-          </Button>
-        </div>
-      )}
-      <div onClick={e => e.stopPropagation()}>
-        <Modal
-          centered
-          open={visible}
-          onOk={e => deleteNode(true)}
-          okText="确定"
-          cancelText="取消"
-          title={(
-            <p className="flex items-center">
-              <InfoCircleFilled className="text-yellow-500 mr-2 text-xl" />
-              <span>确定删除该目录？</span>
-            </p>
-          )}
-          onCancel={e => setVisible(false)}
-        >
-          <div>
-            该目录下存在 {children.length} 个书签和子目录，删除后无法恢复，请谨慎操作。
+    <Dropdown menu={{ items: menuItems, onClick: handleContextMenu }} trigger={['contextMenu']}>
+      <div className="flex group">
+        <TextInput value={title} editing={editing} onSave={onSave} />
+        {!rootNode && (
+          <div className="flex-1 justify-end flex items-center">
+            <Button
+              type="text"
+              shape="circle"
+              onClick={handleDelete}
+              className="w-6 h-6 !min-w-6 flex justify-center items-center invisible group-hover:visible"
+            >
+              <DeleteOutlined />
+            </Button>
           </div>
-        </Modal>
+        )}
+        <div onClick={e => e.stopPropagation()}>
+          <Modal
+            centered
+            open={visible}
+            onOk={e => deleteNode(true)}
+            okText="确定"
+            cancelText="取消"
+            title={(
+              <p className="flex items-center">
+                <InfoCircleFilled className="text-yellow-500 mr-2 text-xl" />
+                <span>确定删除该目录？</span>
+              </p>
+            )}
+            onCancel={e => setVisible(false)}
+          >
+            <div>
+              该目录下存在 {children.length} 个书签和子目录，删除后无法恢复，请谨慎操作。
+            </div>
+          </Modal>
+        </div>
       </div>
-    </div>
+    </Dropdown>
   )
 }
 

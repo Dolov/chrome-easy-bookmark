@@ -6,8 +6,9 @@ import tailwindcss from "data-text:~tailwindcss.css"
 import antdResetCssText from "data-text:antd/dist/reset.css"
 import Manage from '~components/Manage'
 import Create from '~/components/Create'
+import { useBoolean } from '~/components/hooks'
 import { GlobalAntdProvider } from "~GlobalAntdProvider"
-import { useBoolean, MessageActionEnum } from '~/utils'
+import { MessageActionEnum } from '~/utils'
 
 const HOST_ID = "easy-bookmark-host"
 
