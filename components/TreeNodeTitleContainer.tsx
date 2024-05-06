@@ -9,7 +9,10 @@ import { MessageActionEnum } from '~/utils'
 import TextInput from './TextInput'
 
 const TreeNodeTitleContainer = props => {
-  const { node, onSuccess, editingBookmark, setEditingBookmark, children: jsxTitleChildren } = props
+  const {
+    node, onSuccess, editingBookmark, setEditingBookmark,
+    children: jsxTitleChildren, setNodeExpand
+  } = props
   const { url, id, children, originalTitle } = node
   const [visible, setVisible] = React.useState(false)
 
@@ -87,8 +90,9 @@ const TreeNodeTitleContainer = props => {
           parentId: id,
         }
       })
-      setEditingBookmark(newFolder)
       onSuccess()
+      setNodeExpand(node.id)
+      setEditingBookmark(newFolder)
     }
     if (key === "delete") {
       handleDelete(e.domEvent)

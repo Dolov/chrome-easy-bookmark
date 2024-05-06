@@ -10,3 +10,20 @@ export const useBoolean = (defaultValue = false) => {
   }
   return [value, toggle, valueRef] as const
 }
+
+export const useRefState = <T,>(defaultValue: T) => {
+  const [value, setValue] = React.useState(defaultValue)
+  const valueRef = React.useRef(value)
+  valueRef.current = value
+
+  const setChangeValue = (nextValue: T) => {
+    setValue(nextValue)
+  }
+
+  return [
+    valueRef.current,
+    setChangeValue,
+    valueRef,
+  ] as const
+}
+

@@ -1,17 +1,17 @@
 import React from "react"
 import { useStorage } from "@plasmohq/storage/hook"
-import { Tooltip, Modal, Button, Input, Tree, Dropdown } from 'antd'
-import { type TreeDataNode, type InputRef, type TreeProps, type MenuProps } from 'antd'
+import { Tooltip, Modal, Button, Input, Tree } from 'antd'
+import { type TreeDataNode, type InputRef, type TreeProps } from 'antd'
 import {
-  SearchOutlined, AlignLeftOutlined, AlignRightOutlined, AlignCenterOutlined, DeleteOutlined,
-  InfoCircleFilled, DeleteFilled, FolderAddFilled, EditFilled
+  SearchOutlined, AlignLeftOutlined, AlignRightOutlined, AlignCenterOutlined,
 } from '@ant-design/icons'
 import { debounce } from 'radash'
 import {
   MessageActionEnum, formatBookmarkTreeNodes, baseZIndex,
   StorageKeyEnum, SearchTypeEnum, searchTypeState,
 } from '~/utils'
-import TextInput from './TextInput'
+
+import { useRefState } from './hooks'
 import TreeNodeTitleContainer from './TreeNodeTitleContainer'
 
 const { DirectoryTree } = Tree;
@@ -97,7 +97,7 @@ const matchSearch = (searchValue: string, treeNode = [], options) => {
 }
 
 const formattedTreeNodesTitle = (treeNodes = [], options) => {
-  const { onSuccess, editingBookmark, setEditingBookmark } = options
+  const { onSuccess, setNodeExpand, editingBookmark, setEditingBookmark } = options
   return treeNodes.reduce((currentValue, item) => {
     const { children = [], url, title } = item
     let titleJsx = title
@@ -114,6 +114,7 @@ const formattedTreeNodesTitle = (treeNodes = [], options) => {
         <TreeNodeTitleContainer
           node={item}
           onSuccess={onSuccess}
+          setNodeExpand={setNodeExpand}
           editingBookmark={editingBookmark}
           setEditingBookmark={setEditingBookmark}
         >
@@ -135,7 +136,7 @@ const Manage: React.FC<ManageProps> = props => {
   const { visible, toggleVisible } = props
   const [dataSource, setDataSource] = React.useState([])
   const [searchValue, setSearchValue] = React.useState('');
-  const [expandedKeys, setExpandedKeys] = React.useState<React.Key[]>([]);
+  const [expandedKeys, setExpandedKeys, expandedKeysRef] = useRefState([])
   const [editingBookmark, setEditingBookmark] = React.useState<chrome.bookmarks.BookmarkTreeNode>()
   const [autoExpandParent, setAutoExpandParent] = React.useState(true);
   const [sensitive] = useStorage(StorageKeyEnum.CASE_SENSITIVE, false)
@@ -160,10 +161,19 @@ const Manage: React.FC<ManageProps> = props => {
     }, 500);
   }, [visible])
 
+  const setNodeExpand = (key: React.Key) => {
+    if (expandedKeysRef.current.includes(key)) return
+    setExpandedKeys([
+      ...expandedKeysRef.current,
+      key
+    ]);
+  };
+
   const matchedNodes = React.useMemo(() => {
     if (!searchValue) {
       const jsxNodes = formattedTreeNodesTitle(dataSource, {
         onSuccess: init,
+        setNodeExpand,
         editingBookmark,
         setEditingBookmark,
       })
@@ -177,6 +187,7 @@ const Manage: React.FC<ManageProps> = props => {
 
     return formattedTreeNodesTitle(matchedNodes, {
       onSuccess: init,
+      setNodeExpand,
       editingBookmark,
       setEditingBookmark,
     })
