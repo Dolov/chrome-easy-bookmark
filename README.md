@@ -1,6 +1,4 @@
-# Easy GitHub 2FA authentication
-Easily manage your bookmarks.
-
+# Easily manage your bookmarks.
 
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/y/dolov/chrome-easy-bookmark)
 ![Chrome Web Store Users](https://img.shields.io/chrome-web-store/users/cpmbahpdempdojecdoihgdakbjgkfcgm)
