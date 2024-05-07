@@ -10,6 +10,8 @@ export interface TextInputProps {
   children?: React.ReactNode
 }
 
+const INPUT_MAX_LEN = 40
+
 const TextInput: React.FC<TextInputProps> = props => {
   const { editing, value, onSave, children, url, type } = props
   const addFolder = type === "add-folder"
@@ -41,7 +43,7 @@ const TextInput: React.FC<TextInputProps> = props => {
       onPressEnter:() => onSave(inputValue),
     }
 
-    if (addFolder) {
+    if (addFolder || value.length < INPUT_MAX_LEN) {
       return (
         <Input
           size="small"
@@ -50,8 +52,12 @@ const TextInput: React.FC<TextInputProps> = props => {
         />
       )
     }
+
     return (
       <Input.TextArea
+        autoSize={{
+          minRows: 2,
+        }}
         size="small"
         ref={inputRef}
         {...inputProps}
