@@ -92,7 +92,10 @@ const TreeNodeTitleContainer = props => {
       })
       onSuccess()
       setNodeExpand(node.id)
-      setEditingBookmark(newFolder)
+      setEditingBookmark({
+        ...newFolder,
+        type: "add-folder"
+      })
     }
     if (key === "delete") {
       handleDelete(e.domEvent)
@@ -112,13 +115,19 @@ const TreeNodeTitleContainer = props => {
     onSuccess()
   }
 
-  const { id: editId } = editingBookmark || {}
+  const { id: editId, type } = editingBookmark || {}
   const editing = editId === id
 
   return (
     <Dropdown menu={{ items: menuItems, onClick: handleContextMenu }} trigger={['contextMenu']}>
       <div className="flex group">
-        <TextInput title={url} value={originalTitle} editing={editing} onSave={onSave}>
+        <TextInput
+          url={url}
+          type={type}
+          value={originalTitle}
+          editing={editing}
+          onSave={onSave}
+        >
           {jsxTitleChildren}
         </TextInput>
         {!rootNode && (

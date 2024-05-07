@@ -1,17 +1,18 @@
 import React from 'react'
 import { Input } from 'antd'
-import { type InputRef } from 'antd'
+import { type InputRef, type InputProps } from 'antd'
 export interface TextInputProps {
   value: string
   editing: boolean
   onSave(value: string): void
-  title?: string
+  url?: string
+  type?: "add-folder"
   children?: React.ReactNode
 }
 
 const TextInput: React.FC<TextInputProps> = props => {
-  const { editing, value, onSave, children, title } = props
-
+  const { editing, value, onSave, children, url, type } = props
+  const addFolder = type === "add-folder"
   const [inputValue, setInputValue] = React.useState<string>(value)
   const inputRef = React.useRef<InputRef>()
 
@@ -22,28 +23,44 @@ const TextInput: React.FC<TextInputProps> = props => {
   React.useEffect(() => {
     if (!editing) return
     if (!inputRef.current) return
+    if (addFolder) {
+      inputRef.current.select()
+      return
+    }
     inputRef.current.focus({
       cursor: 'end',
     })
   }, [editing])
 
   if (editing) {
+    const inputProps = {
+      value: inputValue,
+      onClick: e => e.stopPropagation(),
+      onChange: e => setInputValue(e.target.value),
+      onBlur: () => onSave(inputValue),
+      onPressEnter:() => onSave(inputValue),
+    }
+
+    if (addFolder) {
+      return (
+        <Input
+          size="small"
+          ref={inputRef}
+          {...inputProps}
+        />
+      )
+    }
     return (
       <Input.TextArea
-        autoSize
         size="small"
         ref={inputRef}
-        value={inputValue}
-        onClick={e => e.stopPropagation()}
-        onChange={e => setInputValue(e.target.value)}
-        onBlur={() => onSave(inputValue)}
-        onPressEnter={() => onSave(inputValue)}
+        {...inputProps}
       />
     )
   }
 
   return (
-    <span title={title}>{children}</span>
+    <span title={url}>{children}</span>
   )
 }
 
