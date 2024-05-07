@@ -1,6 +1,6 @@
 
 import React from "react"
-import { Modal, Button, Dropdown } from 'antd'
+import { Modal, Button, Dropdown, Tooltip } from 'antd'
 import { type MenuProps } from 'antd'
 import {
   DeleteOutlined, InfoCircleFilled, DeleteFilled, FolderAddFilled, EditFilled
@@ -118,7 +118,7 @@ const TreeNodeTitleContainer = props => {
   return (
     <Dropdown menu={{ items: menuItems, onClick: handleContextMenu }} trigger={['contextMenu']}>
       <div className="flex group">
-        <TextInput value={originalTitle} editing={editing} onSave={onSave}>
+        <TextInput title={url} value={originalTitle} editing={editing} onSave={onSave}>
           {jsxTitleChildren}
         </TextInput>
         {!rootNode && (
