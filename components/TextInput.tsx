@@ -22,13 +22,15 @@ const TextInput: React.FC<TextInputProps> = props => {
   React.useEffect(() => {
     if (!editing) return
     if (!inputRef.current) return
-    inputRef.current.select()
+    inputRef.current.focus({
+      cursor: 'end',
+    })
   }, [editing])
 
   if (editing) {
     return (
-      <Input
-        autoFocus
+      <Input.TextArea
+        autoSize
         size="small"
         ref={inputRef}
         value={inputValue}
