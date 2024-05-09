@@ -10,6 +10,7 @@ import {
   MessageActionEnum, formatBookmarkTreeNodes, baseZIndex,
   StorageKeyEnum, SearchTypeEnum, searchTypeState,
 } from '~/utils'
+import SearchInput, { type SearchInputRefProps } from './SearchInput'
 
 import { useRefState } from './hooks'
 import TreeNodeTitleContainer from './TreeNodeTitleContainer'
@@ -141,7 +142,7 @@ const Manage: React.FC<ManageProps> = props => {
   const [autoExpandParent, setAutoExpandParent] = React.useState(true);
   const [sensitive] = useStorage(StorageKeyEnum.CASE_SENSITIVE, false)
   const [searchType] = useStorage(StorageKeyEnum.SEARCH_TYPE, SearchTypeEnum.MIXIN)
-  const searchInputRef = React.useRef<InputRef>()
+  const searchInputRef = React.useRef<SearchInputRefProps>()
 
   const init = () => {
     chrome.runtime.sendMessage({
@@ -267,15 +268,14 @@ const Manage: React.FC<ManageProps> = props => {
     >
       <div>
         <Input
-          ref={searchInputRef}
-          size="middle"
-          className="flex rounded-3xl mt-2 mb-4"
-          onKeyUp={e => e.stopPropagation()}
-          onKeyDown={e => e.stopPropagation()}
-          placeholder="搜索书签"
-          onPressEnter={init}
           onChange={debounce({ delay: 300 }, onChange)}
+        />
+
+        <SearchInput
+          ref={searchInputRef}
+          placeholder="通过关键字检索书签"
           prefix={<SearchOutlined className="mr-1 text-slate-500" />}
+          onPressEnter={init}
           suffix={
             <div className="actions">
               <CaseSensitive />

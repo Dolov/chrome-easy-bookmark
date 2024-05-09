@@ -1,6 +1,8 @@
 $prefixCls: create-container;
 $prefixCls2: list-container;
 
+
+
 .#{$prefixCls}-modal {
   .ant-modal-close {
     top: 22px !important;
@@ -19,5 +21,9 @@ $prefixCls2: list-container;
     .ant-tree-title {
       flex: 1;
     }
+  }
+  input::placeholder {
+    color: rgba(0, 0, 0, 0.25);
+    user-select: none;
   }
 }
