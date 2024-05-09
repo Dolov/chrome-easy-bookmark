@@ -30,7 +30,15 @@ const SearchInput: React.ForwardRefRenderFunction<SearchInputRefProps, SearchInp
   }, [])
 
   const onInputChange = e => {
+    const inputValue = e.target.value
     setInputValue(e.target.value)
+    const nextValue = [
+      ...value,
+    ]
+    if (inputValue) {
+      nextValue.push(inputValue)
+    }
+    onChange && onChange(nextValue)
   }
 
   const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = e => {
@@ -72,7 +80,9 @@ const SearchInput: React.ForwardRefRenderFunction<SearchInputRefProps, SearchInp
   }
 
   const deleteItem = itemValue => {
-    setValue(value.filter(item => item !== itemValue))
+    const nextValues = value.filter(item => item !== itemValue)
+    setValue(nextValues)
+    onChange && onChange(nextValues)
   }
 
   const editItem = itemValue => {

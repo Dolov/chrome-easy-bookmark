@@ -1,7 +1,7 @@
 import React from "react"
 import { useStorage } from "@plasmohq/storage/hook"
-import { Tooltip, Modal, Button, Input, Tree } from 'antd'
-import { type TreeDataNode, type InputRef, type TreeProps } from 'antd'
+import { Tooltip, Modal, Button, Tree } from 'antd'
+import { type TreeDataNode, type TreeProps } from 'antd'
 import {
   SearchOutlined, AlignLeftOutlined, AlignRightOutlined, AlignCenterOutlined,
 } from '@ant-design/icons'
@@ -136,6 +136,7 @@ const Manage: React.FC<ManageProps> = props => {
   const { visible, toggleVisible } = props
   const [dataSource, setDataSource] = React.useState([])
   const [keywords, setKeywords] = React.useState([]);
+  console.log('keywords: ', keywords);
   const [expandedKeys, setExpandedKeys, expandedKeysRef] = useRefState([])
   const [editingBookmark, setEditingBookmark] = React.useState<chrome.bookmarks.BookmarkTreeNode>()
   const [autoExpandParent, setAutoExpandParent] = React.useState(true);
@@ -199,7 +200,7 @@ const Manage: React.FC<ManageProps> = props => {
   ])
 
   React.useEffect(() => {
-    if (!keywords) {
+    if (!keywords.length) {
       setExpandedKeys([])
       return
     }
