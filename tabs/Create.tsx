@@ -1,5 +1,6 @@
 import React from 'react'
 import Create from '~components/Create'
+import { GlobalAntdProvider } from '~GlobalAntdProvider'
 import "~tailwindcss.css"
 import "~components/style.scss"
 
@@ -20,11 +21,13 @@ const App: React.FC<AppProps> = props => {
     }
   }, [])
   return (
-    <Create
-      visible
-      url={url}
-      title={title}
-    />
+    <GlobalAntdProvider>
+      <Create
+        visible
+        url={url}
+        title={title}
+      />
+    </GlobalAntdProvider>
   )
 }
 
