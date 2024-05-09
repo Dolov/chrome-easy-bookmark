@@ -14,6 +14,7 @@ export enum MessageActionEnum {
 }
 
 export enum StorageKeyEnum {
+  UNION = "UNION",
   SEARCH_TYPE = "SEARCH_TYPE",
   CASE_SENSITIVE = "CASE_SENSITIVE"
 }
@@ -90,4 +91,16 @@ export const removeEmptyNode = (treeData = []) => {
     }
     return currentValue
   }, [])
+}
+
+export function highlightText(inputText: string, keywords: string[], sensitive = false) {
+  const i = sensitive ? "" : "i";
+  // 创建正则表达式匹配所有关键字
+  const regex = new RegExp(keywords.join('|'), `g${i}`);
+  let index = 0
+  // 在文本中匹配关键字并进行高亮
+  return inputText.replace(regex, (substring, ...args) => {
+    index += 1
+    return `<span class="highlight highlight-${index}">${substring}</span>`
+  });
 }

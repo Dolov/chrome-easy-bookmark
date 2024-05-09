@@ -8,7 +8,7 @@ export interface SearchInputRefProps {
 export interface SearchInputProps {
   prefix?: React.ReactNode
   suffix?: React.ReactNode
-  onChange?: (value: string) => void
+  onChange?: (value: string[]) => void
   placeholder?: string
   onPressEnter?: () => void
 }
@@ -56,12 +56,14 @@ const SearchInput: React.ForwardRefRenderFunction<SearchInputRefProps, SearchInp
       setInputValue("")
     }
     setValue(nextValues)
-    onChange && onChange(inputValue)
+    onChange && onChange(nextValues)
   }
 
   const handleDeleteEvent = (inputValue: string) => {
     if (inputValue) return
-    setValue(value.slice(0, -1))
+    const nextValues = value.slice(0, -1)
+    setValue(nextValues)
+    onChange && onChange(nextValues)
   }
 
   const handleContainerClick = (e: React.MouseEvent) => {
@@ -74,16 +76,16 @@ const SearchInput: React.ForwardRefRenderFunction<SearchInputRefProps, SearchInp
   }
 
   const editItem = itemValue => {
-    setInputValue(itemValue)
     setValue(value.filter(item => item !== itemValue))
+    setInputValue(itemValue)
   }
 
   return (
     <div
-      className="flex justify-between rounded-3xl mt-2 mb-4 cursor-text border border-solid border-[#d9d9d9] py-1 px-3"
       onClick={handleContainerClick}
+      className="flex justify-between rounded-3xl mt-2 mb-4 cursor-text border border-solid border-[#d9d9d9] py-1 px-3"
     >
-      {prefix}
+      <div className="mr-1 flex items-center">{prefix}</div>
       <div className="flex flex-1 pt-[1] h-8">
         <div style={{ display: 'flex' }}>
           {value.map(item => {
@@ -105,6 +107,7 @@ const SearchInput: React.ForwardRefRenderFunction<SearchInputRefProps, SearchInp
             value={inputValue}
             onChange={onInputChange}
             className="border-none outline-none text-sm w-full"
+            onBlur={() => handleEnterEvent(inputValue)}
             onKeyUp={e => e.stopPropagation()}
             onKeyDown={onKeyDown}
             placeholder={placeholder}

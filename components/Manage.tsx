@@ -8,7 +8,7 @@ import {
 import { debounce } from 'radash'
 import {
   MessageActionEnum, formatBookmarkTreeNodes, baseZIndex,
-  StorageKeyEnum, SearchTypeEnum, searchTypeState,
+  StorageKeyEnum, SearchTypeEnum, searchTypeState, highlightText
 } from '~/utils'
 import SearchInput, { type SearchInputRefProps } from './SearchInput'
 
@@ -33,37 +33,37 @@ const getKeys = (treeNode = []) => {
   }, [])
 }
 
-const matchSearch = (searchValue: string, treeNode = [], options) => {
-  const { sensitive, parentMatched, searchType } = options
-  return treeNode.reduce((currentValue, item) => {
-    const { url, originalTitle, children = [], title } = item
-    if (!originalTitle) return currentValue
-    const strTitle = originalTitle as string
-    const lTitle = sensitive ? strTitle : strTitle.toLowerCase()
-    const lSearchValue = sensitive ? searchValue : searchValue.toLowerCase()
-    const matched = lTitle.includes(lSearchValue)
-    const matchedChildren = matchSearch(searchValue, children as TreeNodeProps[], {
+const matchSearch = (keywords: string[], treeNode: TreeNodeProps[] = [], options) => {
+  const { sensitive, parentMatched, searchType, union } = options
+
+  const result: TreeNodeProps[] = []
+  for (let index = 0; index < treeNode.length; index++) {
+    const itemNode = treeNode[index];
+    const { url, children = [], title } = itemNode
+    const originalTitle: string = (itemNode as any).originalTitle
+    if (!originalTitle) return result
+    const lTitle = sensitive ? originalTitle : originalTitle.toLowerCase()
+
+    let matched = false
+    // 并集检索
+    if (union) {
+      matched = keywords.some(keyword => lTitle.includes(keyword.toLowerCase()))
+    } else {
+      matched = keywords.every(keyword => lTitle.includes(keyword.toLowerCase()))
+    }
+
+    const matchedChildren = matchSearch(keywords, children as TreeNodeProps[], {
       ...options,
       parentMatched: parentMatched || matched
     })
 
     const push = () => {
-      const index = lTitle.indexOf(lSearchValue);
-      const beforeStr = strTitle.substring(0, index);
-      const afterStr = strTitle.slice(index + searchValue.length);
-      const newTitle = (
-        <span>
-          {beforeStr}
-          <span className="text-red-500 font-black">
-            {searchValue}
-          </span>
-          {afterStr}
-        </span>
-      )
+      const text = highlightText(originalTitle, keywords, sensitive)
 
-      currentValue.push({
-        ...item,
-        title: matched ? newTitle : title,
+      result.push({
+        ...itemNode,
+        // @ts-ignore
+        title: <span dangerouslySetInnerHTML={{ __html: text }} />,
         children: matchedChildren
       })
     }
@@ -71,30 +71,29 @@ const matchSearch = (searchValue: string, treeNode = [], options) => {
     if (searchType === SearchTypeEnum.URL) {
       if (matched || matchedChildren.length) {
         push()
-        return currentValue
+        continue
       }
     }
 
     if (searchType === SearchTypeEnum.DIR) {
       if (url && parentMatched) {
         push()
-        return currentValue
+        continue
       }
       if (!url && (matched || parentMatched || matchedChildren.length)) {
         push()
-        return currentValue
+        continue
       }
     }
 
     if (searchType === SearchTypeEnum.MIXIN) {
       if (matched || matchedChildren.length || parentMatched) {
         push()
-        return currentValue
+        continue
       }
     }
-
-    return currentValue
-  }, [])
+  }
+  return result
 }
 
 const formattedTreeNodesTitle = (treeNodes = [], options) => {
@@ -136,10 +135,11 @@ interface ManageProps {
 const Manage: React.FC<ManageProps> = props => {
   const { visible, toggleVisible } = props
   const [dataSource, setDataSource] = React.useState([])
-  const [searchValue, setSearchValue] = React.useState('');
+  const [keywords, setKeywords] = React.useState([]);
   const [expandedKeys, setExpandedKeys, expandedKeysRef] = useRefState([])
   const [editingBookmark, setEditingBookmark] = React.useState<chrome.bookmarks.BookmarkTreeNode>()
   const [autoExpandParent, setAutoExpandParent] = React.useState(true);
+  const [union] = useStorage(StorageKeyEnum.UNION, true)
   const [sensitive] = useStorage(StorageKeyEnum.CASE_SENSITIVE, false)
   const [searchType] = useStorage(StorageKeyEnum.SEARCH_TYPE, SearchTypeEnum.MIXIN)
   const searchInputRef = React.useRef<SearchInputRefProps>()
@@ -171,7 +171,7 @@ const Manage: React.FC<ManageProps> = props => {
   };
 
   const matchedNodes = React.useMemo(() => {
-    if (!searchValue) {
+    if (!keywords.length) {
       const jsxNodes = formattedTreeNodesTitle(dataSource, {
         onSuccess: init,
         setNodeExpand,
@@ -181,7 +181,8 @@ const Manage: React.FC<ManageProps> = props => {
       return jsxNodes
     }
 
-    const matchedNodes = matchSearch(searchValue, dataSource, {
+    const matchedNodes = matchSearch(keywords, dataSource, {
+      union,
       sensitive,
       searchType,
     })
@@ -193,27 +194,26 @@ const Manage: React.FC<ManageProps> = props => {
       setEditingBookmark,
     })
   }, [
-    searchValue, dataSource, sensitive, searchType,
-    editingBookmark,
+    keywords, dataSource, sensitive, searchType,
+    editingBookmark, union,
   ])
 
   React.useEffect(() => {
-    if (!searchValue) {
+    if (!keywords) {
       setExpandedKeys([])
       return
     }
     const keys = getKeys(matchedNodes)
     setExpandedKeys(keys)
-  }, [searchValue])
+  }, [keywords])
 
   const onExpand = (newExpandedKeys: React.Key[]) => {
     setExpandedKeys(newExpandedKeys);
     setAutoExpandParent(false);
   };
 
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target
-    setSearchValue(value)
+  const onChange = (keywords: string[]) => {
+    setKeywords(keywords)
   };
 
   const allowDrop: TreeProps['allowDrop'] = info => {
@@ -267,18 +267,18 @@ const Manage: React.FC<ManageProps> = props => {
       className={`${prefixCls}-modal`}
     >
       <div>
-        <Input
-          onChange={debounce({ delay: 300 }, onChange)}
-        />
-
         <SearchInput
           ref={searchInputRef}
-          placeholder="通过关键字检索书签"
-          prefix={<SearchOutlined className="mr-1 text-slate-500" />}
+          onChange={debounce({ delay: 300 }, onChange)}
+          placeholder="输入关键字，点击 Enter 检索"
+          prefix={<SearchOutlined className="text-slate-500" />}
           onPressEnter={init}
           suffix={
-            <div className="actions">
+            <div className="actions flex">
               <CaseSensitive />
+              <span className="ml-1">
+                <Union />
+              </span>
               <span className="ml-1">
                 <SearchType />
               </span>
@@ -314,6 +314,28 @@ const CaseSensitive = () => {
         onClick={() => setSensitive(!sensitive)}
       >
         Aa
+      </Button>
+    </Tooltip>
+  )
+}
+
+const Union = () => {
+  const [union, setUnion] = useStorage(StorageKeyEnum.UNION, true)
+  const title = union ? "并集" : "交集"
+  return (
+    <Tooltip zIndex={baseZIndex} title={title}>
+      <Button
+        type="text"
+        className={`text-slate-500 flex items-center justify-center ${!union ? "bg-slate-200" : ""} hover:!bg-slate-200`}
+        shape="circle"
+        onClick={() => setUnion(!union)}
+      >
+        {union && (<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 14" height="1em" width="1em">
+          <path d="M10.858 2.48 10 2.888l-.858-.408a5 5 0 1 0 0 9.04l.858-.408.858.408a5 5 0 1 0 0-9.04ZM13 0a7 7 0 1 1-3 13.326A7 7 0 1 1 10 .673 6.973 6.973 0 0 1 13 0Z"/>
+        </svg>)}
+        {!union && (<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 14" height="1em" width="1em">
+          <path d="M7 14A7 7 0 1 1 10 .674a7 7 0 1 1 0 12.653A6.973 6.973 0 0 1 7 14ZM7 2a5 5 0 1 0 1 9.9A6.977 6.977 0 0 1 6 7a6.98 6.98 0 0 1 2-4.9A5.023 5.023 0 0 0 7 2Zm7 5a6.977 6.977 0 0 1-2 4.9 5 5 0 1 0 0-9.8A6.977 6.977 0 0 1 14 7Z"/>
+        </svg>)}
       </Button>
     </Tooltip>
   )
