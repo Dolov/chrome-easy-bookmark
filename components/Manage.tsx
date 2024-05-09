@@ -136,7 +136,6 @@ const Manage: React.FC<ManageProps> = props => {
   const { visible, toggleVisible } = props
   const [dataSource, setDataSource] = React.useState([])
   const [keywords, setKeywords] = React.useState([]);
-  console.log('keywords: ', keywords);
   const [expandedKeys, setExpandedKeys, expandedKeysRef] = useRefState([])
   const [editingBookmark, setEditingBookmark] = React.useState<chrome.bookmarks.BookmarkTreeNode>()
   const [autoExpandParent, setAutoExpandParent] = React.useState(true);
@@ -331,12 +330,9 @@ const Union = () => {
         shape="circle"
         onClick={() => setUnion(!union)}
       >
-        {union && (<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 14" height="1em" width="1em">
-          <path d="M10.858 2.48 10 2.888l-.858-.408a5 5 0 1 0 0 9.04l.858-.408.858.408a5 5 0 1 0 0-9.04ZM13 0a7 7 0 1 1-3 13.326A7 7 0 1 1 10 .673 6.973 6.973 0 0 1 13 0Z"/>
-        </svg>)}
-        {!union && (<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 14" height="1em" width="1em">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 14" height="1em" width="1em">
           <path d="M7 14A7 7 0 1 1 10 .674a7 7 0 1 1 0 12.653A6.973 6.973 0 0 1 7 14ZM7 2a5 5 0 1 0 1 9.9A6.977 6.977 0 0 1 6 7a6.98 6.98 0 0 1 2-4.9A5.023 5.023 0 0 0 7 2Zm7 5a6.977 6.977 0 0 1-2 4.9 5 5 0 1 0 0-9.8A6.977 6.977 0 0 1 14 7Z"/>
-        </svg>)}
+        </svg>
       </Button>
     </Tooltip>
   )
