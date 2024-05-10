@@ -1,5 +1,5 @@
 import React from "react"
-import type { PlasmoCSConfig, PlasmoGetShadowHostId } from "plasmo"
+import type { PlasmoCSConfig, PlasmoGetShadowHostId, PlasmoCreateShadowRoot } from "plasmo"
 import { StyleProvider } from "@ant-design/cssinjs"
 import contentCss from "data-text:~components/style.scss"
 import tailwindcss from "data-text:~tailwindcss.css"

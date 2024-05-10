@@ -11,6 +11,15 @@ $prefixCls2: list-container;
 
 
 .#{$prefixCls2}-modal {
+  // fix 在部分页面样式错乱问题
+  .ant-tree-switcher, .ant-tree-iconEle, .ant-tree-draggable-icon {
+    height: 24px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+
+  // 支持自定义 title
   .ant-tree-node-content-wrapper {
     display: flex;
     .ant-tree-title {
@@ -18,6 +27,7 @@ $prefixCls2: list-container;
     }
   }
 
+  // 自定义的搜索组件沿用 antd 的样式
   .search-input-container {
     &:hover {
       border-color: var(--color-primary-hover) !important;
