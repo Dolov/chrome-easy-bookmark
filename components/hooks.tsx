@@ -27,3 +27,14 @@ export const useRefState = <T,>(defaultValue: T) => {
   ] as const
 }
 
+export const useUpdateEffect = (effect: React.EffectCallback, deps?: React.DependencyList) => {
+  const isMounted = React.useRef(false)
+
+  React.useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true
+      return
+    }
+    return effect()
+  }, deps)
+}

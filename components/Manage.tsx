@@ -12,7 +12,7 @@ import {
 } from '~/utils'
 import SearchInput, { type SearchInputRefProps } from './SearchInput'
 
-import { useRefState } from './hooks'
+import { useRefState, useUpdateEffect } from './hooks'
 import TreeNodeTitleContainer from './TreeNodeTitleContainer'
 
 const { DirectoryTree } = Tree;
@@ -170,6 +170,15 @@ const Manage: React.FC<ManageProps> = props => {
     ]);
   };
 
+  useUpdateEffect(() => {
+    if (!keywords.length) {
+      // setExpandedKeys([])
+      return
+    }
+    const keys = getKeys(matchedNodes)
+    setExpandedKeys(keys)
+  }, [keywords])
+
   const matchedNodes = React.useMemo(() => {
     if (!keywords.length) {
       const jsxNodes = formattedTreeNodesTitle(dataSource, {
@@ -178,6 +187,7 @@ const Manage: React.FC<ManageProps> = props => {
         editingBookmark,
         setEditingBookmark,
       })
+      expandedKeysRef.current = []
       return jsxNodes
     }
 
@@ -198,22 +208,15 @@ const Manage: React.FC<ManageProps> = props => {
     editingBookmark, union,
   ])
 
-  React.useEffect(() => {
-    if (!keywords.length) {
-      setExpandedKeys([])
-      return
-    }
-    const keys = getKeys(matchedNodes)
-    setExpandedKeys(keys)
-  }, [keywords])
-
   const onExpand = (newExpandedKeys: React.Key[]) => {
     setExpandedKeys(newExpandedKeys);
     setAutoExpandParent(false);
   };
 
-  const onChange = (keywords: string[]) => {
-    setKeywords(keywords)
+  const onChange = (words: string[]) => {
+    // 判断搜索值不相等时，才触发搜索
+    if (words.join() === keywords.join()) return
+    setKeywords(words)
   };
 
   const allowDrop: TreeProps['allowDrop'] = info => {
@@ -294,7 +297,7 @@ const Manage: React.FC<ManageProps> = props => {
           onExpand={onExpand}
           treeData={matchedNodes}
           allowDrop={allowDrop}
-          expandedKeys={expandedKeys}
+          expandedKeys={expandedKeysRef.current}
           autoExpandParent={autoExpandParent}
         />
       </div>

@@ -66,7 +66,7 @@ const TextInput: React.FC<TextInputProps> = props => {
   }
 
   return (
-    <span title={url}>{children}</span>
+    <span>{children}</span>
   )
 }
 
