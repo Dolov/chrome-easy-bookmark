@@ -3,22 +3,29 @@ $prefixCls2: list-container;
 
 
 
+// fix 在部分页面样式错乱问题
+@mixin fix-antd-tree-style {
+  .ant-tree-switcher, .ant-tree-iconEle, .ant-tree-draggable-icon, .ant-select-tree-switcher {
+    height: 24px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
 .#{$prefixCls}-modal {
   .ant-modal-close {
     top: 22px !important;
   }
 }
 
+.#{$prefixCls}-tree-select-popup {
+  @include fix-antd-tree-style;
+}
+
 
 .#{$prefixCls2}-modal {
-  // fix 在部分页面样式错乱问题
-  .ant-tree-switcher, .ant-tree-iconEle, .ant-tree-draggable-icon {
-    height: 24px;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-  }
-
+  @include fix-antd-tree-style;
   // 支持自定义 title
   .ant-tree-node-content-wrapper {
     display: flex;
