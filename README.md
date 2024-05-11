@@ -4,7 +4,10 @@
 ![Chrome Web Store Users](https://img.shields.io/chrome-web-store/users/cpmbahpdempdojecdoihgdakbjgkfcgm)
 ![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/cpmbahpdempdojecdoihgdakbjgkfcgm)
 
-![img](./screenshorts/WX20240511-171249@2x.png)
+## Manange or search
+![img](./screenshorts/WX20240511-173136@2x.png)
+## Create or edit
+![img](./screenshorts/WX20240511-173054@2x.png)
 
 
 ## Feature
