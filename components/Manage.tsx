@@ -170,15 +170,6 @@ const Manage: React.FC<ManageProps> = props => {
     ]);
   };
 
-  useUpdateEffect(() => {
-    if (!keywords.length) {
-      // setExpandedKeys([])
-      return
-    }
-    const keys = getKeys(matchedNodes)
-    setExpandedKeys(keys)
-  }, [keywords])
-
   const matchedNodes = React.useMemo(() => {
     if (!keywords.length) {
       const jsxNodes = formattedTreeNodesTitle(dataSource, {
@@ -196,6 +187,9 @@ const Manage: React.FC<ManageProps> = props => {
       sensitive,
       searchType,
     })
+
+    const keys = getKeys(matchedNodes)
+    expandedKeysRef.current = keys
 
     return formattedTreeNodesTitle(matchedNodes, {
       onSuccess: init,
