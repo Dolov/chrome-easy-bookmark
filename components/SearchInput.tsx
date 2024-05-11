@@ -119,13 +119,13 @@ const SearchInput: React.ForwardRefRenderFunction<SearchInputRefProps, SearchInp
         className={`${focus? "focus": ""} search-input-container flex justify-between rounded-3xl mt-2 mb-4 cursor-text border border-solid border-[#d9d9d9] py-1 px-3`}
       >
         <div className="mr-1 flex items-center">{prefix}</div>
-        <div className="flex flex-1 pt-[1] h-8">
+        <div className="flex flex-1">
           <div style={{ display: 'flex' }}>
             {value.map(item => {
               return (
                 <div
                   key={item}
-                  className="px-2 my-1 mr-1 bg-[#0000000f] rounded-xl flex justify-center items-center text-nowrap"
+                  className="pr-2 pl-3 my-1 mr-1 bg-[#0000000f] rounded-[12px] flex justify-center items-center text-nowrap"
                 >
                   <span onClick={() => editItem(item)}>{item}</span>
                   <CloseOutlined onClick={() => deleteItem(item)} className="ml-1 cursor-pointer w-3 text-gray-400 hover:text-gray-500" />
@@ -139,7 +139,7 @@ const SearchInput: React.ForwardRefRenderFunction<SearchInputRefProps, SearchInp
               type="text"
               value={inputValue}
               onChange={onInputChange}
-              className="border-none outline-none text-sm w-full"
+              className="border-none outline-none text-[14px] w-full"
               onBlur={onBlur}
               onFocus={onFocus}
               onKeyUp={e => e.stopPropagation()}
