@@ -39,14 +39,14 @@
           "default": "Ctrl+D",
           "mac": "Command+D"
         },
-        "description": "Create or edit"
+        "description": "新建 / 编辑"
       },
       "manage-or-search": {
         "suggested_key": {
           "default": "Ctrl+K",
           "mac": "Command+K"
         },
-        "description": "Manage or search"
+        "description": "管理 / 搜索"
       }
     },
     "permissions": [
