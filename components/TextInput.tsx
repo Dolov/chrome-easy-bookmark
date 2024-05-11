@@ -37,9 +37,11 @@ const TextInput: React.FC<TextInputProps> = props => {
   if (editing) {
     const inputProps = {
       value: inputValue,
+      onBlur: () => onSave(inputValue),
+      onKeyUp: e => e.stopPropagation(),
       onClick: e => e.stopPropagation(),
       onChange: e => setInputValue(e.target.value),
-      onBlur: () => onSave(inputValue),
+      onKeyDown: e => e.stopPropagation(),
       onPressEnter:() => onSave(inputValue),
     }
 
