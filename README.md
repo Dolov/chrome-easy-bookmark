@@ -20,8 +20,8 @@
 - Support various search matching modes, including multi-keyword search, case sensitivity, intersection and union, mixed matching, title matching, folder matching, etc.
 - The UI interface is simple and exquisite, simplifying user operations.
 
-## Setting Shortcut Keys
-open page [chrome://extensions/shortcuts](chrome://extensions/shortcuts)
+## Set Shortcut Keys
+open page **chrome://extensions/shortcuts**
 
 <!-- 该扩展的快捷键分为两个，一个是新建或编辑书签，一个是搜索或管理书签。使用者可以根据自己的喜好进行设置，不要与系统快捷键或其他扩展快捷键冲突即可。我喜欢使用的快捷键是 command+D 和 command+K。 -->
 
