@@ -7,6 +7,7 @@ const { useToken } = theme;
 
 export interface SearchInputRefProps {
   focus(): void
+  addKeyword(value: string): void
 }
 
 export interface SearchInputProps {
@@ -29,17 +30,26 @@ const SearchInput: React.ForwardRefRenderFunction<SearchInputRefProps, SearchInp
 
   React.useImperativeHandle(ref, () => {
     return {
-      focus: () => {
+      focus() {
         if (inputRef.current) {
           inputRef.current.focus()
         }
+      },
+      addKeyword(keyword) {
+        if (value.includes(keyword)) return
+        handleInputChange(keyword)
+        setValue([...value, keyword])
       }
     }
-  }, [])
+  }, [value])
 
   const onInputChange = e => {
     const inputValue = e.target.value
-    setInputValue(e.target.value)
+    setInputValue(inputValue)
+    handleInputChange(inputValue)
+  }
+
+  const handleInputChange = inputValue => {
     const nextValue = [
       ...value,
     ]

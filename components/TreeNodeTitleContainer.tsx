@@ -3,7 +3,8 @@ import React from "react"
 import { Modal, Button, Dropdown, Tooltip } from 'antd'
 import { type MenuProps } from 'antd'
 import {
-  DeleteOutlined, InfoCircleFilled, DeleteFilled, FolderAddFilled, EditFilled
+  DeleteOutlined, InfoCircleFilled, DeleteFilled, FolderAddFilled, EditFilled,
+  SearchOutlined,
 } from '@ant-design/icons'
 import { MessageActionEnum } from '~/utils'
 import TextInput from './TextInput'
@@ -11,7 +12,7 @@ import TextInput from './TextInput'
 const TreeNodeTitleContainer = props => {
   const {
     node, onSuccess, editingBookmark, setEditingBookmark,
-    children: jsxTitleChildren, setNodeExpand
+    children: jsxTitleChildren, setNodeExpand, addKeyword
   } = props
   const { url, id, children, originalTitle } = node
   const [visible, setVisible] = React.useState(false)
@@ -54,6 +55,10 @@ const TreeNodeTitleContainer = props => {
       label: <div><FolderAddFilled className="mr-2" />添加文件夹</div>,
       key: 'add-folder',
     }
+    const searchItem = {
+      label: <div><SearchOutlined className="mr-2" />{`搜索 "${originalTitle}"`}</div>,
+      key: 'add-keyword',
+    }
     const deleteItem = {
       label: <div className="text-red-500 font-medium"><DeleteFilled className="mr-2" />删除</div>,
       key: 'delete',
@@ -69,6 +74,15 @@ const TreeNodeTitleContainer = props => {
       ]
     }
 
+    if (!url) {
+      return [
+        renameItem,
+        searchItem,
+        addFolderItem,
+        deleteItem,
+      ]
+    }
+
     return [
       renameItem,
       addFolderItem,
@@ -81,6 +95,7 @@ const TreeNodeTitleContainer = props => {
     const { key } = e
     if (key === "rename") {
       setEditingBookmark(node)
+      return
     }
     if (key === "add-folder") {
       const newFolder = await chrome.runtime.sendMessage({
@@ -96,9 +111,15 @@ const TreeNodeTitleContainer = props => {
         ...newFolder,
         type: "add-folder"
       })
+      return
     }
     if (key === "delete") {
       handleDelete(e.domEvent)
+      return
+    }
+    if (key === "add-keyword") {
+      addKeyword(originalTitle)
+      return
     }
   }
 

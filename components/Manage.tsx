@@ -103,7 +103,7 @@ const matchSearch = (keywords: string[], treeNode: TreeNodeProps[] = [], options
 }
 
 const formattedTreeNodesTitle = (treeNodes = [], options) => {
-  const { onSuccess, setNodeExpand, editingBookmark, setEditingBookmark } = options
+  const { onSuccess, setNodeExpand, editingBookmark, setEditingBookmark, addKeyword } = options
   return treeNodes.reduce((currentValue, item) => {
     const { children = [], url, title } = item
     let titleJsx = title
@@ -120,6 +120,7 @@ const formattedTreeNodesTitle = (treeNodes = [], options) => {
         <TreeNodeTitleContainer
           node={item}
           onSuccess={onSuccess}
+          addKeyword={addKeyword}
           setNodeExpand={setNodeExpand}
           editingBookmark={editingBookmark}
           setEditingBookmark={setEditingBookmark}
@@ -141,8 +142,7 @@ interface ManageProps {
 const Manage: React.FC<ManageProps> = props => {
   const { visible, toggleVisible } = props
   const [dataSource, setDataSource] = React.useState([])
-  const [keywords, setKeywords] = React.useState([]);
-  const lastKeywordsRef = React.useRef<string[]>()
+  const [keywords, setKeywords, keywordsRef] = useRefState<string[]>([])
   const [expandedKeys, setExpandedKeys, expandedKeysRef] = useRefState([])
   const [editingBookmark, setEditingBookmark] = React.useState<chrome.bookmarks.BookmarkTreeNode>()
   const [autoExpandParent, setAutoExpandParent] = React.useState(true);
@@ -177,6 +177,10 @@ const Manage: React.FC<ManageProps> = props => {
     ]);
   };
 
+  const addKeyword = (title: string) => {
+    searchInputRef.current.addKeyword(title)
+  }
+
   useUpdateEffect(() => {
     if (!keywords.length) {
       setExpandedKeys([])
@@ -187,13 +191,15 @@ const Manage: React.FC<ManageProps> = props => {
   }, [keywords])
 
   const matchedNodes = React.useMemo(() => {
+    const options = {
+      onSuccess: init,
+      addKeyword,
+      setNodeExpand,
+      editingBookmark,
+      setEditingBookmark,
+    }
     if (!keywords.length) {
-      const jsxNodes = formattedTreeNodesTitle(dataSource, {
-        onSuccess: init,
-        setNodeExpand,
-        editingBookmark,
-        setEditingBookmark,
-      })
+      const jsxNodes = formattedTreeNodesTitle(dataSource, options)
       return jsxNodes
     }
 
@@ -204,12 +210,7 @@ const Manage: React.FC<ManageProps> = props => {
       editingBookmark,
     })
 
-    return formattedTreeNodesTitle(matchedNodes, {
-      onSuccess: init,
-      setNodeExpand,
-      editingBookmark,
-      setEditingBookmark,
-    })
+    return formattedTreeNodesTitle(matchedNodes, options)
   }, [
     keywords, dataSource, sensitive, searchType,
     editingBookmark, union,
@@ -298,8 +299,8 @@ const Manage: React.FC<ManageProps> = props => {
         <DirectoryTree
           draggable
           blockNode
-          selectedKeys={[]}
           checkedKeys={[]}
+          selectedKeys={[]}
           onDrop={onDrop}
           onExpand={onExpand}
           treeData={matchedNodes}
