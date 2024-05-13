@@ -16,6 +16,7 @@ export enum MessageActionEnum {
 export enum StorageKeyEnum {
   UNION = "UNION",
   SEARCH_TYPE = "SEARCH_TYPE",
+  LAST_PARENT_ID = "LAST_PARENT_ID",
   CASE_SENSITIVE = "CASE_SENSITIVE"
 }
 

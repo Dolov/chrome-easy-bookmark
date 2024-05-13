@@ -1,6 +1,7 @@
 import React from "react"
+import { useStorage } from "@plasmohq/storage/hook"
 import { Button, Modal, Form, Input, TreeSelect } from 'antd'
-import { MessageActionEnum, formatBookmarkTreeNodes, findTreeNode, baseZIndex } from '~/utils'
+import { MessageActionEnum, formatBookmarkTreeNodes, findTreeNode, baseZIndex, StorageKeyEnum } from '~/utils'
 
 const DEFAULT_PARENT_ID = "1"
 
@@ -44,6 +45,7 @@ const Create: React.FC<CreateProps> = props => {
   const [treeNodes, setTreeNodes] = React.useState([])
   const [treeNodeDirs, setTreeNodeDirs] = React.useState([])
   const [editBookmark, setEditBookmark] = React.useState<chrome.bookmarks.BookmarkTreeNode>()
+  const [lastParentId, setLastParentId] = useStorage(StorageKeyEnum.LAST_PARENT_ID, DEFAULT_PARENT_ID)
 
   const closable = !!toggleVisible
 
@@ -73,7 +75,7 @@ const Create: React.FC<CreateProps> = props => {
   }
 
   const save = () => {
-    const { parentId = DEFAULT_PARENT_ID, title } = form.getFieldsValue()
+    const { parentId = lastParentId, title } = form.getFieldsValue()
     const payload: Partial<chrome.bookmarks.BookmarkTreeNode> = {
       url,
       title,
@@ -95,6 +97,7 @@ const Create: React.FC<CreateProps> = props => {
       payload,
     }, res => {
       init()
+      setLastParentId(parentId)
       closable && toggleVisible()
     });
   }
@@ -129,7 +132,7 @@ const Create: React.FC<CreateProps> = props => {
     }
     form.setFieldsValue({
       title,
-      parentId: DEFAULT_PARENT_ID,
+      parentId: lastParentId,
     })
   }
 
