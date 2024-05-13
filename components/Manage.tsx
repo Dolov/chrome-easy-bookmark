@@ -34,12 +34,12 @@ const getKeys = (treeNode = []) => {
 }
 
 const matchSearch = (keywords: string[], treeNode: TreeNodeProps[] = [], options) => {
-  const { sensitive, parentMatched, searchType, union } = options
+  const { sensitive, parentMatched, searchType, union, editingBookmark } = options
 
   const result: TreeNodeProps[] = []
   for (let index = 0; index < treeNode.length; index++) {
     const itemNode = treeNode[index];
-    const { url, children = [], title } = itemNode
+    const { url, title, children = [] } = itemNode
     const originalTitle: string = (itemNode as any).originalTitle
     if (!originalTitle) return result
     const lTitle = sensitive ? originalTitle : originalTitle.toLowerCase()
@@ -92,6 +92,11 @@ const matchSearch = (keywords: string[], treeNode: TreeNodeProps[] = [], options
         continue
       }
     }
+
+    if (editingBookmark?.id === itemNode?.id) {
+      push()
+      continue
+    }
   }
   return result
 }
@@ -136,6 +141,7 @@ const Manage: React.FC<ManageProps> = props => {
   const { visible, toggleVisible } = props
   const [dataSource, setDataSource] = React.useState([])
   const [keywords, setKeywords] = React.useState([]);
+  const lastKeywordsRef = React.useRef<string[]>()
   const [expandedKeys, setExpandedKeys, expandedKeysRef] = useRefState([])
   const [editingBookmark, setEditingBookmark] = React.useState<chrome.bookmarks.BookmarkTreeNode>()
   const [autoExpandParent, setAutoExpandParent] = React.useState(true);
@@ -163,12 +169,21 @@ const Manage: React.FC<ManageProps> = props => {
   }, [visible])
 
   const setNodeExpand = (key: React.Key) => {
-    if (expandedKeysRef.current.includes(key)) return
+    if (expandedKeys.includes(key)) return
     setExpandedKeys([
-      ...expandedKeysRef.current,
+      ...expandedKeys,
       key
     ]);
   };
+
+  useUpdateEffect(() => {
+    if (!keywords.length) {
+      setExpandedKeys([])
+      return
+    }
+    const keys = getKeys(matchedNodes)
+    setExpandedKeys(keys)
+  }, [keywords])
 
   const matchedNodes = React.useMemo(() => {
     if (!keywords.length) {
@@ -178,7 +193,6 @@ const Manage: React.FC<ManageProps> = props => {
         editingBookmark,
         setEditingBookmark,
       })
-      expandedKeysRef.current = []
       return jsxNodes
     }
 
@@ -186,10 +200,8 @@ const Manage: React.FC<ManageProps> = props => {
       union,
       sensitive,
       searchType,
+      editingBookmark,
     })
-
-    const keys = getKeys(matchedNodes)
-    expandedKeysRef.current = keys
 
     return formattedTreeNodesTitle(matchedNodes, {
       onSuccess: init,
@@ -291,7 +303,7 @@ const Manage: React.FC<ManageProps> = props => {
           onExpand={onExpand}
           treeData={matchedNodes}
           allowDrop={allowDrop}
-          expandedKeys={expandedKeysRef.current}
+          expandedKeys={expandedKeys}
           autoExpandParent={autoExpandParent}
         />
       </div>
