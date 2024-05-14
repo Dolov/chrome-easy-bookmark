@@ -1,6 +1,7 @@
 import React from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 import { Button, Modal, Form, Input, TreeSelect } from 'antd'
+import { useRefState } from '~components/hooks'
 import { MessageActionEnum, formatBookmarkTreeNodes, findTreeNode, baseZIndex, StorageKeyEnum } from '~/utils'
 
 const DEFAULT_PARENT_ID = "1"
@@ -31,7 +32,7 @@ interface CreateProps {
   visible: boolean
   url?: string
   title?: string
-  toggleVisible?: () => void
+  toggleVisible?: (visible?: boolean) => void
   toggleListVisible?: () => void
 }
 
@@ -44,10 +45,24 @@ const Create: React.FC<CreateProps> = props => {
   const [disabled, setDisabled] = React.useState(false)
   const [treeNodes, setTreeNodes] = React.useState([])
   const [treeNodeDirs, setTreeNodeDirs] = React.useState([])
-  const [editBookmark, setEditBookmark] = React.useState<chrome.bookmarks.BookmarkTreeNode>()
+  const [editBookmark, setEditBookmark, editBookmarkRef] = useRefState<chrome.bookmarks.BookmarkTreeNode>()
   const [lastParentId, setLastParentId] = useStorage(StorageKeyEnum.LAST_PARENT_ID, DEFAULT_PARENT_ID)
+  const visibleRef = React.useRef(visible)
 
+  visibleRef.current = visible
   const closable = !!toggleVisible
+
+  React.useEffect(() => {
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return
+      if (!visibleRef.current) return
+      if (editBookmarkRef.current) {
+        toggleVisible(false)
+        return
+      }
+      save()
+    })
+  }, [])
 
   React.useEffect(() => {
     if (!visible) return
@@ -158,8 +173,12 @@ const Create: React.FC<CreateProps> = props => {
         </div>
       )}
       onOk={save}
+      cancelButtonProps={{
+        onKeyUp: e => e.stopPropagation(),
+        onKeyDown: e => e.stopPropagation(),
+      }}
       closable={closable}
-      onCancel={toggleVisible}
+      onCancel={() => toggleVisible(false)}
       className={`${prefixCls}-modal`}
       footer={(
         <ModalFooter
@@ -184,6 +203,7 @@ const Create: React.FC<CreateProps> = props => {
           <Input
             onKeyUp={e => e.stopPropagation()}
             onKeyDown={e => e.stopPropagation()}
+            onPressEnter={save}
           />
         </Form.Item>
         <Form.Item name="parentId" label="文件夹">
@@ -211,13 +231,22 @@ const ModalFooter = props => {
           shape="round"
           className="ml-0"
           onClick={handleDelete}
+          onKeyUp={e => e.stopPropagation()}
+          onKeyDown={e => e.stopPropagation()}
         >
           移除
         </Button>
       )}
       <div className="flex-1">
         {closable && (
-          <Button onClick={toggle} shape="round">取消</Button>
+          <Button
+            shape="round"
+            onClick={toggle}
+            onKeyUp={e => e.stopPropagation()}
+            onKeyDown={e => e.stopPropagation()}
+          >
+            取消
+          </Button>
         )}
         <Button
           type='primary'
@@ -225,6 +254,8 @@ const ModalFooter = props => {
           disabled={disabled}
           onClick={save}
           className="ml-2"
+          onKeyUp={e => e.stopPropagation()}
+          onKeyDown={e => e.stopPropagation()}
         >
           保存
         </Button>

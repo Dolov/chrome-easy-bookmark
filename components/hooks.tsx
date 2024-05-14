@@ -4,14 +4,15 @@ export const useBoolean = (defaultValue = false) => {
   const [value, setValue] = React.useState(defaultValue)
   const valueRef = React.useRef<boolean>()
   valueRef.current = value
-  const toggle = () => {
-    valueRef.current = !valueRef.current
+  const toggle = (value?: boolean) => {
+    const isBoolean = typeof value === "boolean"
+    valueRef.current = isBoolean ? value: !valueRef.current
     setValue(valueRef.current)
   }
   return [value, toggle, valueRef] as const
 }
 
-export const useRefState = <T,>(defaultValue: T) => {
+export const useRefState = <T,>(defaultValue?: T) => {
   const [value, setValue] = React.useState(defaultValue)
   const valueRef = React.useRef(value)
   valueRef.current = value
