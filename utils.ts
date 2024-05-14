@@ -1,6 +1,8 @@
-
+import { type TreeDataNode } from 'antd'
 
 export const baseZIndex = 2000
+
+export type TreeNodeProps = TreeDataNode & chrome.bookmarks.BookmarkTreeNode
 
 export enum MessageActionEnum {
   COMMAND = "COMMAND",

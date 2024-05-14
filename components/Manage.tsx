@@ -1,26 +1,27 @@
 import React from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 import { Modal, Tree } from 'antd'
-import { type TreeDataNode, type TreeProps } from 'antd'
+import { type TreeProps } from 'antd'
 import {
   SearchOutlined
 } from '@ant-design/icons'
 import { debounce } from 'radash'
 import {
   MessageActionEnum, formatBookmarkTreeNodes, baseZIndex,
-  StorageKeyEnum, SearchTypeEnum, highlightText
+  StorageKeyEnum, SearchTypeEnum, highlightText,
+  type TreeNodeProps
 } from '~/utils'
 import SearchInput, { type SearchInputRefProps } from './SearchInput'
 
 import { useRefState, useUpdateEffect } from './hooks'
 import TreeNodeTitleContainer from './TreeNodeTitleContainer'
 import { CaseSensitive, Union, SearchType } from './SearchCondition'
+import HandlerBar from './HandlerBar'
 
 const { DirectoryTree } = Tree;
 
 const prefixCls = "list-container"
 
-type TreeNodeProps = TreeDataNode & chrome.bookmarks.BookmarkTreeNode
 
 const getKeys = (treeNode = []) => {
   return treeNode.reduce((currentValue, item) => {
@@ -141,7 +142,7 @@ interface ManageProps {
 
 const Manage: React.FC<ManageProps> = props => {
   const { visible, toggleVisible } = props
-  const [dataSource, setDataSource] = React.useState([])
+  const [dataSource, setDataSource] = React.useState<TreeNodeProps[]>([])
   const [keywords, setKeywords, keywordsRef] = useRefState<string[]>([])
   const [expandedKeys, setExpandedKeys, expandedKeysRef] = useRefState([])
   const [checkedKeys, setCheckedKeys] = useRefState([])
@@ -296,6 +297,10 @@ const Manage: React.FC<ManageProps> = props => {
               </span>
             </div>
           }
+        />
+        <HandlerBar
+          dataSource={dataSource}
+          checkedKeys={checkedKeys}
         />
         <DirectoryTree
           draggable

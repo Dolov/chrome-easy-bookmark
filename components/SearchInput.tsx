@@ -126,7 +126,7 @@ const SearchInput: React.ForwardRefRenderFunction<SearchInputRefProps, SearchInp
     }}>
       <div
         onClick={handleContainerClick}
-        className={`${focus? "focus": ""} search-input-container flex justify-between rounded-3xl mt-2 mb-4 cursor-text border border-solid border-[#d9d9d9] py-1 px-3`}
+        className={`${focus? "focus": ""} search-input-container flex justify-between rounded-3xl mt-3 mb-2 cursor-text border border-solid border-[#d9d9d9] py-1 px-3`}
       >
         <div className="mr-1 flex items-center">{prefix}</div>
         <div className="flex flex-1">
