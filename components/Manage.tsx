@@ -168,7 +168,7 @@ const Manage: React.FC<ManageProps> = props => {
     init()
     setTimeout(() => {
       searchInputRef.current.focus()
-    }, 500);
+    }, 400);
   }, [visible])
 
   const setNodeExpand = (key: React.Key) => {

@@ -1,12 +1,17 @@
 import React from "react"
 import { useStorage } from "@plasmohq/storage/hook"
-import { Button, Modal, Form, Input, TreeSelect } from 'antd'
+import { Button, Modal, Form, Input, TreeSelect, type InputRef } from 'antd'
 import { useRefState } from '~components/hooks'
 import { MessageActionEnum, formatBookmarkTreeNodes, findTreeNode, baseZIndex, StorageKeyEnum } from '~/utils'
 
 const DEFAULT_PARENT_ID = "1"
 
 const prefixCls = "create-container"
+
+const onKeyDown = (e: React.KeyboardEvent) => {
+  if (e.key === "Escape") return
+  e.stopPropagation()
+}
 
 const setTreeNodeTitle = (nodes = [], options) => {
   const { init } = options
@@ -47,6 +52,7 @@ const Create: React.FC<CreateProps> = props => {
   const [treeNodeDirs, setTreeNodeDirs] = React.useState([])
   const [editBookmark, setEditBookmark, editBookmarkRef] = useRefState<chrome.bookmarks.BookmarkTreeNode>()
   const [lastParentId, setLastParentId] = useStorage(StorageKeyEnum.LAST_PARENT_ID, DEFAULT_PARENT_ID)
+  const inputRef = React.useRef<InputRef>(null)
   const visibleRef = React.useRef(visible)
 
   visibleRef.current = visible
@@ -69,6 +75,13 @@ const Create: React.FC<CreateProps> = props => {
     init().then(treeNodes => {
       setFormInitialValues(treeNodes)
     })
+  }, [visible])
+
+  React.useEffect(() => {
+    if (!visible) return
+    setTimeout(() => {
+      inputRef.current.focus()
+    }, 400)
   }, [visible])
 
   const init = async () => {
@@ -156,8 +169,8 @@ const Create: React.FC<CreateProps> = props => {
 
   return (
     <Modal
-      zIndex={baseZIndex}
       open={visible}
+      zIndex={baseZIndex}
       title={(
         <div className="flex items-center">
           <div
@@ -174,8 +187,8 @@ const Create: React.FC<CreateProps> = props => {
       )}
       onOk={save}
       cancelButtonProps={{
+        onKeyDown,
         onKeyUp: e => e.stopPropagation(),
-        onKeyDown: e => e.stopPropagation(),
       }}
       closable={closable}
       onCancel={() => toggleVisible(false)}
@@ -201,8 +214,9 @@ const Create: React.FC<CreateProps> = props => {
       >
         <Form.Item name="title" label="名称">
           <Input
+            ref={inputRef}
             onKeyUp={e => e.stopPropagation()}
-            onKeyDown={e => e.stopPropagation()}
+            onKeyDown={onKeyDown}
             onPressEnter={save}
           />
         </Form.Item>
@@ -211,7 +225,7 @@ const Create: React.FC<CreateProps> = props => {
             showSearch
             treeData={treeNodeDirs}
             onKeyUp={e => e.stopPropagation()}
-            onKeyDown={e => e.stopPropagation()}
+            onKeyDown={onKeyDown}
             treeNodeFilterProp="originalTitle"
             popupClassName={`${prefixCls}-tree-select-popup`}
           />
@@ -232,7 +246,7 @@ const ModalFooter = props => {
           className="ml-0"
           onClick={handleDelete}
           onKeyUp={e => e.stopPropagation()}
-          onKeyDown={e => e.stopPropagation()}
+          onKeyDown={onKeyDown}
         >
           移除
         </Button>
@@ -243,7 +257,7 @@ const ModalFooter = props => {
             shape="round"
             onClick={toggle}
             onKeyUp={e => e.stopPropagation()}
-            onKeyDown={e => e.stopPropagation()}
+            onKeyDown={onKeyDown}
           >
             取消
           </Button>
@@ -255,7 +269,7 @@ const ModalFooter = props => {
           onClick={save}
           className="ml-2"
           onKeyUp={e => e.stopPropagation()}
-          onKeyDown={e => e.stopPropagation()}
+          onKeyDown={onKeyDown}
         >
           保存
         </Button>
