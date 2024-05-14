@@ -60,6 +60,7 @@ const SearchInput: React.ForwardRefRenderFunction<SearchInputRefProps, SearchInp
   }
 
   const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = e => {
+    if (e.key === "Escape") return
     e.stopPropagation()
     if (e.key === 'Enter') {
       handleEnterEvent(inputValue)
