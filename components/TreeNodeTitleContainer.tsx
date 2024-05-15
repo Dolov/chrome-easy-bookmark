@@ -56,16 +56,17 @@ const TreeNodeTitleContainer = props => {
       key: 'add-folder',
     }
     const searchItem = {
-      label: <div><SearchOutlined className="mr-2" />{`搜索 "${originalTitle}"`}</div>,
+      label: (
+        <div className="max-w-[200px] overflow-ellipsis overflow-hidden whitespace-nowrap">
+          <SearchOutlined className="mr-2" />
+          {`搜索 "${originalTitle}"`}
+        </div>
+      ),
       key: 'add-keyword',
     }
     const deleteItem = {
       label: <div className="text-red-500 font-medium"><DeleteFilled className="mr-2" />删除</div>,
       key: 'delete',
-    }
-
-    if (url) {
-      return [renameItem, deleteItem]
     }
 
     if (rootNode) {
@@ -74,17 +75,17 @@ const TreeNodeTitleContainer = props => {
       ]
     }
 
-    if (!url) {
+    if (url) {
       return [
         renameItem,
         searchItem,
-        addFolderItem,
         deleteItem,
       ]
     }
 
     return [
       renameItem,
+      searchItem,
       addFolderItem,
       deleteItem,
     ]

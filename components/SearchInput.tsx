@@ -138,7 +138,12 @@ const SearchInput: React.ForwardRefRenderFunction<SearchInputRefProps, SearchInp
                   key={item}
                   className="pr-2 pl-3 my-1 mr-1 bg-[#0000000f] rounded-[12px] flex justify-center items-center text-nowrap"
                 >
-                  <span onClick={() => editItem(item)}>{item}</span>
+                  <span
+                    onClick={() => editItem(item)}
+                    className="max-w-[200px] overflow-ellipsis overflow-hidden whitespace-nowrap"
+                  >
+                    {item}
+                  </span>
                   <CloseOutlined onClick={() => deleteItem(item)} className="ml-1 cursor-pointer w-3 text-gray-400 hover:text-gray-500" />
                 </div>
               )
