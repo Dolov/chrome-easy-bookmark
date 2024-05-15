@@ -3,7 +3,7 @@ import React from "react"
 import { Modal, Button, Dropdown, message } from 'antd'
 import { type MenuProps } from 'antd'
 import { InfoCircleFilled } from '@ant-design/icons'
-import { MessageActionEnum, copyTextToClipboard } from '~/utils'
+import { MessageActionEnum, copyTextToClipboard, type TreeNodeProps } from '~/utils'
 import TextInput from './TextInput'
 import {
   MdiRename,
@@ -15,6 +15,36 @@ import {
   MaterialSymbolsContentCopyRounded,
   MaterialSymbolsDriveFileMoveRounded,
 } from './Icon'
+
+const getChildrenUrls = (children: TreeNodeProps[]) => {
+  return children.reduce((text, item) => {
+    const { url, originalTitle } = item
+    if (url) {
+      return `${text}\n\n${originalTitle}\n${url}`
+    }
+    const childrenText = getChildrenUrls(item.children as unknown as any)
+    return `${text}\n\n${childrenText}`
+  }, "")
+}
+
+const getBookmarksToHtml = (children: TreeNodeProps[], parentTitle = "", level = 1) => {
+  const n = level > 6 ? 6 : level
+  let html = `<h${n}>${parentTitle}</h${n}><ul>\n`;
+
+  children.forEach(child => {
+    if (child.url) {
+      html += `<li><a href="${child.url}" target="_blank">${child.originalTitle}</a></li>\n`;
+      return
+    }
+
+    if (child.children) {
+      // @ts-ignore
+      html += getBookmarksToHtml(child.children, child.originalTitle, level + 1);
+    }
+  });
+  html += `</ul>\n`;
+  return html;
+};
 
 const TreeNodeTitleContainer = props => {
   const {
@@ -75,9 +105,9 @@ const TreeNodeTitleContainer = props => {
     }
     const searchItem = {
       label: (
-        <div className="max-w-[200px] ellipsis h-center">
-          <MingcuteSearch2Fill className="mr-2 text-lg text-gray-700" />
-          {`搜索 "${originalTitle}"`}
+        <div className="h-center">
+          <MingcuteSearch2Fill className="mr-2 text-lg text-gray-700 min-w-[18px]" />
+          <div className="max-w-[200px] ellipsis">{`搜索 "${originalTitle}"`}</div>
         </div>
       ),
       key: 'add-keyword',
@@ -182,13 +212,22 @@ const TreeNodeTitleContainer = props => {
     if (key === "copy") {
       if (url) {
         copyTextToClipboard(url)
-        return
+      } else {
+        const text = getChildrenUrls(children)
+        copyTextToClipboard(text)
       }
+      message.success("复制成功。")
+      return
     }
     if (key === "move") {
       return
     }
     if (key === "download") {
+      const downloadLink = document.createElement('a');
+      const html = getBookmarksToHtml(children, originalTitle)
+      downloadLink.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(html));
+      downloadLink.setAttribute('download', `${originalTitle}.html`);
+      downloadLink.click();
       return
     }
   }
