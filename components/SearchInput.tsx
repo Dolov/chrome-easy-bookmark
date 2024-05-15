@@ -140,7 +140,7 @@ const SearchInput: React.ForwardRefRenderFunction<SearchInputRefProps, SearchInp
                 >
                   <span
                     onClick={() => editItem(item)}
-                    className="max-w-[200px] overflow-ellipsis overflow-hidden whitespace-nowrap"
+                    className="max-w-[200px] ellipsis"
                   >
                     {item}
                   </span>

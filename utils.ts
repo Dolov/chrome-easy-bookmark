@@ -107,3 +107,24 @@ export function highlightText(inputText: string, keywords: string[], sensitive =
     return `<span class="highlight highlight-${index}">${substring}</span>`
   });
 }
+
+
+/**
+ * Copies the given text to the clipboard.
+ *
+ * @param {string} text - The text to be copied.
+ * @return {void} This function does not return anything.
+ */
+export const copyTextToClipboard = (text: string) => {
+	const textArea = document.createElement("textarea");
+	textArea.value = text;
+	document.body.appendChild(textArea);
+	textArea.select();
+
+	try {
+		const successful = document.execCommand('copy');
+	} catch (err) {
+		console.log('err: ', err);
+	}
+	document.body.removeChild(textArea);
+}

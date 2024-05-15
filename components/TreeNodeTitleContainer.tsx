@@ -1,13 +1,20 @@
 
 import React from "react"
-import { Modal, Button, Dropdown, Tooltip } from 'antd'
+import { Modal, Button, Dropdown, message } from 'antd'
 import { type MenuProps } from 'antd'
-import {
-  DeleteOutlined, InfoCircleFilled, DeleteFilled, FolderAddFilled, EditFilled,
-  SearchOutlined, 
-} from '@ant-design/icons'
-import { MessageActionEnum } from '~/utils'
+import { InfoCircleFilled } from '@ant-design/icons'
+import { MessageActionEnum, copyTextToClipboard } from '~/utils'
 import TextInput from './TextInput'
+import {
+  MdiRename,
+  MingcuteSearch2Fill,
+  RiDownloadCloud2Fill,
+  MaterialSymbolsDelete,
+  FluentFolderAdd24Filled,
+  MaterialSymbolsBookmarkRemove,
+  MaterialSymbolsContentCopyRounded,
+  MaterialSymbolsDriveFileMoveRounded,
+} from './Icon'
 
 const TreeNodeTitleContainer = props => {
   const {
@@ -16,6 +23,7 @@ const TreeNodeTitleContainer = props => {
   } = props
   const { url, id, children, originalTitle } = node
   const [visible, setVisible] = React.useState(false)
+  const DeleteIcon = url ? MaterialSymbolsBookmarkRemove: MaterialSymbolsDelete
 
   /** 两个根节点 */
   const rootNode = ["1", "2"].includes(id)
@@ -48,29 +56,73 @@ const TreeNodeTitleContainer = props => {
 
   const menuItems: MenuProps['items'] = React.useMemo(() => {
     const renameItem = {
-      label: <div><EditFilled className="mr-2" />重命名</div>,
+      label: (
+        <div className="h-center">
+          <MdiRename className="mr-2 text-lg text-gray-700" />
+          重命名
+        </div>
+      ),
       key: 'rename',
     }
     const addFolderItem = {
-      label: <div><FolderAddFilled className="mr-2" />添加文件夹</div>,
+      label: (
+        <div className="h-center">
+          <FluentFolderAdd24Filled className="mr-2 text-lg text-gray-700" />
+          添加文件夹
+        </div>
+      ),
       key: 'add-folder',
     }
     const searchItem = {
       label: (
-        <div className="max-w-[200px] overflow-ellipsis overflow-hidden whitespace-nowrap">
-          <SearchOutlined className="mr-2" />
+        <div className="max-w-[200px] ellipsis h-center">
+          <MingcuteSearch2Fill className="mr-2 text-lg text-gray-700" />
           {`搜索 "${originalTitle}"`}
         </div>
       ),
       key: 'add-keyword',
     }
+    const moveItem = {
+      label: (
+        <div className="h-center">
+          <MaterialSymbolsDriveFileMoveRounded className="mr-2 text-lg text-gray-700" />
+          移动
+        </div>
+      ),
+      key: 'move',
+    }
+    const copyItem = {
+      label: (
+        <div className="h-center">
+          <MaterialSymbolsContentCopyRounded className="mr-2 text-lg text-gray-700" />
+          复制
+        </div>
+      ),
+      key: 'copy',
+    }
+    const downloadItem = {
+      label: (
+        <div className="h-center">
+          <RiDownloadCloud2Fill className="mr-2 text-lg text-gray-700" />
+          下载
+        </div>
+      ),
+      key: 'download',
+    }
     const deleteItem = {
-      label: <div className="text-red-500 font-medium"><DeleteFilled className="mr-2" />删除</div>,
+      label: (
+        <div className="text-red-500 font-medium h-center">
+          <DeleteIcon className="mr-2 text-lg" />
+          删除
+        </div>
+      ),
       key: 'delete',
     }
 
     if (rootNode) {
       return [
+        copyItem,
+        downloadItem,
         addFolderItem,
       ]
     }
@@ -79,6 +131,8 @@ const TreeNodeTitleContainer = props => {
       return [
         renameItem,
         searchItem,
+        copyItem,
+        moveItem,
         deleteItem,
       ]
     }
@@ -87,6 +141,9 @@ const TreeNodeTitleContainer = props => {
       renameItem,
       searchItem,
       addFolderItem,
+      copyItem,
+      moveItem,
+      downloadItem,
       deleteItem,
     ]
   }, [])
@@ -120,6 +177,18 @@ const TreeNodeTitleContainer = props => {
     }
     if (key === "add-keyword") {
       addKeyword(originalTitle)
+      return
+    }
+    if (key === "copy") {
+      if (url) {
+        copyTextToClipboard(url)
+        return
+      }
+    }
+    if (key === "move") {
+      return
+    }
+    if (key === "download") {
       return
     }
   }
@@ -160,7 +229,7 @@ const TreeNodeTitleContainer = props => {
               onClick={handleDelete}
               className="w-6 h-6 !min-w-6 flex justify-center items-center invisible group-hover:visible"
             >
-              <DeleteOutlined />
+              <DeleteIcon className="text-lg hover:text-red-600" />
             </Button>
           </div>
         )}
