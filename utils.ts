@@ -49,19 +49,31 @@ export const searchTypeState = {
 }
 
 
-export const formatBookmarkTreeNodes = (treeData = [], withLeaf = false) => {
+export const formatBookmarkTreeNodes = (treeData = [], withLeaf = false, options) => {
+  const { excludeChildrenNodeId } = options || {}
   return treeData.reduce((currentValue, item) => {
     if (!item) return currentValue
     const { children = [], url, id, title } = item
     if (!withLeaf && url) return currentValue
-    currentValue.push({
+
+    const pushItem = {
       ...item,
       key: id,
       value: id,
+      isLeaf: !!url,
       originalTitle: title,
-      children: formatBookmarkTreeNodes(children, withLeaf),
-      isLeaf: !!url
-    })
+    }
+
+    if (excludeChildrenNodeId === id) {
+      pushItem.isLeaf = true
+      pushItem.children = []
+    } else {
+      pushItem.children = formatBookmarkTreeNodes(children, withLeaf, options)
+      const isLeaf = !pushItem.children.length
+      pushItem.isLeaf = isLeaf
+    }
+
+    currentValue.push(pushItem)
     return currentValue
   }, [])
 }

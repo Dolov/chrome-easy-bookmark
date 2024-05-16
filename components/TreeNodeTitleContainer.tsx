@@ -1,9 +1,9 @@
 
 import React from "react"
-import { Modal, Button, Dropdown, message } from 'antd'
+import { Modal, Button, Dropdown, message, TreeSelect, type GetRef } from 'antd'
 import { type MenuProps } from 'antd'
 import { InfoCircleFilled } from '@ant-design/icons'
-import { MessageActionEnum, copyTextToClipboard, type TreeNodeProps } from '~/utils'
+import { MessageActionEnum, copyTextToClipboard, type TreeNodeProps, baseZIndex, formatBookmarkTreeNodes } from '~/utils'
 import TextInput from './TextInput'
 import {
   MdiRename,
@@ -46,17 +46,29 @@ const getBookmarksToHtml = (children: TreeNodeProps[], parentTitle = "", level =
   return html;
 };
 
+type TreeSelectRef = GetRef<typeof TreeSelect>
+
 const TreeNodeTitleContainer = props => {
   const {
     node, onSuccess, editingBookmark, setEditingBookmark,
-    children: jsxTitleChildren, setNodeExpand, addKeyword
+    children: jsxTitleChildren, setNodeExpand, addKeyword, dataSource,
   } = props
   const { url, id, children, originalTitle } = node
   const [visible, setVisible] = React.useState(false)
-  const DeleteIcon = url ? MaterialSymbolsBookmarkRemove: MaterialSymbolsDelete
+  const [parentId, setParentId] = React.useState(id)
+  const [moveOpen, setMoveOpen] = React.useState(false)
+  const moveTreeSelectRef = React.useRef<TreeSelectRef>()
 
+  const DeleteIcon = url ? MaterialSymbolsBookmarkRemove: MaterialSymbolsDelete
   /** 两个根节点 */
   const rootNode = ["1", "2"].includes(id)
+
+  const nodes = React.useMemo(() => {
+    if (!moveOpen) return []
+    return formatBookmarkTreeNodes(dataSource, false, {
+      excludeChildrenNodeId: id,
+    })
+  }, [dataSource, moveOpen])
 
   const deleteNode = (folder = false) => {
     const action = folder ? MessageActionEnum.BOOKMARK_REMOVE_TREE : MessageActionEnum.BOOKMARK_REMOVE
@@ -220,6 +232,11 @@ const TreeNodeTitleContainer = props => {
       return
     }
     if (key === "move") {
+      setParentId(id)
+      setMoveOpen(true)
+      setTimeout(() => {
+        moveTreeSelectRef.current.focus()
+      }, 400);
       return
     }
     if (key === "download") {
@@ -230,6 +247,21 @@ const TreeNodeTitleContainer = props => {
       downloadLink.click();
       return
     }
+  }
+
+  const handleMove = async () => {
+    setMoveOpen(false)
+    if (!parentId) return
+    if (parentId === id) return
+    const res = await chrome.runtime.sendMessage({
+      action: MessageActionEnum.BOOKMARK_MOVE,
+      payload: {
+        id,
+        index: 0,
+        parentId,
+      }
+    })
+    onSuccess()
   }
 
   const onSave = async (value: string) => {
@@ -290,6 +322,27 @@ const TreeNodeTitleContainer = props => {
             <div>
               该目录下存在 {children.length} 个书签和子目录，删除后无法恢复，请谨慎操作。
             </div>
+          </Modal>
+          <Modal
+            centered
+            open={moveOpen}
+            title={`移动 ${originalTitle}`}
+            zIndex={baseZIndex}
+            okText="确定"
+            cancelText="取消"
+            onCancel={() => setMoveOpen(false)}
+            onOk={handleMove}
+          >
+            <TreeSelect
+              showSearch
+              ref={moveTreeSelectRef}
+              style={{ width: "100%" }}
+              treeData={nodes}
+              value={parentId}
+              onChange={setParentId}
+              treeNodeFilterProp="originalTitle"
+              treeDefaultExpandedKeys={["1", "2"]}
+            />
           </Modal>
         </div>
       </div>

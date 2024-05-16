@@ -104,7 +104,7 @@ const matchSearch = (keywords: string[], treeNode: TreeNodeProps[] = [], options
 }
 
 const formattedTreeNodesTitle = (treeNodes = [], options) => {
-  const { onSuccess, setNodeExpand, editingBookmark, setEditingBookmark, addKeyword } = options
+  const { onSuccess, setNodeExpand, editingBookmark, setEditingBookmark, addKeyword, dataSource } = options
   return treeNodes.reduce((currentValue, item) => {
     const { children = [], url, title } = item
     let titleJsx = title
@@ -121,6 +121,7 @@ const formattedTreeNodesTitle = (treeNodes = [], options) => {
         <TreeNodeTitleContainer
           node={item}
           onSuccess={onSuccess}
+          dataSource={dataSource}
           addKeyword={addKeyword}
           setNodeExpand={setNodeExpand}
           editingBookmark={editingBookmark}
@@ -196,6 +197,7 @@ const Manage: React.FC<ManageProps> = props => {
     const options = {
       onSuccess: init,
       addKeyword,
+      dataSource,
       setNodeExpand,
       editingBookmark,
       setEditingBookmark,
