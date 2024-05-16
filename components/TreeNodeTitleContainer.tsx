@@ -56,7 +56,8 @@ const TreeNodeTitleContainer = props => {
   const { url, id, children, originalTitle } = node
   const [visible, setVisible] = React.useState(false)
   const [parentId, setParentId] = React.useState(id)
-  const [moveOpen, setMoveOpen] = React.useState(false)
+  const [moveTreeOpen, setMoveTreeOpen] = React.useState(false)
+  const [moveModalOpen, setMoveModalOpen] = React.useState(false)
   const moveTreeSelectRef = React.useRef<TreeSelectRef>()
 
   const DeleteIcon = url ? MaterialSymbolsBookmarkRemove: MaterialSymbolsDelete
@@ -64,11 +65,11 @@ const TreeNodeTitleContainer = props => {
   const rootNode = ["1", "2"].includes(id)
 
   const nodes = React.useMemo(() => {
-    if (!moveOpen) return []
+    if (!moveModalOpen) return []
     return formatBookmarkTreeNodes(dataSource, false, {
       excludeChildrenNodeId: id,
     })
-  }, [dataSource, moveOpen])
+  }, [dataSource, moveModalOpen])
 
   const deleteNode = (folder = false) => {
     const action = folder ? MessageActionEnum.BOOKMARK_REMOVE_TREE : MessageActionEnum.BOOKMARK_REMOVE
@@ -234,8 +235,9 @@ const TreeNodeTitleContainer = props => {
     if (key === "move") {
       const viewId = url ? undefined : id
       setParentId(viewId)
-      setMoveOpen(true)
+      setMoveModalOpen(true)
       setTimeout(() => {
+        setMoveTreeOpen(true)
         moveTreeSelectRef.current.focus()
       }, 400);
       return
@@ -251,7 +253,7 @@ const TreeNodeTitleContainer = props => {
   }
 
   const handleMove = async () => {
-    setMoveOpen(false)
+    setMoveModalOpen(false)
     if (!parentId) return
     if (parentId === id) return
     const res = await chrome.runtime.sendMessage({
@@ -326,17 +328,19 @@ const TreeNodeTitleContainer = props => {
           </Modal>
           <Modal
             centered
-            open={moveOpen}
+            open={moveModalOpen}
             title={`移动 ${originalTitle}`}
             zIndex={baseZIndex}
             okText="确定"
             cancelText="取消"
-            onCancel={() => setMoveOpen(false)}
+            onCancel={() => setMoveModalOpen(false)}
             onOk={handleMove}
           >
             <TreeSelect
               showSearch
               ref={moveTreeSelectRef}
+              open={moveTreeOpen}
+              onDropdownVisibleChange={setMoveTreeOpen}
               style={{ width: "100%" }}
               treeData={nodes}
               value={parentId}
