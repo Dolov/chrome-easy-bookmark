@@ -232,7 +232,8 @@ const TreeNodeTitleContainer = props => {
       return
     }
     if (key === "move") {
-      setParentId(id)
+      const viewId = url ? undefined : id
+      setParentId(viewId)
       setMoveOpen(true)
       setTimeout(() => {
         moveTreeSelectRef.current.focus()
