@@ -301,6 +301,7 @@ const Manage: React.FC<ManageProps> = props => {
           }
         />
         <HandlerBar
+          onSuccess={init}
           dataSource={dataSource}
           checkedKeys={checkedKeys}
         />

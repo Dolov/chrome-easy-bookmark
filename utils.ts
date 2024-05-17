@@ -49,7 +49,7 @@ export const searchTypeState = {
 }
 
 
-export const formatBookmarkTreeNodes = (treeData = [], withLeaf = false, options) => {
+export const formatBookmarkTreeNodes = (treeData = [], withLeaf = false, options?) => {
   const { excludeChildrenNodeId } = options || {}
   return treeData.reduce((currentValue, item) => {
     if (!item) return currentValue
@@ -78,15 +78,26 @@ export const formatBookmarkTreeNodes = (treeData = [], withLeaf = false, options
   }, [])
 }
 
-export const findTreeNode = (url: string, treeData: chrome.bookmarks.BookmarkTreeNode[]): 
+export const findBookmarkByUrl = (url: string, treeData: chrome.bookmarks.BookmarkTreeNode[]): 
 chrome.bookmarks.BookmarkTreeNode | undefined => {
   if (!treeData || !treeData.length) return
   for (let index = 0; index < treeData.length; index++) {
     const item = treeData[index];
     if (item.url === url) return item
-    const target = findTreeNode(url, item.children)
+    const target = findBookmarkByUrl(url, item.children)
     if (target) return target
   }
+}
+
+export const getBookmarksToText = (children: TreeNodeProps[]) => {
+  return children.reduce((text, item) => {
+    const { url, originalTitle } = item
+    if (url) {
+      return `${text}\n\n${originalTitle}\n${url}`
+    }
+    const childrenText = getBookmarksToText(item.children as unknown as any)
+    return `${text}\n\n${childrenText}`
+  }, "")
 }
 
 export const removeEmptyNode = (treeData = []) => {

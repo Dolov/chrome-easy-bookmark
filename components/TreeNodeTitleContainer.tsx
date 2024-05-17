@@ -3,7 +3,10 @@ import React from "react"
 import { Modal, Button, Dropdown, message, TreeSelect, type GetRef } from 'antd'
 import { type MenuProps } from 'antd'
 import { InfoCircleFilled } from '@ant-design/icons'
-import { MessageActionEnum, copyTextToClipboard, type TreeNodeProps, baseZIndex, formatBookmarkTreeNodes } from '~/utils'
+import {
+  MessageActionEnum, copyTextToClipboard, type TreeNodeProps,
+  baseZIndex, formatBookmarkTreeNodes, getBookmarksToText
+} from '~/utils'
 import TextInput from './TextInput'
 import {
   MdiRename,
@@ -16,16 +19,6 @@ import {
   MaterialSymbolsDriveFileMoveRounded,
 } from './Icon'
 
-const getChildrenUrls = (children: TreeNodeProps[]) => {
-  return children.reduce((text, item) => {
-    const { url, originalTitle } = item
-    if (url) {
-      return `${text}\n\n${originalTitle}\n${url}`
-    }
-    const childrenText = getChildrenUrls(item.children as unknown as any)
-    return `${text}\n\n${childrenText}`
-  }, "")
-}
 
 const getBookmarksToHtml = (children: TreeNodeProps[], parentTitle = "", level = 1) => {
   const n = level > 6 ? 6 : level
@@ -226,7 +219,7 @@ const TreeNodeTitleContainer = props => {
       if (url) {
         copyTextToClipboard(url)
       } else {
-        const text = getChildrenUrls(children)
+        const text = getBookmarksToText(children)
         copyTextToClipboard(text)
       }
       message.success("复制成功。")

@@ -2,7 +2,7 @@ import React from "react"
 import { useStorage } from "@plasmohq/storage/hook"
 import { Button, Modal, Form, Input, TreeSelect, type InputRef } from 'antd'
 import { useRefState } from '~components/hooks'
-import { MessageActionEnum, formatBookmarkTreeNodes, findTreeNode, baseZIndex, StorageKeyEnum } from '~/utils'
+import { MessageActionEnum, formatBookmarkTreeNodes, findBookmarkByUrl, baseZIndex, StorageKeyEnum } from '~/utils'
 
 const DEFAULT_PARENT_ID = "1"
 
@@ -148,7 +148,7 @@ const Create: React.FC<CreateProps> = props => {
 
   const setFormInitialValues = treeNodes => {
     if (!form) return
-    const node = findTreeNode(url, treeNodes)
+    const node = findBookmarkByUrl(url, treeNodes)
     if (node) {
       const { title, parentId } = node
       setEditBookmark(node)
