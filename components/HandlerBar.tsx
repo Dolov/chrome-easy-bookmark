@@ -1,8 +1,8 @@
 import React from 'react'
-import { Button, Tooltip, message, Modal } from 'antd'
+import { Button, Tooltip, message, Modal, TreeSelect } from 'antd'
 import { ChromeFilled, InfoCircleFilled } from '@ant-design/icons'
 import {
-  type TreeNodeProps, getBookmarksToText,
+  type TreeNodeProps, getBookmarksToText, baseZIndex, formatBookmarkTreeNodes,
   copyTextToClipboard, MessageActionEnum, downloadBookmarkAsHtml
 } from '~utils'
 import {
@@ -14,6 +14,7 @@ export interface HandlerBarProps {
   onSuccess(): void
   dataSource: TreeNodeProps[]
   checkedKeys: string[]
+  setNodeExpand: (key: React.Key) => void
   setCheckedKeys: (keys: string[]) => void
 }
 
@@ -49,8 +50,10 @@ const getBookmarkTree = (dataSource: TreeNodeProps[]) => {
 }
 
 const HandlerBar: React.FC<HandlerBarProps> = props => {
-  const { checkedKeys, dataSource, onSuccess, setCheckedKeys } = props
+  const { checkedKeys, dataSource, onSuccess, setCheckedKeys, setNodeExpand } = props
+  const [parentId, setParentId] = React.useState("")
   const [deleteModalVisible, setDeleteModalVisible] = React.useState(false)
+  const [moveParentFolderModalVisible, setMoveParentFolderModalVisible] = React.useState(false)
 
   const visible = checkedKeys.length > 0
 
@@ -71,15 +74,33 @@ const HandlerBar: React.FC<HandlerBarProps> = props => {
     })
   }
 
-  const handleMove = () => {
-
+  const handleMove = async () => {
+    if (!parentId) return
+    for (let index = 0; index < bookmarkTree.length; index++) {
+      const { id } = bookmarkTree[index];
+      const res = await chrome.runtime.sendMessage({
+        action: MessageActionEnum.BOOKMARK_MOVE,
+        payload: {
+          id,
+          index: 0,
+          parentId,
+        }
+      })
+    }
+    onSuccess()
+    setNodeExpand(parentId)
+    setMoveParentFolderModalVisible(false)
   }
 
   const handleCopy = () => {
     const text = getBookmarksToText(bookmarkList)
     copyTextToClipboard(text)
     message.success("复制成功。")
-  } 
+  }
+
+  const onMove = () => {
+    setMoveParentFolderModalVisible(true)
+  }
 
   const onDelete = () => {
     setDeleteModalVisible(true)
@@ -106,6 +127,14 @@ const HandlerBar: React.FC<HandlerBarProps> = props => {
 
   return (
     <div className="mb-2 min-h-[1]" onClick={e => e.stopPropagation()}>
+      <MoveParentFolderModal
+        visible={moveParentFolderModalVisible}
+        onCancel={() => setMoveParentFolderModalVisible(false)}
+        onOk={handleMove}
+        value={parentId}
+        onChange={setParentId}
+        dataSource={dataSource}
+      />
       <DeleteConfirmModal
         visible={deleteModalVisible}
         onOk={handleDelete}
@@ -127,7 +156,7 @@ const HandlerBar: React.FC<HandlerBarProps> = props => {
               </Button>
             </Tooltip>
             <Tooltip title="移动选中书签">
-              <Button onClick={handleMove} className="center" type="text" shape="circle">
+              <Button onClick={onMove} className="center" type="text" shape="circle">
                 <MaterialSymbolsDriveFileMoveRounded className="text-lg text-gray-700" />
               </Button>
             </Tooltip>
@@ -158,7 +187,7 @@ interface DeleteConfirmModalProps {
 
 export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = props => {
   const { visible, onCancel, onOk, dataSource } = props
-  
+
   const count = React.useMemo(() => {
     if (!dataSource) return 0
     const getCount = (nodes: TreeNodeProps[]) => {
@@ -178,6 +207,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = props => {
       onOk={onOk}
       okText="确定"
       cancelText="取消"
+      zIndex={baseZIndex}
       title={(
         <p className="flex items-center">
           <InfoCircleFilled className="text-yellow-500 mr-2 text-xl" />
@@ -186,7 +216,68 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = props => {
       )}
       onCancel={onCancel}
     >
-      <div>共计 {count} 个目录及书签，删除后无法恢复，请谨慎操作。</div>
+      <div>共计 {count} 个文件夹及书签，删除后无法恢复，请谨慎操作。</div>
+    </Modal>
+  )
+}
+
+interface MoveParentFolderModalProps {
+  visible: boolean
+  onOk: () => void
+  value: string
+  onChange: (value: string) => void
+  onCancel: () => void
+  dataSource: TreeNodeProps[]
+  title?: React.ReactNode
+  excludeChildrenNodeId?: string
+}
+
+export const MoveParentFolderModal: React.FC<MoveParentFolderModalProps> = props => {
+  const {
+    visible, onCancel, onOk, dataSource, title = "选择上级文件夹",
+    value, onChange, excludeChildrenNodeId,
+  } = props
+
+  const treeSelectRef = React.useRef(null)
+  const [treeSelectOpen, setTreeSelectOpen] = React.useState(false)
+
+  React.useEffect(() => {
+    if (!visible) return
+    setTimeout(() => {
+      setTreeSelectOpen(true)
+      treeSelectRef.current.focus()
+    }, 400);
+  }, [visible])
+
+  const treeData = React.useMemo(() => {
+    if (!visible) return []
+    return formatBookmarkTreeNodes(dataSource, false, {
+      excludeChildrenNodeId,
+    })
+  }, [dataSource, visible])
+
+  return (
+    <Modal
+      open={visible}
+      title={title}
+      zIndex={baseZIndex}
+      okText="确定"
+      cancelText="取消"
+      onOk={onOk}
+      onCancel={onCancel}
+    >
+      <TreeSelect
+        showSearch
+        ref={treeSelectRef}
+        open={treeSelectOpen}
+        onDropdownVisibleChange={setTreeSelectOpen}
+        style={{ width: "100%" }}
+        treeData={treeData}
+        value={value}
+        onChange={onChange}
+        treeNodeFilterProp="originalTitle"
+        treeDefaultExpandedKeys={["1", "2"]}
+      />
     </Modal>
   )
 }

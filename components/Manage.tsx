@@ -300,6 +300,7 @@ const Manage: React.FC<ManageProps> = props => {
           onSuccess={init}
           dataSource={dataSource}
           checkedKeys={checkedKeys}
+          setNodeExpand={setNodeExpand}
           setCheckedKeys={setCheckedKeys}
         />
         <DirectoryTree
