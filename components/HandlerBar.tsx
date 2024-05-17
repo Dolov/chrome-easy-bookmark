@@ -1,9 +1,9 @@
 import React from 'react'
-import { Button, Tooltip, message } from 'antd'
-import { ChromeFilled } from '@ant-design/icons'
+import { Button, Tooltip, message, Modal } from 'antd'
+import { ChromeFilled, InfoCircleFilled } from '@ant-design/icons'
 import {
   type TreeNodeProps, getBookmarksToText,
-  copyTextToClipboard, MessageActionEnum
+  copyTextToClipboard, MessageActionEnum, downloadBookmarkAsHtml
 } from '~utils'
 import {
   MaterialSymbolsDelete, MaterialSymbolsDriveFileMoveRounded,
@@ -23,25 +23,48 @@ const getBookmarkList = (checkedKeys: string[], dataSource: TreeNodeProps[]) => 
       bookmarks.push(item)
     }
     if (item.children) {
-      // @ts-ignore
       bookmarks = bookmarks.concat(getBookmarkList(checkedKeys, children))
     }
     return bookmarks
   }, [])
 }
 
+const getBookmarkTree = (dataSource: TreeNodeProps[]) => {
+  const map = {};
+  const tree = [];
+  dataSource.forEach(item => {
+    map[item.id] = { ...item, children: [] };
+  });
+
+  dataSource.forEach(item => {
+    const { parentId, id } = item
+    if (parentId && map[parentId]) {
+      map[parentId].children.push(map[id]);
+    } else {
+      tree.push(map[id]);
+    }
+  });
+  return tree;
+}
+
 const HandlerBar: React.FC<HandlerBarProps> = props => {
   const { checkedKeys, dataSource, onSuccess } = props
+  const [deleteModalVisible, setDeleteModalVisible] = React.useState(false)
+
   const visible = checkedKeys.length > 0
 
-  const bookmarks = React.useMemo(() => {
+  const bookmarkList = React.useMemo(() => {
     if (!checkedKeys) return []
     if (!checkedKeys.length) return []
     return getBookmarkList(checkedKeys, dataSource)
   }, [checkedKeys, dataSource])
 
+  const bookmarkTree = React.useMemo(() => {
+    return getBookmarkTree(bookmarkList)
+  }, [bookmarkList])
+
   const handleOpen = () => {
-    bookmarks.forEach(item => {
+    bookmarkList.forEach(item => {
       const { url } = item
       if (url) window.open(url)
     })
@@ -52,13 +75,18 @@ const HandlerBar: React.FC<HandlerBarProps> = props => {
   }
 
   const handleCopy = () => {
-    const text = getBookmarksToText(bookmarks)
+    const text = getBookmarksToText(bookmarkList)
     copyTextToClipboard(text)
     message.success("复制成功。")
   } 
+
+  const onDelete = () => {
+    setDeleteModalVisible(true)
+  }
+
   const handleDelete = async () => {
-    for (let index = 0; index < bookmarks.length; index++) {
-      const element = bookmarks[index];
+    for (let index = 0; index < bookmarkList.length; index++) {
+      const element = bookmarkList[index];
       const { url, id } = element
       const action = url ? MessageActionEnum.BOOKMARK_REMOVE : MessageActionEnum.BOOKMARK_REMOVE_TREE
       await chrome.runtime.sendMessage({
@@ -66,16 +94,22 @@ const HandlerBar: React.FC<HandlerBarProps> = props => {
         action,
       })
     }
-    message.success("删除成功。")
     onSuccess()
+    setDeleteModalVisible(false)
   }
 
   const handleDownload = () => {
-
+    downloadBookmarkAsHtml(bookmarkTree)
   }
 
   return (
-    <div className="mb-2 min-h-[1]">
+    <div className="mb-2 min-h-[1]" onClick={e => e.stopPropagation()}>
+      <DeleteConfirmModal
+        visible={deleteModalVisible}
+        onOk={handleDelete}
+        onCancel={() => setDeleteModalVisible(false)}
+        dataSource={bookmarkTree}
+      />
       {visible && (
         <div className="flex justify-between items-center">
           <span className="ml-2 font-bold">选中 {checkedKeys.length} 项</span>
@@ -101,7 +135,7 @@ const HandlerBar: React.FC<HandlerBarProps> = props => {
               </Button>
             </Tooltip>
             <Tooltip title="删除选中书签">
-              <Button onClick={handleDelete} className="center" type="text" shape="circle">
+              <Button onClick={onDelete} className="center" type="text" shape="circle">
                 <MaterialSymbolsDelete className="text-lg text-red-500" />
               </Button>
             </Tooltip>
@@ -109,6 +143,49 @@ const HandlerBar: React.FC<HandlerBarProps> = props => {
         </div>
       )}
     </div>
+  )
+}
+
+interface DeleteConfirmModalProps {
+  visible: boolean
+  onOk: () => void
+  onCancel: () => void
+  dataSource: TreeNodeProps[]
+  title?: React.ReactNode
+}
+
+export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = props => {
+  const { visible, onCancel, onOk, dataSource } = props
+  
+  const count = React.useMemo(() => {
+    if (!dataSource) return 0
+    const getCount = (nodes: TreeNodeProps[]) => {
+      return nodes.reduce((currentValue, item) => {
+        if (item.children) {
+          return currentValue + 1 + getCount(item.children)
+        }
+        return currentValue + 1
+      }, 0)
+    }
+    return getCount(dataSource)
+  }, [dataSource])
+
+  return (
+    <Modal
+      open={visible}
+      onOk={onOk}
+      okText="确定"
+      cancelText="取消"
+      title={(
+        <p className="flex items-center">
+          <InfoCircleFilled className="text-yellow-500 mr-2 text-xl" />
+          <span>确定删除？</span>
+        </p>
+      )}
+      onCancel={onCancel}
+    >
+      <div>共计 {count} 个目录及书签，删除后无法恢复，请谨慎操作。</div>
+    </Modal>
   )
 }
 

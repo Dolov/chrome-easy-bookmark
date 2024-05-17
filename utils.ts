@@ -4,6 +4,7 @@ export const baseZIndex = 2000
 
 export type TreeNodeProps = TreeDataNode & chrome.bookmarks.BookmarkTreeNode & {
   originalTitle: string
+  children: TreeNodeProps[]
 }
 
 export enum MessageActionEnum {
@@ -98,6 +99,32 @@ export const getBookmarksToText = (children: TreeNodeProps[]) => {
     const childrenText = getBookmarksToText(item.children as unknown as any)
     return `${text}\n\n${childrenText}`
   }, "")
+}
+
+const getBookmarkAsHtml = (children: TreeNodeProps[], parentTitle = "", level = 1) => {
+  const n = level > 6 ? 6 : level
+  let html = `<h${n}>${parentTitle}</h${n}><ul>\n`;
+
+  children.forEach(child => {
+    if (child.url) {
+      html += `<li><a href="${child.url}" target="_blank">${child.originalTitle}</a></li>\n`;
+      return
+    }
+
+    if (child.children) {
+      html += getBookmarkAsHtml(child.children, child.originalTitle, level + 1);
+    }
+  });
+  html += `</ul>\n`;
+  return html;
+};
+
+export const downloadBookmarkAsHtml = (children: TreeNodeProps[], title = "书签") => {
+  const downloadLink = document.createElement('a');
+  const html = getBookmarkAsHtml(children)
+  downloadLink.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(html));
+  downloadLink.setAttribute('download', `${title}.html`);
+  downloadLink.click();
 }
 
 export const removeEmptyNode = (treeData = []) => {

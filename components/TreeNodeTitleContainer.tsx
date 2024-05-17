@@ -4,8 +4,9 @@ import { Modal, Button, Dropdown, message, TreeSelect, type GetRef } from 'antd'
 import { type MenuProps } from 'antd'
 import { InfoCircleFilled } from '@ant-design/icons'
 import {
-  MessageActionEnum, copyTextToClipboard, type TreeNodeProps,
-  baseZIndex, formatBookmarkTreeNodes, getBookmarksToText
+  MessageActionEnum, copyTextToClipboard,
+  baseZIndex, formatBookmarkTreeNodes, getBookmarksToText,
+  downloadBookmarkAsHtml,
 } from '~/utils'
 import TextInput from './TextInput'
 import {
@@ -18,26 +19,8 @@ import {
   MaterialSymbolsContentCopyRounded,
   MaterialSymbolsDriveFileMoveRounded,
 } from './Icon'
+import { DeleteConfirmModal } from '~components/HandlerBar'
 
-
-const getBookmarksToHtml = (children: TreeNodeProps[], parentTitle = "", level = 1) => {
-  const n = level > 6 ? 6 : level
-  let html = `<h${n}>${parentTitle}</h${n}><ul>\n`;
-
-  children.forEach(child => {
-    if (child.url) {
-      html += `<li><a href="${child.url}" target="_blank">${child.originalTitle}</a></li>\n`;
-      return
-    }
-
-    if (child.children) {
-      // @ts-ignore
-      html += getBookmarksToHtml(child.children, child.originalTitle, level + 1);
-    }
-  });
-  html += `</ul>\n`;
-  return html;
-};
 
 type TreeSelectRef = GetRef<typeof TreeSelect>
 
@@ -236,11 +219,7 @@ const TreeNodeTitleContainer = props => {
       return
     }
     if (key === "download") {
-      const downloadLink = document.createElement('a');
-      const html = getBookmarksToHtml(children, originalTitle)
-      downloadLink.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(html));
-      downloadLink.setAttribute('download', `${originalTitle}.html`);
-      downloadLink.click();
+      downloadBookmarkAsHtml(children, originalTitle)
       return
     }
   }
@@ -301,24 +280,12 @@ const TreeNodeTitleContainer = props => {
           </div>
         )}
         <div onClick={e => e.stopPropagation()}>
-          <Modal
-            centered
-            open={visible}
-            onOk={e => deleteNode(true)}
-            okText="确定"
-            cancelText="取消"
-            title={(
-              <p className="flex items-center">
-                <InfoCircleFilled className="text-yellow-500 mr-2 text-xl" />
-                <span>确定删除该目录？</span>
-              </p>
-            )}
-            onCancel={e => setVisible(false)}
-          >
-            <div>
-              该目录下存在 {children.length} 个书签和子目录，删除后无法恢复，请谨慎操作。
-            </div>
-          </Modal>
+          <DeleteConfirmModal
+            visible={visible}
+            onOk={() => deleteNode(true)}
+            onCancel={() => setVisible(false)}
+            dataSource={[node]}
+          />
           <Modal
             centered
             open={moveModalOpen}
