@@ -14,6 +14,7 @@ export interface HandlerBarProps {
   onSuccess(): void
   dataSource: TreeNodeProps[]
   checkedKeys: string[]
+  setCheckedKeys: (keys: string[]) => void
 }
 
 const getBookmarkList = (checkedKeys: string[], dataSource: TreeNodeProps[]) => {
@@ -48,7 +49,7 @@ const getBookmarkTree = (dataSource: TreeNodeProps[]) => {
 }
 
 const HandlerBar: React.FC<HandlerBarProps> = props => {
-  const { checkedKeys, dataSource, onSuccess } = props
+  const { checkedKeys, dataSource, onSuccess, setCheckedKeys } = props
   const [deleteModalVisible, setDeleteModalVisible] = React.useState(false)
 
   const visible = checkedKeys.length > 0
@@ -95,6 +96,7 @@ const HandlerBar: React.FC<HandlerBarProps> = props => {
       })
     }
     onSuccess()
+    setCheckedKeys([])
     setDeleteModalVisible(false)
   }
 

@@ -104,7 +104,6 @@ const matchSearch = (keywords: string[], treeNode: TreeNodeProps[] = [], options
 }
 
 const formattedTreeNodesTitle = (treeNodes = [], options) => {
-  const { onSuccess, setNodeExpand, editingBookmark, setEditingBookmark, addKeyword, dataSource } = options
   return treeNodes.reduce((currentValue, item) => {
     const { children = [], url, title } = item
     let titleJsx = title
@@ -120,12 +119,7 @@ const formattedTreeNodesTitle = (treeNodes = [], options) => {
       title: (
         <TreeNodeTitleContainer
           node={item}
-          onSuccess={onSuccess}
-          dataSource={dataSource}
-          addKeyword={addKeyword}
-          setNodeExpand={setNodeExpand}
-          editingBookmark={editingBookmark}
-          setEditingBookmark={setEditingBookmark}
+          {...options}
         >
           {titleJsx}
         </TreeNodeTitleContainer>
@@ -199,6 +193,7 @@ const Manage: React.FC<ManageProps> = props => {
       addKeyword,
       dataSource,
       setNodeExpand,
+      setCheckedKeys,
       editingBookmark,
       setEditingBookmark,
     }
@@ -304,6 +299,7 @@ const Manage: React.FC<ManageProps> = props => {
           onSuccess={init}
           dataSource={dataSource}
           checkedKeys={checkedKeys}
+          setCheckedKeys={setCheckedKeys}
         />
         <DirectoryTree
           draggable

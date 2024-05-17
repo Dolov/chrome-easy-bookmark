@@ -27,7 +27,7 @@ type TreeSelectRef = GetRef<typeof TreeSelect>
 const TreeNodeTitleContainer = props => {
   const {
     node, onSuccess, editingBookmark, setEditingBookmark,
-    children: jsxTitleChildren, setNodeExpand, addKeyword, dataSource,
+    children: jsxTitleChildren, setNodeExpand, addKeyword, dataSource, setCheckedKeys,
   } = props
   const { url, id, children, originalTitle } = node
   const [visible, setVisible] = React.useState(false)
