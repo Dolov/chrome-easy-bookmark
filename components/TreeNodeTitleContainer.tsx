@@ -2,11 +2,10 @@
 import React from "react"
 import { Modal, Button, Dropdown, message, TreeSelect, type GetRef } from 'antd'
 import { type MenuProps } from 'antd'
-import { InfoCircleFilled } from '@ant-design/icons'
 import {
   MessageActionEnum, copyTextToClipboard,
   baseZIndex, formatBookmarkTreeNodes, getBookmarksToText,
-  downloadBookmarkAsHtml,
+  downloadBookmarkAsHtml, type TreeNodeProps
 } from '~/utils'
 import TextInput from './TextInput'
 import {
@@ -21,13 +20,26 @@ import {
 } from './Icon'
 import { DeleteConfirmModal } from '~components/HandlerBar'
 
+/**
+ * Recursively retrieves the IDs of the node and its children.
+ *
+ * @param {TreeNodeProps} node - The node to start retrieving IDs from.
+ * @return {Array<number>} An array of IDs including the node and its children.
+ */
+const getIds = (node: TreeNodeProps) => {
+  const { id, children = [] } = node
+  return children.reduce((currentValue, item: TreeNodeProps) => {
+    currentValue.push(...getIds(item))
+    return currentValue
+  }, [id])
+}
 
 type TreeSelectRef = GetRef<typeof TreeSelect>
 
 const TreeNodeTitleContainer = props => {
   const {
     node, onSuccess, editingBookmark, setEditingBookmark,
-    children: jsxTitleChildren, setNodeExpand, addKeyword, dataSource, setCheckedKeys,
+    children: jsxTitleChildren, setNodeExpand, addKeyword, dataSource, setCheckedKeys, checkedKeysRef,
   } = props
   const { url, id, children, originalTitle } = node
   const [visible, setVisible] = React.useState(false)
@@ -50,9 +62,12 @@ const TreeNodeTitleContainer = props => {
   const deleteNode = (folder = false) => {
     const action = folder ? MessageActionEnum.BOOKMARK_REMOVE_TREE : MessageActionEnum.BOOKMARK_REMOVE
     chrome.runtime.sendMessage({
+      id,
       action,
-      id: node.id
     }).then(res => {
+      const ids = getIds(node)
+      const nextCheckedKeys = checkedKeysRef.current.filter(key => !ids.includes(key))
+      setCheckedKeys(nextCheckedKeys)
       onSuccess()
     })
   }

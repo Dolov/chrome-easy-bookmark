@@ -140,7 +140,7 @@ const Manage: React.FC<ManageProps> = props => {
   const [dataSource, setDataSource] = React.useState<TreeNodeProps[]>([])
   const [keywords, setKeywords, keywordsRef] = useRefState<string[]>([])
   const [expandedKeys, setExpandedKeys, expandedKeysRef] = useRefState([])
-  const [checkedKeys, setCheckedKeys] = useRefState([])
+  const [checkedKeys, setCheckedKeys, checkedKeysRef] = useRefState([])
   const [editingBookmark, setEditingBookmark] = React.useState<chrome.bookmarks.BookmarkTreeNode>()
   const [autoExpandParent, setAutoExpandParent] = React.useState(true);
   const [union] = useStorage(StorageKeyEnum.UNION, true)
@@ -194,6 +194,7 @@ const Manage: React.FC<ManageProps> = props => {
       dataSource,
       setNodeExpand,
       setCheckedKeys,
+      checkedKeysRef,
       editingBookmark,
       setEditingBookmark,
     }
