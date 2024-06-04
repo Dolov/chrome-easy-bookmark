@@ -280,7 +280,7 @@ const Manage: React.FC<ManageProps> = props => {
       <div>
         <SearchInput
           ref={searchInputRef}
-          onChange={debounce({ delay: 300 }, onChange)}
+          onChange={debounce({ delay: 600 }, onChange)}
           placeholder="输入关键字，点击 Enter 检索"
           prefix={<SearchOutlined className="text-slate-500" />}
           onPressEnter={init}
