@@ -49,6 +49,17 @@
         "description": "管理 / 搜索"
       }
     },
+    "web_accessible_resources": [
+      {
+        "resources": [
+          "tabs/Settings.html"
+        ],
+        "matches": ["<all_urls>"]
+      }
+    ],
+    "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self';"
+    },
     "permissions": [
       "bookmarks",
       "contextMenus",
