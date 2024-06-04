@@ -1,7 +1,7 @@
 {
   "name": "easy-bookmark",
   "displayName": "Easy Bookmark",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Easily manage your bookmarks.",
   "author": "shisongyan. <songyan_shi@163.com>",
   "scripts": {
