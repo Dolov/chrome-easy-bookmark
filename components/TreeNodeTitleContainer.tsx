@@ -1,24 +1,41 @@
-
+import {
+  Button,
+  Dropdown,
+  message,
+  Modal,
+  TreeSelect,
+  type GetRef,
+  type MenuProps
+} from "antd"
 import React from "react"
-import { Modal, Button, Dropdown, message, TreeSelect, type GetRef } from 'antd'
-import { type MenuProps } from 'antd'
+
 import {
-  MessageActionEnum, copyTextToClipboard,
-  baseZIndex, formatBookmarkTreeNodes, getBookmarksToText,
-  downloadBookmarkAsHtml, type TreeNodeProps
-} from '~/utils'
-import TextInput from './TextInput'
+  baseZIndex,
+  copyTextToClipboard,
+  downloadBookmarkAsHtml,
+  formatBookmarkTreeNodes,
+  getBookmarksToText,
+  MessageActionEnum,
+  type TreeNodeProps
+} from "~/utils"
 import {
-  MdiRename,
-  MingcuteSearch2Fill,
-  RiDownloadCloud2Fill,
-  MaterialSymbolsDelete,
+  DeleteConfirmModal,
+  MoveParentFolderModal
+} from "~components/HandlerBar"
+
+import {
   FluentFolderAdd24Filled,
   MaterialSymbolsBookmarkRemove,
   MaterialSymbolsContentCopyRounded,
+  MaterialSymbolsDelete,
   MaterialSymbolsDriveFileMoveRounded,
-} from './Icon'
-import { DeleteConfirmModal, MoveParentFolderModal } from '~components/HandlerBar'
+  MaterialSymbolsShareReviews,
+  MdiRename,
+  MingcuteSearch2Fill,
+  RiDownloadCloud2Fill
+} from "./Icon"
+import ShareModal from "./Share"
+import TextInput from "./TextInput"
 
 /**
  * Recursively retrieves the IDs of the node and its children.
@@ -28,59 +45,74 @@ import { DeleteConfirmModal, MoveParentFolderModal } from '~components/HandlerBa
  */
 const getIds = (node: TreeNodeProps) => {
   const { id, children = [] } = node
-  return children.reduce((currentValue, item: TreeNodeProps) => {
-    currentValue.push(...getIds(item))
-    return currentValue
-  }, [id])
+  return children.reduce(
+    (currentValue, item: TreeNodeProps) => {
+      currentValue.push(...getIds(item))
+      return currentValue
+    },
+    [id]
+  )
 }
 
 type TreeSelectRef = GetRef<typeof TreeSelect>
 
-const TreeNodeTitleContainer = props => {
+const TreeNodeTitleContainer = (props) => {
   const {
-    node, onSuccess, editingBookmark, setEditingBookmark,
-    children: jsxTitleChildren, setNodeExpand, addKeyword, dataSource, setCheckedKeys, checkedKeysRef,
+    node,
+    onSuccess,
+    editingBookmark,
+    setEditingBookmark,
+    children: jsxTitleChildren,
+    setNodeExpand,
+    addKeyword,
+    dataSource,
+    setCheckedKeys,
+    checkedKeysRef
   } = props
   const { url, id, children, originalTitle } = node
   const [visible, setVisible] = React.useState(false)
+  const [shareModalOpen, setShareModalOpen] = React.useState(false)
   const [parentId, setParentId] = React.useState(id)
   const [moveModalOpen, setMoveModalOpen] = React.useState(false)
   const moveTreeSelectRef = React.useRef<TreeSelectRef>()
 
-  const DeleteIcon = url ? MaterialSymbolsBookmarkRemove: MaterialSymbolsDelete
+  const DeleteIcon = url ? MaterialSymbolsBookmarkRemove : MaterialSymbolsDelete
   /** 两个根节点 */
   const rootNode = ["1", "2"].includes(id)
 
   const deleteNode = (folder = false) => {
-    const action = folder ? MessageActionEnum.BOOKMARK_REMOVE_TREE : MessageActionEnum.BOOKMARK_REMOVE
-    chrome.runtime.sendMessage({
-      id,
-      action,
-    }).then(res => {
-      const ids = getIds(node)
-      const nextCheckedKeys = checkedKeysRef.current.filter(key => !ids.includes(key))
-      setCheckedKeys(nextCheckedKeys)
-      onSuccess()
-    })
+    const action = folder
+      ? MessageActionEnum.BOOKMARK_REMOVE_TREE
+      : MessageActionEnum.BOOKMARK_REMOVE
+    chrome.runtime
+      .sendMessage({
+        id,
+        action
+      })
+      .then((res) => {
+        const ids = getIds(node)
+        const nextCheckedKeys = checkedKeysRef.current.filter(
+          (key) => !ids.includes(key)
+        )
+        setCheckedKeys(nextCheckedKeys)
+        onSuccess()
+      })
   }
 
-  const handleDelete = e => {
+  const handleDelete = (e) => {
     e.stopPropagation()
     if (url) {
       deleteNode()
       return
     }
-    if (
-      !children.length ||
-      children.length === 1
-    ) {
+    if (!children.length || children.length === 1) {
       deleteNode(true)
       return
     }
     setVisible(true)
   }
 
-  const menuItems: MenuProps['items'] = React.useMemo(() => {
+  const menuItems: MenuProps["items"] = React.useMemo(() => {
     const renameItem = {
       label: (
         <div className="h-center">
@@ -88,7 +120,16 @@ const TreeNodeTitleContainer = props => {
           重命名
         </div>
       ),
-      key: 'rename',
+      key: "rename"
+    }
+    const shareItem = {
+      label: (
+        <div className="h-center">
+          <MaterialSymbolsShareReviews className="mr-2 text-lg text-gray-700" />
+          分享
+        </div>
+      ),
+      key: "share"
     }
     const addFolderItem = {
       label: (
@@ -97,7 +138,7 @@ const TreeNodeTitleContainer = props => {
           添加文件夹
         </div>
       ),
-      key: 'add-folder',
+      key: "add-folder"
     }
     const searchItem = {
       label: (
@@ -106,7 +147,7 @@ const TreeNodeTitleContainer = props => {
           <div className="max-w-[200px] ellipsis">{`搜索 "${originalTitle}"`}</div>
         </div>
       ),
-      key: 'add-keyword',
+      key: "add-keyword"
     }
     const moveItem = {
       label: (
@@ -115,7 +156,7 @@ const TreeNodeTitleContainer = props => {
           移动
         </div>
       ),
-      key: 'move',
+      key: "move"
     }
     const copyItem = {
       label: (
@@ -124,7 +165,7 @@ const TreeNodeTitleContainer = props => {
           复制
         </div>
       ),
-      key: 'copy',
+      key: "copy"
     }
     const downloadItem = {
       label: (
@@ -133,7 +174,7 @@ const TreeNodeTitleContainer = props => {
           下载
         </div>
       ),
-      key: 'download',
+      key: "download"
     }
     const deleteItem = {
       label: (
@@ -142,27 +183,20 @@ const TreeNodeTitleContainer = props => {
           删除
         </div>
       ),
-      key: 'delete',
+      key: "delete"
     }
 
+    // 两个根节点
     if (rootNode) {
-      return [
-        copyItem,
-        downloadItem,
-        addFolderItem,
-      ]
+      return [copyItem, downloadItem, addFolderItem]
     }
 
+    // 书签
     if (url) {
-      return [
-        renameItem,
-        searchItem,
-        copyItem,
-        moveItem,
-        deleteItem,
-      ]
+      return [renameItem, searchItem, shareItem, copyItem, moveItem, deleteItem]
     }
 
+    // 文件夹
     return [
       renameItem,
       searchItem,
@@ -170,15 +204,19 @@ const TreeNodeTitleContainer = props => {
       copyItem,
       moveItem,
       downloadItem,
-      deleteItem,
+      deleteItem
     ]
   }, [])
 
-  const handleContextMenu = async e => {
+  const handleContextMenu = async (e) => {
     e.domEvent.stopPropagation()
     const { key } = e
     if (key === "rename") {
       setEditingBookmark(node)
+      return
+    }
+    if (key === "share") {
+      setShareModalOpen(true)
       return
     }
     if (key === "add-folder") {
@@ -186,7 +224,7 @@ const TreeNodeTitleContainer = props => {
         action: MessageActionEnum.BOOKMARK_CREATE,
         payload: {
           title: "新建文件夹",
-          parentId: id,
+          parentId: id
         }
       })
       onSuccess()
@@ -236,7 +274,7 @@ const TreeNodeTitleContainer = props => {
       payload: {
         id,
         index: 0,
-        parentId,
+        parentId
       }
     })
     onSuccess()
@@ -259,15 +297,16 @@ const TreeNodeTitleContainer = props => {
   const editing = editId === id
 
   return (
-    <Dropdown menu={{ items: menuItems, onClick: handleContextMenu }} trigger={['contextMenu']}>
+    <Dropdown
+      menu={{ items: menuItems, onClick: handleContextMenu }}
+      trigger={["contextMenu"]}>
       <div className="flex group">
         <TextInput
           url={url}
           type={type}
           value={originalTitle}
           editing={editing}
-          onSave={onSave}
-        >
+          onSave={onSave}>
           {jsxTitleChildren}
         </TextInput>
         {!rootNode && (
@@ -276,13 +315,17 @@ const TreeNodeTitleContainer = props => {
               type="text"
               shape="circle"
               onClick={handleDelete}
-              className="w-6 h-6 !min-w-6 flex justify-center items-center invisible group-hover:visible"
-            >
+              className="w-6 h-6 !min-w-6 flex justify-center items-center invisible group-hover:visible">
               <DeleteIcon className="text-lg hover:text-red-600" />
             </Button>
           </div>
         )}
-        <div onClick={e => e.stopPropagation()}>
+        <div onClick={(e) => e.stopPropagation()}>
+          <ShareModal
+            data={node}
+            visible={shareModalOpen}
+            onCancel={() => setShareModalOpen(false)}
+          />
           <DeleteConfirmModal
             visible={visible}
             onOk={() => deleteNode(true)}

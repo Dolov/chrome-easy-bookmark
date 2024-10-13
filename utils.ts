@@ -1,11 +1,14 @@
-import { type TreeDataNode } from 'antd'
+import { type TreeDataNode } from "antd"
 
 export const baseZIndex = 2000
 
-export type TreeNodeProps = TreeDataNode & chrome.bookmarks.BookmarkTreeNode & {
-  originalTitle: string
-  children: TreeNodeProps[]
-}
+export const serverUrl = "https://easy-bookmark-server.freeless.cn"
+
+export type TreeNodeProps = TreeDataNode &
+  chrome.bookmarks.BookmarkTreeNode & {
+    originalTitle: string
+    children: TreeNodeProps[]
+  }
 
 export enum MessageActionEnum {
   COMMAND = "COMMAND",
@@ -16,6 +19,8 @@ export enum MessageActionEnum {
   BOOKMARK_GET_TREE = "BOOKMARK_GET_TREE",
   BOOKMARK_REMOVE_TREE = "BOOKMARK_REMOVE_TREE",
   ACTION_ON_CLICKED = "ACTION_ON_CLICKED",
+  /** 打开书签广场 */
+  OPEN_SQUARE = "OPEN_SQUARE"
 }
 
 export enum StorageKeyEnum {
@@ -28,7 +33,7 @@ export enum StorageKeyEnum {
 export enum SearchTypeEnum {
   URL = "URL",
   DIR = "DIR",
-  MIXIN = "MIXIN",
+  MIXIN = "MIXIN"
 }
 
 export const searchTypeState = {
@@ -49,8 +54,11 @@ export const searchTypeState = {
   }
 }
 
-
-export const formatBookmarkTreeNodes = (treeData = [], withLeaf = false, options?) => {
+export const formatBookmarkTreeNodes = (
+  treeData = [],
+  withLeaf = false,
+  options?
+) => {
   const { excludeChildrenNodeId } = options || {}
   return treeData.reduce((currentValue, item) => {
     if (!item) return currentValue
@@ -62,7 +70,7 @@ export const formatBookmarkTreeNodes = (treeData = [], withLeaf = false, options
       key: id,
       value: id,
       isLeaf: !!url,
-      originalTitle: title,
+      originalTitle: title
     }
 
     if (excludeChildrenNodeId === id) {
@@ -79,11 +87,13 @@ export const formatBookmarkTreeNodes = (treeData = [], withLeaf = false, options
   }, [])
 }
 
-export const findBookmarkByUrl = (url: string, treeData: chrome.bookmarks.BookmarkTreeNode[]): 
-chrome.bookmarks.BookmarkTreeNode | undefined => {
+export const findBookmarkByUrl = (
+  url: string,
+  treeData: chrome.bookmarks.BookmarkTreeNode[]
+): chrome.bookmarks.BookmarkTreeNode | undefined => {
   if (!treeData || !treeData.length) return
   for (let index = 0; index < treeData.length; index++) {
-    const item = treeData[index];
+    const item = treeData[index]
     if (item.url === url) return item
     const target = findBookmarkByUrl(url, item.children)
     if (target) return target
@@ -101,30 +111,40 @@ export const getBookmarksToText = (children: TreeNodeProps[]) => {
   }, "")
 }
 
-const getBookmarkAsHtml = (children: TreeNodeProps[], parentTitle = "", level = 1) => {
+const getBookmarkAsHtml = (
+  children: TreeNodeProps[],
+  parentTitle = "",
+  level = 1
+) => {
   const n = level > 6 ? 6 : level
-  let html = `<h${n}>${parentTitle}</h${n}><ul>\n`;
+  let html = `<h${n}>${parentTitle}</h${n}><ul>\n`
 
-  children.forEach(child => {
+  children.forEach((child) => {
     if (child.url) {
-      html += `<li><a href="${child.url}" target="_blank">${child.originalTitle}</a></li>\n`;
+      html += `<li><a href="${child.url}" target="_blank">${child.originalTitle}</a></li>\n`
       return
     }
 
     if (child.children) {
-      html += getBookmarkAsHtml(child.children, child.originalTitle, level + 1);
+      html += getBookmarkAsHtml(child.children, child.originalTitle, level + 1)
     }
-  });
-  html += `</ul>\n`;
-  return html;
-};
+  })
+  html += `</ul>\n`
+  return html
+}
 
-export const downloadBookmarkAsHtml = (children: TreeNodeProps[], title = "书签") => {
-  const downloadLink = document.createElement('a');
+export const downloadBookmarkAsHtml = (
+  children: TreeNodeProps[],
+  title = "书签"
+) => {
+  const downloadLink = document.createElement("a")
   const html = getBookmarkAsHtml(children)
-  downloadLink.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(html));
-  downloadLink.setAttribute('download', `${title}.html`);
-  downloadLink.click();
+  downloadLink.setAttribute(
+    "href",
+    "data:text/html;charset=utf-8," + encodeURIComponent(html)
+  )
+  downloadLink.setAttribute("download", `${title}.html`)
+  downloadLink.click()
 }
 
 export const removeEmptyNode = (treeData = []) => {
@@ -148,18 +168,21 @@ export const removeEmptyNode = (treeData = []) => {
   }, [])
 }
 
-export function highlightText(inputText: string, keywords: string[], sensitive = false) {
-  const i = sensitive ? "" : "i";
+export function highlightText(
+  inputText: string,
+  keywords: string[],
+  sensitive = false
+) {
+  const i = sensitive ? "" : "i"
   // 创建正则表达式匹配所有关键字
-  const regex = new RegExp(keywords.join('|'), `g${i}`);
+  const regex = new RegExp(keywords.join("|"), `g${i}`)
   let index = 0
   // 在文本中匹配关键字并进行高亮
   return inputText.replace(regex, (substring, ...args) => {
     index += 1
     return `<span class="highlight highlight-${index}">${substring}</span>`
-  });
+  })
 }
-
 
 /**
  * Copies the given text to the clipboard.
@@ -168,15 +191,15 @@ export function highlightText(inputText: string, keywords: string[], sensitive =
  * @return {void} This function does not return anything.
  */
 export const copyTextToClipboard = (text: string) => {
-	const textArea = document.createElement("textarea");
-	textArea.value = text;
-	document.body.appendChild(textArea);
-	textArea.select();
+  const textArea = document.createElement("textarea")
+  textArea.value = text
+  document.body.appendChild(textArea)
+  textArea.select()
 
-	try {
-		const successful = document.execCommand('copy');
-	} catch (err) {
-		console.log('err: ', err);
-	}
-	document.body.removeChild(textArea);
+  try {
+    const successful = document.execCommand("copy")
+  } catch (err) {
+    console.log("err: ", err)
+  }
+  document.body.removeChild(textArea)
 }

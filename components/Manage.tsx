@@ -1,27 +1,29 @@
+import { SearchOutlined } from "@ant-design/icons"
+import { Button, Modal, Tree, type TreeProps } from "antd"
+import { debounce } from "radash"
 import React from "react"
+
 import { useStorage } from "@plasmohq/storage/hook"
-import { Modal, Tree } from 'antd'
-import { type TreeProps } from 'antd'
+
 import {
-  SearchOutlined
-} from '@ant-design/icons'
-import { debounce } from 'radash'
-import {
-  MessageActionEnum, formatBookmarkTreeNodes, baseZIndex,
-  StorageKeyEnum, SearchTypeEnum, highlightText,
+  baseZIndex,
+  formatBookmarkTreeNodes,
+  highlightText,
+  MessageActionEnum,
+  SearchTypeEnum,
+  StorageKeyEnum,
   type TreeNodeProps
-} from '~/utils'
-import SearchInput, { type SearchInputRefProps } from './SearchInput'
+} from "~/utils"
 
-import { useRefState, useUpdateEffect } from './hooks'
-import TreeNodeTitleContainer from './TreeNodeTitleContainer'
-import { CaseSensitive, Union, SearchType } from './SearchCondition'
-import HandlerBar from './HandlerBar'
+import HandlerBar from "./HandlerBar"
+import { useRefState, useUpdateEffect } from "./hooks"
+import { CaseSensitive, SearchType, Union } from "./SearchCondition"
+import SearchInput, { type SearchInputRefProps } from "./SearchInput"
+import TreeNodeTitleContainer from "./TreeNodeTitleContainer"
 
-const { DirectoryTree } = Tree;
+const { DirectoryTree } = Tree
 
 const prefixCls = "list-container"
-
 
 const getKeys = (treeNode = []) => {
   return treeNode.reduce((currentValue, item) => {
@@ -35,12 +37,17 @@ const getKeys = (treeNode = []) => {
   }, [])
 }
 
-const matchSearch = (keywords: string[], treeNode: TreeNodeProps[] = [], options) => {
-  const { sensitive, parentMatched, searchType, union, editingBookmark } = options
+const matchSearch = (
+  keywords: string[],
+  treeNode: TreeNodeProps[] = [],
+  options
+) => {
+  const { sensitive, parentMatched, searchType, union, editingBookmark } =
+    options
 
   const result: TreeNodeProps[] = []
   for (let index = 0; index < treeNode.length; index++) {
-    const itemNode = treeNode[index];
+    const itemNode = treeNode[index]
     const { url, title, children = [] } = itemNode
     const originalTitle: string = (itemNode as any).originalTitle
     if (!originalTitle) return result
@@ -49,9 +56,13 @@ const matchSearch = (keywords: string[], treeNode: TreeNodeProps[] = [], options
     let matched = false
     // 并集检索
     if (union) {
-      matched = keywords.some(keyword => lTitle.includes(keyword.toLowerCase()))
+      matched = keywords.some((keyword) =>
+        lTitle.includes(keyword.toLowerCase())
+      )
     } else {
-      matched = keywords.every(keyword => lTitle.includes(keyword.toLowerCase()))
+      matched = keywords.every((keyword) =>
+        lTitle.includes(keyword.toLowerCase())
+      )
     }
 
     const matchedChildren = matchSearch(keywords, children as TreeNodeProps[], {
@@ -109,7 +120,11 @@ const formattedTreeNodesTitle = (treeNodes = [], options) => {
     let titleJsx = title
     if (url) {
       titleJsx = (
-        <a className="hover:text-blue-500 hover:underline text-inherit" type="link" href={url} target="_blank">
+        <a
+          className="hover:text-blue-500 hover:underline text-inherit"
+          type="link"
+          href={url}
+          target="_blank">
           {title}
         </a>
       )
@@ -117,14 +132,11 @@ const formattedTreeNodesTitle = (treeNodes = [], options) => {
     currentValue.push({
       ...item,
       title: (
-        <TreeNodeTitleContainer
-          node={item}
-          {...options}
-        >
+        <TreeNodeTitleContainer node={item} {...options}>
           {titleJsx}
         </TreeNodeTitleContainer>
       ),
-      children: formattedTreeNodesTitle(children, options),
+      children: formattedTreeNodesTitle(children, options)
     })
     return currentValue
   }, [])
@@ -135,27 +147,35 @@ interface ManageProps {
   toggleVisible?: () => void
 }
 
-const Manage: React.FC<ManageProps> = props => {
+const Manage: React.FC<ManageProps> = (props) => {
   const { visible, toggleVisible } = props
   const [dataSource, setDataSource] = React.useState<TreeNodeProps[]>([])
   const [keywords, setKeywords, keywordsRef] = useRefState<string[]>([])
   const [expandedKeys, setExpandedKeys, expandedKeysRef] = useRefState([])
   const [checkedKeys, setCheckedKeys, checkedKeysRef] = useRefState([])
-  const [editingBookmark, setEditingBookmark] = React.useState<chrome.bookmarks.BookmarkTreeNode>()
-  const [autoExpandParent, setAutoExpandParent] = React.useState(true);
+  const [editingBookmark, setEditingBookmark] =
+    React.useState<chrome.bookmarks.BookmarkTreeNode>()
+  const [autoExpandParent, setAutoExpandParent] = React.useState(true)
   const [union] = useStorage(StorageKeyEnum.UNION, true)
   const [sensitive] = useStorage(StorageKeyEnum.CASE_SENSITIVE, false)
-  const [searchType] = useStorage(StorageKeyEnum.SEARCH_TYPE, SearchTypeEnum.MIXIN)
+  const [searchType] = useStorage(
+    StorageKeyEnum.SEARCH_TYPE,
+    SearchTypeEnum.MIXIN
+  )
   const searchInputRef = React.useRef<SearchInputRefProps>()
 
   const init = () => {
-    chrome.runtime.sendMessage({
-      action: MessageActionEnum.BOOKMARK_GET_TREE
-    }, treeNodes => {
-      if (!treeNodes) return
-      const formattedTreeNodes = formatBookmarkTreeNodes(treeNodes, true)[0].children
-      setDataSource(formattedTreeNodes)
-    });
+    chrome.runtime.sendMessage(
+      {
+        action: MessageActionEnum.BOOKMARK_GET_TREE
+      },
+      (treeNodes) => {
+        if (!treeNodes) return
+        const formattedTreeNodes = formatBookmarkTreeNodes(treeNodes, true)[0]
+          .children
+        setDataSource(formattedTreeNodes)
+      }
+    )
   }
 
   React.useEffect(() => {
@@ -163,16 +183,13 @@ const Manage: React.FC<ManageProps> = props => {
     init()
     setTimeout(() => {
       searchInputRef.current.focus()
-    }, 400);
+    }, 400)
   }, [visible])
 
   const setNodeExpand = (key: React.Key) => {
     if (expandedKeys.includes(key)) return
-    setExpandedKeys([
-      ...expandedKeys,
-      key
-    ]);
-  };
+    setExpandedKeys([...expandedKeys, key])
+  }
 
   const addKeyword = (title: string) => {
     searchInputRef.current.addKeyword(title)
@@ -196,7 +213,7 @@ const Manage: React.FC<ManageProps> = props => {
       setCheckedKeys,
       checkedKeysRef,
       editingBookmark,
-      setEditingBookmark,
+      setEditingBookmark
     }
     if (!keywords.length) {
       const jsxNodes = formattedTreeNodesTitle(dataSource, options)
@@ -207,39 +224,33 @@ const Manage: React.FC<ManageProps> = props => {
       union,
       sensitive,
       searchType,
-      editingBookmark,
+      editingBookmark
     })
 
     return formattedTreeNodesTitle(matchedNodes, options)
-  }, [
-    keywords, dataSource, sensitive, searchType,
-    editingBookmark, union,
-  ])
+  }, [keywords, dataSource, sensitive, searchType, editingBookmark, union])
 
   const onExpand = (newExpandedKeys: React.Key[]) => {
-    setExpandedKeys(newExpandedKeys);
-    setAutoExpandParent(false);
-  };
+    setExpandedKeys(newExpandedKeys)
+    setAutoExpandParent(false)
+  }
 
   const onChange = (words: string[]) => {
     // 判断搜索值不相等时，才触发搜索
     if (words.join() === keywords.join()) return
     setKeywords(words)
-  };
+  }
 
-  const allowDrop: TreeProps['allowDrop'] = info => {
+  const allowDrop: TreeProps["allowDrop"] = (info) => {
     if (!info.dropNode.isLeaf) return true
     // 不允许拖拽到叶子节点内
-    if (
-      info.dropNode.isLeaf &&
-      info.dropPosition === 0
-    ) {
+    if (info.dropNode.isLeaf && info.dropPosition === 0) {
       return false
     }
     return true
   }
 
-  const onDrop: TreeProps['onDrop'] = info => {
+  const onDrop: TreeProps["onDrop"] = (info) => {
     // drop 元素的末级顺序
     const index = info.dropPosition
     // 被拖拽元素的 key
@@ -247,7 +258,7 @@ const Manage: React.FC<ManageProps> = props => {
     // 平为 true, 缩为 false
     const dropToGap = info.dropToGap
     const payload: Record<string, any> = {
-      id: dragKey,
+      id: dragKey
     }
 
     if (dropToGap) {
@@ -258,13 +269,21 @@ const Manage: React.FC<ManageProps> = props => {
       payload.parentId = info.node.key
     }
 
+    chrome.runtime
+      .sendMessage({
+        payload,
+        action: MessageActionEnum.BOOKMARK_MOVE
+      })
+      .then((res) => {
+        init()
+      })
+  }
+
+  const toSquare = () => {
     chrome.runtime.sendMessage({
-      payload,
-      action: MessageActionEnum.BOOKMARK_MOVE,
-    }).then(res => {
-      init()
+      action: MessageActionEnum.OPEN_SQUARE
     })
-  };
+  }
 
   return (
     <Modal
@@ -272,11 +291,19 @@ const Manage: React.FC<ManageProps> = props => {
       width={800}
       open={visible}
       footer={null}
-      title="书签管理"
+      title={
+        <div className="">
+          <span>书签管理</span>
+          <span
+            className="text-sm ml-4 cursor-pointer font-medium underline"
+            onClick={toSquare}>
+            书签广场
+          </span>
+        </div>
+      }
       closable={!!toggleVisible}
       onCancel={toggleVisible}
-      className={`${prefixCls}-modal`}
-    >
+      className={`${prefixCls}-modal`}>
       <div>
         <SearchInput
           ref={searchInputRef}
@@ -322,6 +349,5 @@ const Manage: React.FC<ManageProps> = props => {
     </Modal>
   )
 }
-
 
 export default Manage

@@ -63,7 +63,8 @@
     "permissions": [
       "bookmarks",
       "contextMenus",
-      "tabs"
+      "tabs",
+      "identity"
     ],
     "host_permissions": [
       "https://*/*"
