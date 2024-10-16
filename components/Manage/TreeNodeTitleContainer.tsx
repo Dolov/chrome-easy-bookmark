@@ -21,7 +21,7 @@ import {
 import {
   DeleteConfirmModal,
   MoveParentFolderModal
-} from "~components/HandlerBar"
+} from "~components/Manage/HandlerBar"
 
 import {
   FluentFolderAdd24Filled,
@@ -33,7 +33,7 @@ import {
   MdiRename,
   MingcuteSearch2Fill,
   RiDownloadCloud2Fill
-} from "./Icon"
+} from "../Icon"
 import ShareModal from "./Share"
 import TextInput from "./TextInput"
 

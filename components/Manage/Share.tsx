@@ -3,6 +3,9 @@ import React from "react"
 
 import { serverUrl, type TreeNodeProps } from "~utils"
 
+import { ManageContext } from "./Context"
+import Login from "./Login"
+
 const options = [
   { label: "工作工具", value: "work_tools" },
   { label: "学习资源", value: "learning_resources" },
@@ -56,14 +59,12 @@ const options = [
   { label: "自我提升", value: "self_improvement" }
 ]
 
-const Share: React.FC<{
-  data: TreeNodeProps
-  visible?: boolean
-  onCancel?: () => void
-}> = (props) => {
-  const { data, visible, onCancel } = props
-  const { url, title } = data
+const Share: React.FC = () => {
+  const context = React.useContext(ManageContext)
+  const { shareInfo, shareVisible, setShareVisible } = context
+  const { url, title } = shareInfo || {}
   const [form] = Form.useForm()
+  const [loginOpen, setLoginOpen] = React.useState(false)
 
   const [categorys, setCategorys] = React.useState(options)
   const [categoryValue, setCategoryValue] = React.useState("")
@@ -71,13 +72,13 @@ const Share: React.FC<{
     React.useState(false)
 
   React.useEffect(() => {
-    if (!visible) return
+    if (!shareVisible) return
     getCategories()
     form.setFieldsValue({
       url,
       title
     })
-  }, [visible])
+  }, [shareVisible])
 
   const handleShare = () => {
     const { url, title } = form.getFieldsValue()
@@ -120,72 +121,77 @@ const Share: React.FC<{
     createCategory()
   }
 
-  const signup = () => {}
+  const login = () => {
+    setLoginOpen(true)
+  }
 
   return (
-    <Modal
-      open={visible}
-      title="分享到广场"
-      okText="确定"
-      onOk={handleShare}
-      onCancel={onCancel}
-      cancelText="取消">
-      <div className="mt-6">
-        <Form form={form} labelCol={{ span: 4 }}>
-          <Form.Item required name="url" label="书签链接">
-            <Input />
-          </Form.Item>
-          <Form.Item required name="title" label="书签标题">
-            <Input.TextArea autoSize />
-          </Form.Item>
-          <Form.Item required name="description" label="分享原因">
-            <Input.TextArea />
-          </Form.Item>
-          <Form.Item name="category" label="书签分类">
-            <Select
-              allowClear
-              showSearch
-              mode="multiple"
-              maxCount={3}
-              options={categorys}
-              optionFilterProp="label"
-              dropdownRender={(menu) => (
-                <>
-                  {menu}
-                  <Divider className="my-2" />
-                  <div className="flex px-2 pb-2">
-                    <Input
-                      className="w-full"
-                      value={categoryValue}
-                      onChange={(e) => setCategoryValue(e.target.value)}
-                      onKeyDown={onCreateCategoryInputKeydown}
-                      placeholder="自定义分类"
-                    />
-                    <Button
-                      type="text"
-                      loading={createCategoryLoading}
-                      className="ml-2"
-                      onClick={createCategory}>
-                      新建
-                    </Button>
-                  </div>
-                </>
-              )}
-            />
-          </Form.Item>
-          <div className="flex items-center justify-end">
-            <Form.Item name="anonymous" label="">
-              <Checkbox>匿名分享</Checkbox>
+    <>
+      <Modal
+        open={shareVisible}
+        title="分享到广场"
+        okText="确定"
+        onOk={handleShare}
+        onCancel={() => setShareVisible(false)}
+        cancelText="取消">
+        <div className="mt-6">
+          <Form form={form} labelCol={{ span: 4 }}>
+            <Form.Item required name="url" label="书签链接">
+              <Input />
             </Form.Item>
-            <Form.Item>
-              <span onClick={signup} className="underline ml-2 cursor-pointer">
-                创建账号？
-              </span>
+            <Form.Item required name="title" label="书签标题">
+              <Input.TextArea autoSize />
             </Form.Item>
-          </div>
-        </Form>
-      </div>
-    </Modal>
+            <Form.Item required name="description" label="分享原因">
+              <Input.TextArea />
+            </Form.Item>
+            <Form.Item name="category" label="书签分类">
+              <Select
+                allowClear
+                showSearch
+                mode="multiple"
+                maxCount={3}
+                options={categorys}
+                optionFilterProp="label"
+                dropdownRender={(menu) => (
+                  <>
+                    {menu}
+                    <Divider className="my-2" />
+                    <div className="flex px-2 pb-2">
+                      <Input
+                        className="w-full"
+                        value={categoryValue}
+                        onChange={(e) => setCategoryValue(e.target.value)}
+                        onKeyDown={onCreateCategoryInputKeydown}
+                        placeholder="自定义分类"
+                      />
+                      <Button
+                        type="text"
+                        loading={createCategoryLoading}
+                        className="ml-2"
+                        onClick={createCategory}>
+                        新建
+                      </Button>
+                    </div>
+                  </>
+                )}
+              />
+            </Form.Item>
+            <div className="flex items-center justify-end">
+              <Form.Item name="anonymous" label="">
+                <Checkbox>匿名分享</Checkbox>
+              </Form.Item>
+              <Form.Item>
+                <span onClick={login} className="underline ml-2 cursor-pointer">
+                  登录/创建账号？
+                </span>
+              </Form.Item>
+            </div>
+          </Form>
+        </div>
+      </Modal>
+      <Login open={loginOpen} onCancel={() => setLoginOpen(false)} />
+    </>
   )
 }
 

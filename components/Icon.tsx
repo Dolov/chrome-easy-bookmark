@@ -146,3 +146,51 @@ export function MaterialSymbolsShareReviews(props) {
     </svg>
   )
 }
+
+export function BxsUser(props) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      {...props}>
+      <path
+        fill="currentColor"
+        d="M7.5 6.5C7.5 8.981 9.519 11 12 11s4.5-2.019 4.5-4.5S14.481 2 12 2S7.5 4.019 7.5 6.5M20 21h1v-1c0-3.859-3.141-7-7-7h-4c-3.86 0-7 3.141-7 7v1z"
+      />
+    </svg>
+  )
+}
+
+export function MdiEmail(props) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      {...props}>
+      <path
+        fill="currentColor"
+        d="m20 8l-8 5l-8-5V6l8 5l8-5m0-2H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2"
+      />
+    </svg>
+  )
+}
+
+export function MaterialSymbolsShieldLockedSharp(props) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      {...props}>
+      <path
+        fill="currentColor"
+        d="M16 22v-5h1v-1q0-.825.588-1.412T19 14t1.413.588T21 16v1h1v5zm2-5h2v-1q0-.425-.288-.712T19 15t-.712.288T18 16zm-6 5q-3.475-.875-5.738-3.988T4 11.1V5l8-3l8 3v6.1q0 .25-.012.5t-.038.5q-.225-.05-.462-.075T19 12q-2.075 0-3.537 1.45T14 17v4.25q-.475.25-.975.438T12 22"
+      />
+    </svg>
+  )
+}
