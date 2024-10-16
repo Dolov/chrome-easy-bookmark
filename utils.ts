@@ -2,8 +2,6 @@ import { type TreeDataNode } from "antd"
 
 export const baseZIndex = 2000
 
-export const serverUrl = "https://easy-bookmark-server.freeless.cn"
-
 export type TreeNodeProps = TreeDataNode &
   chrome.bookmarks.BookmarkTreeNode & {
     originalTitle: string
