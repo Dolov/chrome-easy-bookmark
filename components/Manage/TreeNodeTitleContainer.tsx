@@ -34,7 +34,7 @@ import {
   MingcuteSearch2Fill,
   RiDownloadCloud2Fill
 } from "../Icon"
-import ShareModal from "./Share"
+import { ManageContext } from "./Context"
 import TextInput from "./TextInput"
 
 /**
@@ -69,12 +69,14 @@ const TreeNodeTitleContainer = (props) => {
     setCheckedKeys,
     checkedKeysRef
   } = props
+  const context = React.useContext(ManageContext)
   const { url, id, children, originalTitle } = node
   const [visible, setVisible] = React.useState(false)
-  const [shareModalOpen, setShareModalOpen] = React.useState(false)
   const [parentId, setParentId] = React.useState(id)
   const [moveModalOpen, setMoveModalOpen] = React.useState(false)
   const moveTreeSelectRef = React.useRef<TreeSelectRef>()
+
+  const { setShareInfo, setShareVisible } = context
 
   const DeleteIcon = url ? MaterialSymbolsBookmarkRemove : MaterialSymbolsDelete
   /** 两个根节点 */
@@ -216,7 +218,11 @@ const TreeNodeTitleContainer = (props) => {
       return
     }
     if (key === "share") {
-      setShareModalOpen(true)
+      setShareInfo({
+        url,
+        title: originalTitle
+      })
+      setShareVisible(true)
       return
     }
     if (key === "add-folder") {
@@ -321,11 +327,6 @@ const TreeNodeTitleContainer = (props) => {
           </div>
         )}
         <div onClick={(e) => e.stopPropagation()}>
-          <ShareModal
-            data={node}
-            visible={shareModalOpen}
-            onCancel={() => setShareModalOpen(false)}
-          />
           <DeleteConfirmModal
             visible={visible}
             onOk={() => deleteNode(true)}

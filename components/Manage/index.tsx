@@ -8,7 +8,7 @@ import Share from "./Share"
 const ManageContainer: React.FC<{
   visible: boolean
 }> = (props) => {
-  const [loginVisible, setLoginVisible] = React.useState(true)
+  const [loginVisible, setLoginVisible] = React.useState(false)
   const [shareVisible, setShareVisible] = React.useState(false)
   const [shareInfo, setShareInfo] = React.useState(null)
   return (
