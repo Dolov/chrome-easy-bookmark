@@ -1,4 +1,7 @@
-const serverUrl = "https://easy-bookmark-server.freeless.cn"
+const serverUrl =
+  process.env.NODE_ENV === "production"
+    ? "https://easy-bookmark-server.freeless.cn"
+    : "http://localhost:3000"
 
 const GET = (url: string) =>
   fetch(`${serverUrl}${url}`, {
@@ -40,4 +43,8 @@ export const signin = (data: any) => {
 
 export const sendotp = (data: any) => {
   return POST("/api/user/sendotp", data)
+}
+
+export const verifyotp = (data: any) => {
+  return POST("/api/user/verifyotp", data)
 }

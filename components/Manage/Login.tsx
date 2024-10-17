@@ -3,6 +3,7 @@ import React from "react"
 
 import { baseZIndex } from "~utils"
 
+import { sendotp, verifyotp } from "../../service"
 import { BxsUser, MaterialSymbolsShieldLockedSharp, MdiEmail } from "../Icon"
 import { ManageContext } from "./Context"
 
@@ -64,9 +65,29 @@ const LoginContent = () => {
 }
 
 const RegisterContent = () => {
+  const [form] = Form.useForm()
+
+  const handleSendOTP = async () => {
+    const { username, email } = form.getFieldsValue()
+    const res = await sendotp({
+      email,
+      username
+    })
+    console.log("res: ", res)
+  }
+
+  const handleVerifyOTP = async () => {
+    const { otp, email } = form.getFieldsValue()
+    const res = await verifyotp({
+      otp,
+      email
+    })
+    console.log("res: ", res)
+  }
+
   return (
     <div>
-      <Form size="large">
+      <Form form={form} size="large">
         <Form.Item required name="username">
           <Input
             prefix={<BxsUser className="text-slate-500" />}
@@ -81,9 +102,9 @@ const RegisterContent = () => {
         </Form.Item>
         <div className="flex justify-between">
           <Form.Item required name="otp">
-            <Input.OTP length={6} />
+            <Input.OTP length={6} onChange={handleVerifyOTP} />
           </Form.Item>
-          <Button>发送验证码</Button>
+          <Button onClick={handleSendOTP}>发送验证码</Button>
         </div>
         <Form.Item required name="password">
           <Input.Password
