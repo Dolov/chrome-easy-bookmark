@@ -1,7 +1,7 @@
 import { Button, Form, Input, Modal, Tabs } from "antd"
 import React from "react"
 
-import { baseZIndex } from "~utils"
+import { baseZIndex, emailRegex } from "~utils"
 
 import { sendotp, verifyotp } from "../../service"
 import { BxsUser, MaterialSymbolsShieldLockedSharp, MdiEmail } from "../Icon"
@@ -67,13 +67,33 @@ const LoginContent = () => {
 const RegisterContent = () => {
   const [form] = Form.useForm()
 
+  const [time, setTime] = React.useState(0)
+  const [sendLoading, setSendLoading] = React.useState(false)
+  const [verifyDisabled, setVerifyDisabled] = React.useState(true)
+  const otpInputRef = React.useRef(null)
+
   const handleSendOTP = async () => {
     const { username, email } = form.getFieldsValue()
+    setSendLoading(true)
     const res = await sendotp({
       email,
       username
+    }).finally(() => {
+      setSendLoading(false)
     })
-    console.log("res: ", res)
+    const { status, data } = res
+    if (status !== 200) return
+    otpInputRef.current.focus()
+    setVerifyDisabled(true)
+    setTime(data * 60)
+    const timer = setInterval(() => {
+      setTime((prevTime) => {
+        if (prevTime > 0) return prevTime - 1
+        clearInterval(timer)
+        setVerifyDisabled(false)
+        return 0
+      })
+    }, 1000)
   }
 
   const handleVerifyOTP = async () => {
@@ -82,31 +102,58 @@ const RegisterContent = () => {
       otp,
       email
     })
-    console.log("res: ", res)
   }
+
+  const onValuesChange = (changedValues, allValues) => {
+    const { email } = allValues
+    if (emailRegex.test(email) && time === 0) {
+      setVerifyDisabled(false)
+    } else {
+      setVerifyDisabled(true)
+    }
+  }
+
+  const handleRegister = () => {
+    form.validateFields().then((error) => {
+      console.log("error: ", error)
+      const values = form.getFieldsValue()
+      console.log(values)
+    })
+  }
+
+  const buttonText = time ? `${time} 秒内有效` : "发送验证码"
 
   return (
     <div>
-      <Form form={form} size="large">
-        <Form.Item required name="username">
+      <Form form={form} size="large" onValuesChange={onValuesChange}>
+        <Form.Item rules={[{ required: true, message: "" }]} name="username">
           <Input
             prefix={<BxsUser className="text-slate-500" />}
             placeholder="昵称"
           />
         </Form.Item>
-        <Form.Item required name="email">
+        <Form.Item rules={[{ required: true, message: "" }]} name="email">
           <Input
             prefix={<MdiEmail className="text-slate-500" />}
             placeholder="邮箱"
           />
         </Form.Item>
         <div className="flex justify-between">
-          <Form.Item required name="otp">
-            <Input.OTP length={6} onChange={handleVerifyOTP} />
+          <Form.Item rules={[{ required: true, message: "" }]} name="otp">
+            <Input.OTP
+              ref={otpInputRef}
+              length={6}
+              onChange={handleVerifyOTP}
+            />
           </Form.Item>
-          <Button onClick={handleSendOTP}>发送验证码</Button>
+          <Button
+            loading={sendLoading}
+            disabled={verifyDisabled}
+            onClick={handleSendOTP}>
+            {buttonText}
+          </Button>
         </div>
-        <Form.Item required name="password">
+        <Form.Item rules={[{ required: true, message: "" }]} name="password">
           <Input.Password
             prefix={
               <MaterialSymbolsShieldLockedSharp className="text-slate-500" />
@@ -115,7 +162,7 @@ const RegisterContent = () => {
           />
         </Form.Item>
       </Form>
-      <Button block type="primary">
+      <Button block onClick={handleRegister} type="primary">
         注册
       </Button>
     </div>

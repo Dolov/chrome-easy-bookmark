@@ -201,3 +201,5 @@ export const copyTextToClipboard = (text: string) => {
   }
   document.body.removeChild(textArea)
 }
+
+export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
