@@ -2,6 +2,12 @@ import { type TreeDataNode } from "antd"
 
 export const baseZIndex = 2000
 
+export interface UserInfo {
+  email: string
+  token: string
+  username: string
+}
+
 export type TreeNodeProps = TreeDataNode &
   chrome.bookmarks.BookmarkTreeNode & {
     originalTitle: string
@@ -25,7 +31,8 @@ export enum StorageKeyEnum {
   UNION = "UNION",
   SEARCH_TYPE = "SEARCH_TYPE",
   LAST_PARENT_ID = "LAST_PARENT_ID",
-  CASE_SENSITIVE = "CASE_SENSITIVE"
+  CASE_SENSITIVE = "CASE_SENSITIVE",
+  USER_INFO = "USER_INFO"
 }
 
 export enum SearchTypeEnum {

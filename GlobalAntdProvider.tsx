@@ -1,9 +1,10 @@
+import { ConfigProvider, theme, type ConfigProviderProps } from "antd"
 import React from "react"
 import type { ReactNode } from "react"
-import { ConfigProvider } from 'antd'
-import { type ConfigProviderProps } from 'antd'
 
-export const GlobalAntdProvider = (props: ConfigProviderProps & { children: ReactNode }) => {
+export const GlobalAntdProvider = (
+  props: ConfigProviderProps & { children: ReactNode }
+) => {
   const { getPopupContainer, children } = props
 
   return (
@@ -12,8 +13,8 @@ export const GlobalAntdProvider = (props: ConfigProviderProps & { children: Reac
       theme={{
         cssVar: true,
         hashed: false,
-        token: {
-        }
+        algorithm: theme.darkAlgorithm,
+        token: {}
       }}>
       {children}
     </ConfigProvider>

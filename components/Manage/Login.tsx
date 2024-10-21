@@ -1,9 +1,11 @@
 import { Button, Form, Input, Modal, Tabs } from "antd"
 import React from "react"
 
-import { baseZIndex, emailRegex } from "~utils"
+import { useStorage } from "@plasmohq/storage/hook"
 
-import { sendotp, verifyotp } from "../../service"
+import { baseZIndex, emailRegex, StorageKeyEnum } from "~utils"
+
+import { sendotp, signin, signup, verifyotp } from "../../service"
 import { BxsUser, MaterialSymbolsShieldLockedSharp, MdiEmail } from "../Icon"
 import { ManageContext } from "./Context"
 
@@ -39,16 +41,34 @@ const Login: React.FC = () => {
 export default Login
 
 const LoginContent = () => {
+  const [form] = Form.useForm()
+  const context = React.useContext(ManageContext)
+  const { setLoginVisible } = context
+  const [loading, setLoading] = React.useState(false)
+  const [userInfo, setUserInfo] = useStorage(StorageKeyEnum.USER_INFO, "")
+
+  const handleSingIn = () => {
+    form.validateFields().then(async (values) => {
+      setLoading(true)
+      const res = await signin(values).finally(() => {
+        setLoading(false)
+      })
+      if (res.status !== 200) return
+      setUserInfo(res.data)
+      setLoginVisible(false)
+    })
+  }
+
   return (
     <div>
-      <Form size="large">
-        <Form.Item required name="email">
+      <Form form={form} size="large">
+        <Form.Item rules={[{ required: true, message: "" }]} name="email">
           <Input
             prefix={<MdiEmail className="text-slate-500" />}
             placeholder="邮箱"
           />
         </Form.Item>
-        <Form.Item required name="password">
+        <Form.Item rules={[{ required: true, message: "" }]} name="password">
           <Input.Password
             prefix={
               <MaterialSymbolsShieldLockedSharp className="text-slate-500" />
@@ -57,7 +77,7 @@ const LoginContent = () => {
           />
         </Form.Item>
       </Form>
-      <Button block type="primary">
+      <Button block type="primary" loading={loading} onClick={handleSingIn}>
         登录
       </Button>
     </div>
@@ -66,8 +86,11 @@ const LoginContent = () => {
 
 const RegisterContent = () => {
   const [form] = Form.useForm()
-
+  const context = React.useContext(ManageContext)
+  const { setLoginVisible } = context
+  const [userInfo, setUserInfo] = useStorage(StorageKeyEnum.USER_INFO, "")
   const [time, setTime] = React.useState(0)
+  const [loading, setLoading] = React.useState(false)
   const [sendLoading, setSendLoading] = React.useState(false)
   const [verifyDisabled, setVerifyDisabled] = React.useState(true)
   const otpInputRef = React.useRef(null)
@@ -114,10 +137,13 @@ const RegisterContent = () => {
   }
 
   const handleRegister = () => {
-    form.validateFields().then((error) => {
-      console.log("error: ", error)
-      const values = form.getFieldsValue()
-      console.log(values)
+    form.validateFields().then(async (values) => {
+      const res = await signup(values).finally(() => {
+        setLoading(false)
+      })
+      if (res.status !== 200) return
+      setUserInfo(res.data)
+      setLoginVisible(false)
     })
   }
 
@@ -162,7 +188,7 @@ const RegisterContent = () => {
           />
         </Form.Item>
       </Form>
-      <Button block onClick={handleRegister} type="primary">
+      <Button block loading={loading} onClick={handleRegister} type="primary">
         注册
       </Button>
     </div>

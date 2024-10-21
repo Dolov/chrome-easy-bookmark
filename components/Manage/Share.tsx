@@ -1,16 +1,25 @@
 import { Button, Checkbox, Divider, Form, Input, Modal, Select } from "antd"
 import React from "react"
 
-import { getCategories, createCategory as sendCategory } from "~service"
-import { baseZIndex, type TreeNodeProps } from "~utils"
+import { useStorage } from "@plasmohq/storage/hook"
+
+import {
+  createShare,
+  getCategories,
+  createCategory as sendCategory
+} from "~service"
+import { baseZIndex, StorageKeyEnum, type UserInfo } from "~utils"
 
 import { ManageContext } from "./Context"
 
 const Share: React.FC = () => {
+  const [userInfo] = useStorage<UserInfo>(StorageKeyEnum.USER_INFO)
   const context = React.useContext(ManageContext)
   const { shareInfo, shareVisible, setShareVisible, setLoginVisible } = context
   const { url, title } = shareInfo || {}
   const [form] = Form.useForm()
+
+  const [shareLoading, setShareLoading] = React.useState(false)
 
   const [categorys, setCategorys] = React.useState([])
   const [categoryValue, setCategoryValue] = React.useState("")
@@ -27,7 +36,17 @@ const Share: React.FC = () => {
   }, [shareVisible])
 
   const handleShare = () => {
-    const { url, title } = form.getFieldsValue()
+    form.validateFields().then(async (values) => {
+      setShareLoading(true)
+      const res = await createShare({
+        ...values,
+        category: categoryValue
+      }).finally(() => {
+        setShareLoading(false)
+      })
+      if (res.status !== 200) return
+      setShareVisible(false)
+    })
   }
 
   const fetchCategories = async () => {
@@ -71,6 +90,7 @@ const Share: React.FC = () => {
       title="分享到广场"
       okText="确定"
       onOk={handleShare}
+      okButtonProps={{ loading: shareLoading }}
       onCancel={() => setShareVisible(false)}
       cancelText="取消">
       <div className="mt-6">
@@ -120,13 +140,15 @@ const Share: React.FC = () => {
             <Form.Item name="anonymous" label="">
               <Checkbox>匿名分享</Checkbox>
             </Form.Item>
-            <Form.Item>
-              <span
-                onClick={() => setLoginVisible(true)}
-                className="underline ml-2 cursor-pointer">
-                登录/创建账号？
-              </span>
-            </Form.Item>
+            {true && (
+              <Form.Item>
+                <span
+                  onClick={() => setLoginVisible(true)}
+                  className="underline ml-2 cursor-pointer">
+                  登录/创建账号？
+                </span>
+              </Form.Item>
+            )}
           </div>
         </Form>
       </div>
