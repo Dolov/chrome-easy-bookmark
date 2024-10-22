@@ -1,9 +1,8 @@
-import React from 'react'
-import { theme } from 'antd'
-import { CloseOutlined } from '@ant-design/icons'
+import { CloseOutlined } from "@ant-design/icons"
+import { theme } from "antd"
+import React from "react"
 
-const { useToken } = theme;
-
+const { useToken } = theme
 
 export interface SearchInputRefProps {
   focus(): void
@@ -18,7 +17,10 @@ export interface SearchInputProps {
   onPressEnter?: () => void
 }
 
-const SearchInput: React.ForwardRefRenderFunction<SearchInputRefProps, SearchInputProps> = (props, ref) => {
+const SearchInput: React.ForwardRefRenderFunction<
+  SearchInputRefProps,
+  SearchInputProps
+> = (props, ref) => {
   const { prefix, suffix, placeholder, onPressEnter, onChange } = props
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [value, setValue] = React.useState<string[]>([])
@@ -26,43 +28,51 @@ const SearchInput: React.ForwardRefRenderFunction<SearchInputRefProps, SearchInp
   const [inputValue, setInputValue] = React.useState("")
   const { token } = useToken()
 
-  const { colorPrimaryHover, colorPrimary, controlOutlineWidth, controlOutline } = token
+  const {
+    colorPrimaryHover,
+    colorPrimary,
+    controlOutlineWidth,
+    controlOutline,
+    colorBgBase
+  } = token
 
-  React.useImperativeHandle(ref, () => {
-    return {
-      focus() {
-        if (inputRef.current) {
-          inputRef.current.focus()
+  React.useImperativeHandle(
+    ref,
+    () => {
+      return {
+        focus() {
+          if (inputRef.current) {
+            inputRef.current.focus()
+          }
+        },
+        addKeyword(keyword) {
+          if (value.includes(keyword)) return
+          handleInputChange(keyword)
+          setValue([...value, keyword])
         }
-      },
-      addKeyword(keyword) {
-        if (value.includes(keyword)) return
-        handleInputChange(keyword)
-        setValue([...value, keyword])
       }
-    }
-  }, [value])
+    },
+    [value]
+  )
 
-  const onInputChange = e => {
+  const onInputChange = (e) => {
     const inputValue = e.target.value
     setInputValue(inputValue)
     handleInputChange(inputValue)
   }
 
-  const handleInputChange = inputValue => {
-    const nextValue = [
-      ...value,
-    ]
+  const handleInputChange = (inputValue) => {
+    const nextValue = [...value]
     if (inputValue) {
       nextValue.push(inputValue)
     }
     onChange && onChange(nextValue)
   }
 
-  const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = e => {
+  const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
     if (e.key === "Escape") return
     e.stopPropagation()
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleEnterEvent(inputValue)
       onPressEnter && onPressEnter()
     }
@@ -76,7 +86,7 @@ const SearchInput: React.ForwardRefRenderFunction<SearchInputRefProps, SearchInp
     const include = value.includes(inputValue)
     let nextValues = [...value, inputValue]
     if (include) {
-      nextValues = value.filter(item => item !== inputValue)
+      nextValues = value.filter((item) => item !== inputValue)
     }
 
     if (inputRef.current) {
@@ -98,14 +108,14 @@ const SearchInput: React.ForwardRefRenderFunction<SearchInputRefProps, SearchInp
     inputRef.current.focus()
   }
 
-  const deleteItem = itemValue => {
-    const nextValues = value.filter(item => item !== itemValue)
+  const deleteItem = (itemValue) => {
+    const nextValues = value.filter((item) => item !== itemValue)
     setValue(nextValues)
     onChange && onChange(nextValues)
   }
 
-  const editItem = itemValue => {
-    setValue(value.filter(item => item !== itemValue))
+  const editItem = (itemValue) => {
+    setValue(value.filter((item) => item !== itemValue))
     setInputValue(itemValue)
   }
 
@@ -119,32 +129,36 @@ const SearchInput: React.ForwardRefRenderFunction<SearchInputRefProps, SearchInp
   }
 
   return (
-    <div style={{
-      "--color-primary": colorPrimary,
-      "--control-outline": controlOutline,
-      "--color-primary-hover": colorPrimaryHover,
-      "--control-outline-width": `${controlOutlineWidth}px`,
-    }}>
+    <div
+      style={{
+        "--color-primary": colorPrimary,
+        "--control-outline": controlOutline,
+        "--color-primary-hover": colorPrimaryHover,
+        "--control-outline-width": `${controlOutlineWidth}px`
+      }}>
       <div
         onClick={handleContainerClick}
-        className={`${focus? "focus": ""} search-input-container flex justify-between rounded-3xl mt-3 mb-2 cursor-text border border-solid border-[#d9d9d9] py-1 px-3`}
-      >
+        style={{
+          backgroundColor: colorBgBase
+        }}
+        className={`${focus ? "focus" : ""} search-input-container flex justify-between rounded-3xl mt-3 mb-2 cursor-text border border-solid border-[#d9d9d9] py-1 px-3`}>
         <div className="mr-1 flex items-center">{prefix}</div>
         <div className="flex flex-1">
-          <div style={{ display: 'flex' }}>
-            {value.map(item => {
+          <div style={{ display: "flex" }}>
+            {value.map((item) => {
               return (
                 <div
                   key={item}
-                  className="pr-2 pl-3 my-1 mr-1 bg-[#0000000f] rounded-[12px] flex justify-center items-center text-nowrap"
-                >
+                  className="pr-2 pl-3 my-1 mr-1 bg-[#0000000f] rounded-[12px] flex justify-center items-center text-nowrap">
                   <span
                     onClick={() => editItem(item)}
-                    className="max-w-[200px] ellipsis"
-                  >
+                    className="max-w-[200px] ellipsis">
                     {item}
                   </span>
-                  <CloseOutlined onClick={() => deleteItem(item)} className="ml-1 cursor-pointer w-3 text-gray-400 hover:text-gray-500" />
+                  <CloseOutlined
+                    onClick={() => deleteItem(item)}
+                    className="ml-1 cursor-pointer w-3 text-gray-400 hover:text-gray-500"
+                  />
                 </div>
               )
             })}
@@ -157,8 +171,11 @@ const SearchInput: React.ForwardRefRenderFunction<SearchInputRefProps, SearchInp
               onChange={onInputChange}
               className="border-none outline-none text-[14px] w-full"
               onBlur={onBlur}
+              style={{
+                backgroundColor: colorBgBase
+              }}
               onFocus={onFocus}
-              onKeyUp={e => e.stopPropagation()}
+              onKeyUp={(e) => e.stopPropagation()}
               onKeyDown={onKeyDown}
               placeholder={placeholder}
             />
@@ -170,4 +187,6 @@ const SearchInput: React.ForwardRefRenderFunction<SearchInputRefProps, SearchInp
   )
 }
 
-export default React.forwardRef<SearchInputRefProps, SearchInputProps>(SearchInput)
+export default React.forwardRef<SearchInputRefProps, SearchInputProps>(
+  SearchInput
+)
